@@ -1,0 +1,14 @@
+/*/bin
+/*/obj
+/*/debug
+/*/release
+/*.suo
+/*.sdf
+/ipch
+/x64
+/x86
+/*/x86
+/*/x64
+/*.opensdf
+/TestResults
+/*.user
