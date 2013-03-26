@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6C620102-A242-43A6-A306-B8AB7B0C207D}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QQChat</RootNamespace>
+    <AssemblyName>QQChat</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Extends\HEXMD5.cs" />
+    <Compile Include="Extends\RTFIMAGE.cs" />
+    <Compile Include="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="User\FriendEventArgs.cs" />
+    <Compile Include="User\GroupEventArgs.cs" />
+    <Compile Include="User\MessageEventType.cs" />
+    <Compile Include="User\QQStatus.cs" />
+    <Compile Include="User\User.cs" />
+    <EmbeddedResource Include="LoginForm.resx">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\face.gif" />
+    <Content Include="Resources\face\0.gif" />
+    <Content Include="Resources\face\1.gif" />
+    <Content Include="Resources\face\10.gif" />
+    <Content Include="Resources\face\100.gif" />
+    <Content Include="Resources\face\101.gif" />
+    <Content Include="Resources\face\102.gif" />
+    <Content Include="Resources\face\103.gif" />
+    <Content Include="Resources\face\104.gif" />
+    <Content Include="Resources\face\105.gif" />
+    <Content Include="Resources\face\106.gif" />
+    <Content Include="Resources\face\107.gif" />
+    <Content Include="Resources\face\108.gif" />
+    <Content Include="Resources\face\109.gif" />
+    <Content Include="Resources\face\11.gif" />
+    <Content Include="Resources\face\110.gif" />
+    <Content Include="Resources\face\111.gif" />
+    <Content Include="Resources\face\112.gif" />
+    <Content Include="Resources\face\113.gif" />
+    <Content Include="Resources\face\114.gif" />
+    <Content Include="Resources\face\115.gif" />
+    <Content Include="Resources\face\116.gif" />
+    <Content Include="Resources\face\117.gif" />
+    <Content Include="Resources\face\118.gif" />
+    <Content Include="Resources\face\119.gif" />
+    <Content Include="Resources\face\12.gif" />
+    <Content Include="Resources\face\120.gif" />
+    <Content Include="Resources\face\121.gif" />
+    <Content Include="Resources\face\122.gif" />
+    <Content Include="Resources\face\123.gif" />
+    <Content Include="Resources\face\124.gif" />
+    <Content Include="Resources\face\125.gif" />
+    <Content Include="Resources\face\126.gif" />
+    <Content Include="Resources\face\127.gif" />
+    <Content Include="Resources\face\128.gif" />
+    <Content Include="Resources\face\129.gif" />
+    <Content Include="Resources\face\13.gif" />
+    <Content Include="Resources\face\130.gif" />
+    <Content Include="Resources\face\131.gif" />
+    <Content Include="Resources\face\132.gif" />
+    <Content Include="Resources\face\133.gif" />
+    <Content Include="Resources\face\134.gif" />
+    <Content Include="Resources\face\14.gif" />
+    <Content Include="Resources\face\15.gif" />
+    <Content Include="Resources\face\16.gif" />
+    <Content Include="Resources\face\17.gif" />
+    <Content Include="Resources\face\18.gif" />
+    <Content Include="Resources\face\19.gif" />
+    <Content Include="Resources\face\2.gif" />
+    <Content Include="Resources\face\20.gif" />
+    <Content Include="Resources\face\21.gif" />
+    <Content Include="Resources\face\22.gif" />
+    <Content Include="Resources\face\23.gif" />
+    <Content Include="Resources\face\24.gif" />
+    <Content Include="Resources\face\25.gif" />
+    <Content Include="Resources\face\26.gif" />
+    <Content Include="Resources\face\27.gif" />
+    <Content Include="Resources\face\28.gif" />
+    <Content Include="Resources\face\29.gif" />
+    <Content Include="Resources\face\3.gif" />
+    <Content Include="Resources\face\30.gif" />
+    <Content Include="Resources\face\31.gif" />
+    <Content Include="Resources\face\32.gif" />
+    <Content Include="Resources\face\33.gif" />
+    <Content Include="Resources\face\34.gif" />
+    <Content Include="Resources\face\35.gif" />
+    <Content Include="Resources\face\36.gif" />
+    <Content Include="Resources\face\37.gif" />
+    <Content Include="Resources\face\38.gif" />
+    <Content Include="Resources\face\39.gif" />
+    <Content Include="Resources\face\4.gif" />
+    <Content Include="Resources\face\40.gif" />
+    <Content Include="Resources\face\41.gif" />
+    <Content Include="Resources\face\42.gif" />
+    <Content Include="Resources\face\43.gif" />
+    <Content Include="Resources\face\44.gif" />
+    <Content Include="Resources\face\45.gif" />
+    <Content Include="Resources\face\46.gif" />
+    <Content Include="Resources\face\47.gif" />
+    <Content Include="Resources\face\48.gif" />
+    <Content Include="Resources\face\49.gif" />
+    <Content Include="Resources\face\5.gif" />
+    <Content Include="Resources\face\50.gif" />
+    <Content Include="Resources\face\51.gif" />
+    <Content Include="Resources\face\52.gif" />
+    <Content Include="Resources\face\53.gif" />
+    <Content Include="Resources\face\54.gif" />
+    <Content Include="Resources\face\55.gif" />
+    <Content Include="Resources\face\56.gif" />
+    <Content Include="Resources\face\57.gif" />
+    <Content Include="Resources\face\58.gif" />
+    <Content Include="Resources\face\59.gif" />
+    <Content Include="Resources\face\6.gif" />
+    <Content Include="Resources\face\60.gif" />
+    <Content Include="Resources\face\61.gif" />
+    <Content Include="Resources\face\62.gif" />
+    <Content Include="Resources\face\63.gif" />
+    <Content Include="Resources\face\64.gif" />
+    <Content Include="Resources\face\65.gif" />
+    <Content Include="Resources\face\66.gif" />
+    <Content Include="Resources\face\67.gif" />
+    <Content Include="Resources\face\68.gif" />
+    <Content Include="Resources\face\69.gif" />
+    <Content Include="Resources\face\7.gif" />
+    <Content Include="Resources\face\70.gif" />
+    <Content Include="Resources\face\71.gif" />
+    <Content Include="Resources\face\72.gif" />
+    <Content Include="Resources\face\73.gif" />
+    <Content Include="Resources\face\74.gif" />
+    <Content Include="Resources\face\75.gif" />
+    <Content Include="Resources\face\76.gif" />
+    <Content Include="Resources\face\77.gif" />
+    <Content Include="Resources\face\78.gif" />
+    <Content Include="Resources\face\79.gif" />
+    <Content Include="Resources\face\8.gif" />
+    <Content Include="Resources\face\80.gif" />
+    <Content Include="Resources\face\81.gif" />
+    <Content Include="Resources\face\82.gif" />
+    <Content Include="Resources\face\83.gif" />
+    <Content Include="Resources\face\84.gif" />
+    <Content Include="Resources\face\85.gif" />
+    <Content Include="Resources\face\86.gif" />
+    <Content Include="Resources\face\87.gif" />
+    <Content Include="Resources\face\88.gif" />
+    <Content Include="Resources\face\89.gif" />
+    <Content Include="Resources\face\9.gif" />
+    <Content Include="Resources\face\90.gif" />
+    <Content Include="Resources\face\91.gif" />
+    <Content Include="Resources\face\92.gif" />
+    <Content Include="Resources\face\93.gif" />
+    <Content Include="Resources\face\94.gif" />
+    <Content Include="Resources\face\95.gif" />
+    <Content Include="Resources\face\96.gif" />
+    <Content Include="Resources\face\97.gif" />
+    <Content Include="Resources\face\98.gif" />
+    <Content Include="Resources\face\99.gif" />
+    <Content Include="Resources\TextFile1.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
