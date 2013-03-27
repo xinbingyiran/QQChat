@@ -1,7 +1,7 @@
 ﻿C#下的Raw Socket编程实现网络封包监视
 
 C#下的Raw Socket编程实现网络封包监视
-谈起socket编程，大家也许会想起QQ和IE，没错。还有许多网络工具如P2P、NetMeeting等在应用层实现的应用程序，也是用socket来实现的。Socket是一个网络编程接口，实现于网络应用层，Windows Socket包括了一套系统组件，充分利用了Microsoft Windows 消息驱动的特点。Socket规范1.1版是在1993年1月发行的，并广泛用于此后出现的Windows9x操作系统中。Socket规范2.2版（其在Windows平台上的版本是Winsock2.2，也叫Winsock2）在 1996 年 5 月发行，Windows NT 5.0及以后版本的Windows系统支持Winsock2，在Winsock2中，支持多个传输协议的原始套接字，重叠I/O模型、服务质量控制等。 
+谈起socket编程，大家也许会想起QQUser和IE，没错。还有许多网络工具如P2P、NetMeeting等在应用层实现的应用程序，也是用socket来实现的。Socket是一个网络编程接口，实现于网络应用层，Windows Socket包括了一套系统组件，充分利用了Microsoft Windows 消息驱动的特点。Socket规范1.1版是在1993年1月发行的，并广泛用于此后出现的Windows9x操作系统中。Socket规范2.2版（其在Windows平台上的版本是Winsock2.2，也叫Winsock2）在 1996 年 5 月发行，Windows NT 5.0及以后版本的Windows系统支持Winsock2，在Winsock2中，支持多个传输协议的原始套接字，重叠I/O模型、服务质量控制等。 
 
 本文向大家介绍Windows Sockets的一些关于用C#实现的原始套接字(Raw Socket)的编程，以及在此基础上实现的网络封包监视技术。同Winsock1相比，Winsock2最明显的就是支持了Raw Socket套接字类型，使用Raw Socket，可把网卡设置成混杂模式，在这种模式下，我们可以收到网络上的IP包，当然包括目的不是本机的IP包，通过原始套接字，我们也可以更加自如地控制Windows下的多种协议，而且能够对网络底层的传输机制进行控制。 
 

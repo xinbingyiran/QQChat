@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace QQChat.User
+namespace WebQQ2.WebQQ2
 {
     public class QQStatus
     {
@@ -31,7 +31,7 @@ namespace QQChat.User
             StatusHidden,
             StatusOffline
         };
-        public QQStatus GetQQStatusByInternal(string statusInternal)
+        public static QQStatus GetQQStatusByInternal(string statusInternal)
         {
             foreach (var st in AllStatus)
             {
@@ -40,7 +40,7 @@ namespace QQChat.User
             }
             return null;
         }
-        public QQStatus GetQQStatusByStatus(string status)
+        public static QQStatus GetQQStatusByStatus(string status)
         {
             foreach (var st in AllStatus)
             {

@@ -28,30 +28,57 @@ namespace MessageDeal1
             get { return _menus; }
         }
 
-        public string DealMessage(string message, out bool isDealed)
+        public string DealFriendMessage(string message)
         {
-            isDealed = _enabled;
             if (_enabled)
             {
-                return message + "_示例";
+                return message + "_用户示例";
             }
-            return message;
+            return null;
         }
 
-        public bool OnMenu(string menuName)
+        public string DealGroupMessage(string message)
+        {
+            if (_enabled)
+            {
+                return message + "_群示例";
+            }
+            return null;
+        }
+
+        public void MenuClicked(string menuName)
         {
             if (menuName == "setting")
             {
                 _enabled = !_enabled;
-                MessageBox.Show("现在的状态是" + (_enabled?"启用":"停用"),"状态指示");
-                return true;
+                MessageBox.Show("现在的状态是" + (_enabled ? "启用" : "停用"), "状态指示");
             }
             else if (menuName == "about")
             {
-                MessageBox.Show("这只是一个示例","关于");
-                return true;
+                MessageBox.Show("这只是一个示例", "关于");
             }
-            return false;
+        }
+
+        public string StatusChanged(string newStatus)
+        {
+            if (_enabled)
+            {
+                QQStatus status = QQStatus.GetQQStatusByInternal(newStatus);
+                if (status != null && status != QQStatus.StatusOffline)
+                {
+                    return string.Format("{0} 你好，你现在的状态是:{1}", TranslateMessage.UserNick, status.Status);
+                }
+            }
+            return null;
+        }
+
+        public string Input()
+        {
+            if (_enabled)
+            {
+                return string.Format("{0} 你好，我正在等待你的输入。", TranslateMessage.UserNick);
+            }
+            return null;
         }
     }
 }

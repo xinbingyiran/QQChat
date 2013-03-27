@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关于ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControlF = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPageG = new System.Windows.Forms.TabPage();
             this.treeViewF = new System.Windows.Forms.TreeView();
+            this.tabPageG = new System.Windows.Forms.TabPage();
             this.treeViewG = new System.Windows.Forms.TreeView();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
@@ -55,6 +55,12 @@
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
+            // 设置ToolStripMenuItem
+            // 
+            this.设置ToolStripMenuItem.Name = "设置ToolStripMenuItem";
+            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.设置ToolStripMenuItem.Text = "设置";
+            // 
             // 菜单ToolStripMenuItem
             // 
             this.菜单ToolStripMenuItem.Checked = true;
@@ -69,12 +75,6 @@
             this.关于ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.关于ToolStripMenuItem.Text = "关于";
             this.关于ToolStripMenuItem.Click += new System.EventHandler(this.关于ToolStripMenuItem_Click);
-            // 
-            // 设置ToolStripMenuItem
-            // 
-            this.设置ToolStripMenuItem.Name = "设置ToolStripMenuItem";
-            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
-            this.设置ToolStripMenuItem.Text = "设置";
             // 
             // tabControlF
             // 
@@ -97,6 +97,17 @@
             this.tabPage1.Text = "好友";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // treeViewF
+            // 
+            this.treeViewF.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewF.FullRowSelect = true;
+            this.treeViewF.Location = new System.Drawing.Point(3, 3);
+            this.treeViewF.Name = "treeViewF";
+            this.treeViewF.Size = new System.Drawing.Size(226, 316);
+            this.treeViewF.TabIndex = 0;
+            this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
+            this.treeViewF.DoubleClick += new System.EventHandler(this.treeViewF_DoubleClick);
+            // 
             // tabPageG
             // 
             this.tabPageG.Controls.Add(this.treeViewG);
@@ -108,15 +119,6 @@
             this.tabPageG.Text = "群";
             this.tabPageG.UseVisualStyleBackColor = true;
             // 
-            // treeViewF
-            // 
-            this.treeViewF.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewF.FullRowSelect = true;
-            this.treeViewF.Location = new System.Drawing.Point(3, 3);
-            this.treeViewF.Name = "treeViewF";
-            this.treeViewF.Size = new System.Drawing.Size(226, 316);
-            this.treeViewF.TabIndex = 0;
-            // 
             // treeViewG
             // 
             this.treeViewG.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -125,6 +127,7 @@
             this.treeViewG.Name = "treeViewG";
             this.treeViewG.Size = new System.Drawing.Size(226, 316);
             this.treeViewG.TabIndex = 0;
+            this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
             // 
             // MainForm
             // 

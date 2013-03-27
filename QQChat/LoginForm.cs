@@ -1,4 +1,4 @@
-﻿using QQChat.User;
+﻿using WebQQ2.WebQQ2;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +14,7 @@ namespace QQChat
 {
     public partial class LoginForm : Form
     {
-        private QQUser _user;
+        private QQ _qq;
 
         public LoginForm()
         {
@@ -75,7 +75,7 @@ namespace QQChat
             string mstr = @"\d{5,12}";
             if (Regex.IsMatch(textBoxUser.Text, mstr))
             {
-                if (_user == null || textBoxUser.Text != _user.QQNum)
+                if (_qq == null || textBoxUser.Text != _qq.User.QQNum)
                 {
                     CreateUser(textBoxUser.Text);
                 }
@@ -90,7 +90,7 @@ namespace QQChat
         private void GetVerifyCode()
         {
             SetInfo("验证是否需要验证码");
-            string vcode = _user.GetVerifyCode();
+            string vcode = _qq.GetVerifyCode();
             if (vcode.StartsWith("!") && vcode.Length == 4)
             {
                 SetTextCode(vcode);
@@ -104,7 +104,7 @@ namespace QQChat
 
         private void CreateUser(string qqnum)
         {
-            _user = new QQUser(qqnum);
+            _qq = new QQ(qqnum);
         }
 
         private void pictureBoxCode_Click(object sender, EventArgs e)
@@ -114,14 +114,13 @@ namespace QQChat
 
         private void GetVerifyImage()
         {
-            SetInfo("加载验证码中...");
-            Image result = _user.GetVerifyImage();
+            Image result = _qq.GetVerifyImage();
             SetImageCode(result);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (_user == null)
+            if (_qq == null)
             {
                 SetInfo("用户名不能空...");
                 return;
@@ -138,16 +137,17 @@ namespace QQChat
         {
             new Task(() =>
             {
-                string result = _user.LogQQ(pass, code);
-                if (!_user.IsPreLoged)
+                string result = _qq.LoginQQ(pass, code);
+                if (!_qq.User.IsPreLoged)
                 {
+                    SetInfo(result);
                     GetVerifyImage();
                     return;
                 }
                 else
                 {
                     SetInfo(result);
-                    result = _user.LogQQ2(status);
+                    result = _qq.LoginQQ2(status);
                     if (result != null)
                     {
                         SetInfo(result);
@@ -167,7 +167,7 @@ namespace QQChat
             }
             this.Hide();
             MainForm m = new MainForm();
-            m.InitUser(_user);
+            m.InitUser(_qq);
             m.ShowDialog();
             Environment.Exit(Environment.ExitCode);
         }

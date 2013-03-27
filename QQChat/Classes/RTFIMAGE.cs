@@ -1,4 +1,4 @@
-﻿namespace QQChat.Extends
+﻿namespace QQChat.Classes
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,7 @@
     /// RichTextBox插入图片使用的静态类 
     /// 资料来源:www.baidu.com 
     /// </summary> 
-    public class RTB_InsertImg
+    public static class RTB_InsertImg
     {
         public const int
         EmfToWmfBitsFlagsDefault = 0x00000000,
@@ -80,9 +80,15 @@
         /// 
         /// 多格式文本框控件 
         /// 插入的图像 
-        public static void InsertImage(RichTextBox rtb, Image image)
+        public static void InsertImage(this RichTextBox rtb, Image image)
         {
             rtb.SelectedRtf = GetImageRtf(rtb,image);
+        }
+
+        public static void AppendImage(this RichTextBox rtb, Image image)
+        {
+            rtb.Select(int.MaxValue,0);
+            rtb.SelectedRtf = GetImageRtf(rtb, image);
         }
 
         public static string GetImageRtf(RichTextBox rtb, Image image)

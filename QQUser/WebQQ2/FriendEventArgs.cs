@@ -4,29 +4,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace QQChat.User
+namespace WebQQ2.WebQQ2
 {
-    public class GroupEventArgs : EventArgs
+    public class FriendEventArgs : EventArgs
     {
-        private QQUser_Group _group = null;
-        private QQUser_Friend _user = null;
+        private QQFriend _user = null;
         private long _msg_id = 0;
         private DateTime? _time = null;
-        private Dictionary<string, object> _msgs = null;
+        private MessageEventType _mtype = MessageEventType.MESSAGE_UNKNOW;
 
-        public QQUser_Group Group
+        public MessageEventType Mtype
         {
-            get { return _group; }
-        }
-
-        public QQUser_Friend User
-        {
-            get { return _user; }
+            get { return _mtype; }
         }
 
         public long Msg_id
         {
             get { return _msg_id; }
+        }
+
+        private Dictionary<string, object> _msgs = null;
+
+        public QQFriend User
+        {
+            get { return _user; }
         }
 
         public DateTime? Time
@@ -93,22 +94,31 @@ namespace QQChat.User
             return o.ToString();
         }
 
-        internal GroupEventArgs(QQUser_Group group, QQUser_Friend user, long msgid, DateTime? time, Dictionary<string, object> msgs)
+        internal FriendEventArgs(QQFriend user, long msgid, DateTime? time, MessageEventType mtype, Dictionary<string, object> msgs)
         {
-            this._group = group;
-            this._msg_id = msgid;
             this._user = user;
+            this._msg_id = msgid;
             this._time = time;
+            this._mtype = mtype;
             this._msgs = msgs;
         }
 
-        internal GroupEventArgs(QQUser_Group group, QQUser_Friend user, long msgid, DateTime? time, string singleMsg)
+        internal FriendEventArgs(QQFriend user, long msgid, DateTime? time, MessageEventType mtype, string singleMsg)
         {
-            this._group = group;
-            this._msg_id = msgid;
             this._user = user;
+            this._msg_id = msgid;
             this._time = time;
+            this._mtype = mtype;
             this._msgs = new Dictionary<string, object>() { { "message", singleMsg } };
+        }
+
+        internal FriendEventArgs(QQFriend user, long msgid, DateTime? time, MessageEventType mtype)
+        {
+            this._user = user;
+            this._msg_id = msgid;
+            this._time = time;
+            this._mtype = mtype;
+            this._msgs = new Dictionary<string, object>();
         }
     }
 

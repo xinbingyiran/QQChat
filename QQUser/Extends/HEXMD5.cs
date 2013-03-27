@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace QQChat.Extends
+namespace WebQQ2.Extends
 {
     public class HEXMD5
     {
