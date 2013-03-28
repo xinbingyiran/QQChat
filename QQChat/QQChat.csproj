@@ -118,6 +118,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="GroupForm.resx">
       <DependentUpon>GroupForm.cs</DependentUpon>
@@ -272,6 +273,7 @@
     <Content Include="Resources\face\97.gif" />
     <Content Include="Resources\face\98.gif" />
     <Content Include="Resources\face\99.gif" />
+    <Content Include="Resources\face\err.gif" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QQUser\WebQQ2.csproj">

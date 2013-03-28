@@ -9,7 +9,7 @@ namespace WebQQ2.WebQQ2
     public class GroupEventArgs : EventArgs
     {
         private QQGroup _group = null;
-        private QQFriend _user = null;
+        private QQGroupMember _member = null;
         private long _msg_id = 0;
         private DateTime? _time = null;
         private Dictionary<string, object> _msgs = null;
@@ -19,9 +19,9 @@ namespace WebQQ2.WebQQ2
             get { return _group; }
         }
 
-        public QQFriend User
+        public QQGroupMember Member
         {
-            get { return _user; }
+            get { return _member; }
         }
 
         public long Msg_id
@@ -93,20 +93,20 @@ namespace WebQQ2.WebQQ2
             return o.ToString();
         }
 
-        internal GroupEventArgs(QQGroup group, QQFriend user, long msgid, DateTime? time, Dictionary<string, object> msgs)
+        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime? time, Dictionary<string, object> msgs)
         {
             this._group = group;
             this._msg_id = msgid;
-            this._user = user;
+            this._member = member;
             this._time = time;
             this._msgs = msgs;
         }
 
-        internal GroupEventArgs(QQGroup group, QQFriend user, long msgid, DateTime? time, string singleMsg)
+        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime? time, string singleMsg)
         {
             this._group = group;
             this._msg_id = msgid;
-            this._user = user;
+            this._member = member;
             this._time = time;
             this._msgs = new Dictionary<string, object>() { { "message", singleMsg } };
         }

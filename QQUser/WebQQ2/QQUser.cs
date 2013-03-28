@@ -63,26 +63,14 @@ namespace WebQQ2.WebQQ2
             return new Random(Guid.NewGuid().GetHashCode()).Next(0, 99) + "" + QQHelper.GetTime() / 1000000;
         }
 
-        public QQGroup GetUserGroup(string gid)
+        public QQGroup GetUserGroup(long gid)
         {
             return QQGroups.GroupList.SingleOrDefault(ele => ele.Key == gid).Value;
         }
 
-        public QQFriend GetUserFriend(string uin)
+        public QQFriend GetUserFriend(long uin)
         {
-            var i = QQFriends.FriendList.SingleOrDefault(ele => ele.Key == uin);
-            //if (i.Value == null)
-            //{
-            //    try
-            //    {
-            //        return new QQFriend() { uin = Convert.ToInt64(uin) };
-            //    }
-            //    catch (Exception)
-            //    {
-            //        return null;
-            //    }
-            //}
-            return i.Value;
+            return QQFriends.GetQQFriend(uin);
         }
     }
 }

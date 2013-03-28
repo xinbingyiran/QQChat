@@ -8,21 +8,32 @@ namespace WebQQ2.WebQQ2
     public class QQGroups
     {
 
-        public Dictionary<string, QQGroup> GroupList { get; set; }
+        public Dictionary<long, QQGroup> GroupList { get; set; }
 
         public QQGroups()
         {
-            GroupList = new Dictionary<string, QQGroup>();
+            GroupList = new Dictionary<long, QQGroup>();
         }
 
         public void Add(QQGroup item)
         {
-            GroupList.Add(item.gid.ToString(), item);
+            GroupList.Add(item.gid, item);
         }
 
         public void Clear()
         {
             GroupList.Clear();
+        }
+
+        public QQGroup GetQQGroup(long gid)
+        {
+            var member = GroupList.FirstOrDefault(ele => ele.Value.gid == gid).Value;
+            if (member == null)
+            {
+                member = new QQGroup() { gid = gid };
+                GroupList.Add(gid, member);
+            }
+            return member;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace QQChat
         {
         }
 
-        public void AppendMessage(string message, QQFriend friend)
+        public void AppendMessage(string message, object friend)
         {
             if (InvokeRequired)
             {
@@ -49,7 +49,8 @@ namespace QQChat
             if (string.IsNullOrEmpty(message))
                 return;
 
-            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message, friend == null?"":friend.LongName);
+            QQFriend qfriend = friend as QQFriend;
+            string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message);
             Color c = FormHelper.PickColor();
             richTextBox1.AppendLine(rmessage, c);
         }

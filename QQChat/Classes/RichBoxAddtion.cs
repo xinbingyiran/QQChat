@@ -7,8 +7,96 @@ using System.Drawing;
 
 namespace QQChat.Classes
 {
+    public enum RichMessageType
+    {
+        TYPETEXT = 1,
+        TYPERTF = 2,
+    }
+
+    public interface IRichMessage
+    {
+        RichMessageType MessageType { get; }
+        string Message { get; }
+        Color? MessageColor { get; set; }
+        bool AppendTo(RichTextBox rtb);
+    }
+
+    public class RichMessageText : IRichMessage
+    {
+        public RichMessageType MessageType
+        {
+            get { return RichMessageType.TYPETEXT; }
+        }
+
+        public string Message
+        {
+            get;
+            private set;
+        }
+
+        public Color? MessageColor
+        {
+            get;
+            set;
+        }
+
+        public RichMessageText(string message)
+        {
+            Message = message;
+        }
+
+        public bool AppendTo(RichTextBox rtb)
+        {
+            if (rtb == null)
+                throw new ArgumentNullException();
+            rtb.Select(int.MaxValue, 0);
+            rtb.SelectionColor = (MessageColor == null) ? rtb.SelectionColor : MessageColor.Value;
+            rtb.SelectedText = this.Message;
+            return true;
+        }
+    }
+
+    public class RichMessageRtf : IRichMessage
+    {
+
+        public RichMessageType MessageType
+        {
+            get { return RichMessageType.TYPERTF; }
+        }
+
+        public string Message
+        {
+            get;
+            private set;
+        }
+
+        public Color? MessageColor
+        {
+            get;
+            set;
+        }
+
+        public RichMessageRtf(RichTextBox rtb, Image image)
+        {
+            Message = RTB_InsertImg.GetImageRtf(rtb, image);
+        }
+
+
+        public bool AppendTo(RichTextBox rtb)
+        {
+            if (rtb == null)
+                throw new ArgumentNullException();
+            rtb.Select(int.MaxValue, 0);
+            rtb.SelectionColor = (MessageColor == null) ? rtb.SelectionColor : MessageColor.Value;
+            rtb.SelectedRtf = this.Message;
+            return true;
+        }
+    }
+
     public static class RichBoxAddtion
     {
+
+
         public static void AppendLine(this RichTextBox textbox, string lineStr)
         {
             int lineCount = 1000;
@@ -67,7 +155,7 @@ namespace QQChat.Classes
                 textbox.SelectionLength = index;
                 textbox.SelectedText = "";
             }
-            int p1 = textbox.TextLength;  
+            int p1 = textbox.TextLength;
             textbox.AppendText(lineStr + "\n");
             int p2 = lineStr.Length;
             textbox.SelectionStart = p1;

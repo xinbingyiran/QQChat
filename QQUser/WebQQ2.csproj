@@ -72,6 +72,7 @@
     <Compile Include="WebQQ2\QQFriendDir.cs" />
     <Compile Include="WebQQ2\QQFriends.cs" />
     <Compile Include="WebQQ2\QQGroup.cs" />
+    <Compile Include="WebQQ2\QQGroupMember.cs" />
     <Compile Include="WebQQ2\QQGroups.cs" />
     <Compile Include="WebQQ2\QQStatus.cs" />
     <Compile Include="WebQQ2\QQUser.cs" />

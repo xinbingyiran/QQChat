@@ -82,6 +82,16 @@ namespace WebQQ2.WebQQ2
             }
         }
 
+        public bool IsValid
+        {
+            get { return this.nick != null; }
+        }
+
+        public bool IsFull
+        {
+            get { return this.num != 0; }
+        }
+
         public QQFriend()
         {
             ShowMarkName = true;

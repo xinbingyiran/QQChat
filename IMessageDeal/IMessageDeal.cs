@@ -6,14 +6,23 @@ using System.Text;
 namespace MessageDeal
 {
 
-    public class TranslateMessage
+    public class TranslateMessageUser
     {
         public static readonly string UserName = "[name]";
         public static readonly string UserNick = "[nick]";
         public static readonly string UserMarkName = "[mark]";
         public static readonly string UserNum = "[num]";
-        public static readonly string ShortName = "[sname]";
-        public static readonly string LongName = "[lname]";
+        public static readonly string UserShortName = "[sname]";
+        public static readonly string UserLongName = "[lname]";
+    }
+    public class TranslateMessageGroup
+    {
+        public static readonly string GroupName = "[name]";
+        public static readonly string GroupShortName = "[sname]";
+        public static readonly string GroupLongName = "[lname]";
+        public static readonly string GroupMemo= "[memo]";
+        public static readonly string MemberNick = "[nick]";
+        public static readonly string MemberCard = "[card]";
     }
 
     public class QQStatus
@@ -77,6 +86,10 @@ namespace MessageDeal
         /// 获取相应的菜单项，格式为[显示内容-传递内容]
         /// </summary>
         Dictionary<string, string> Menus { get; }
+        /// <summary>
+        /// 获取相应的过滤信息，格式为[处理内容-格式说明]
+        /// </summary>
+        Dictionary<string, string> Filters { get; }
         /// <summary>
         /// 处理用户消息，并返回处理结果
         /// </summary>
