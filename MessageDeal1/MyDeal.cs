@@ -20,7 +20,7 @@ namespace MessageDeal1
 
         public string IName
         {
-            get { return "示例1"; }
+            get { return "学话鹦鹉"; }
         }
 
         public bool Enabled

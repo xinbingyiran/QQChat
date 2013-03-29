@@ -358,6 +358,10 @@ namespace QQChat
                     };
                     foreach (var p in Plugins)
                     {
+                        if (!p.Value.Enabled)
+                        {
+                            continue;
+                        }
                         rmsg = p.Value.DealGroupMessage(info, e.MsgContent);
                         if (rmsg != null)
                         {
@@ -394,6 +398,10 @@ namespace QQChat
                                 };
                                 foreach (var p in Plugins)
                                 {
+                                    if (!p.Value.Enabled)
+                                    {
+                                        continue;
+                                    }
                                     rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
                                     if (rmsg != null)
                                     {
@@ -446,6 +454,10 @@ namespace QQChat
                         RefreshUser(e.User);
                         foreach (var p in Plugins)
                         {
+                            if (!p.Value.Enabled)
+                            {
+                                continue;
+                            }
                             string rmsg = p.Value.StatusChanged(info, e.User.status);
                             if (rmsg != null)
                             {
@@ -478,6 +490,10 @@ namespace QQChat
                         SetFriendText(e.User, msg);
                         foreach (var p in Plugins)
                         {
+                            if (!p.Value.Enabled)
+                            {
+                                continue;
+                            }
                             string rmsg = p.Value.Input(info);
                             if (rmsg != null)
                             {

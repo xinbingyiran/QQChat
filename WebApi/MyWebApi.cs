@@ -245,7 +245,7 @@ namespace WebApi
         {
             if (menuName == "about")
             {
-                MessageBox.Show("获取一些网页查询信息。\r\n信息来自网上，谨慎使用。","关于插件");
+                MessageBox.Show("Web信息处理。\r\n信息来自网上，谨慎使用。", "关于插件");
             }
         }
 
