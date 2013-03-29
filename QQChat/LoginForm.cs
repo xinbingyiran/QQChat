@@ -177,5 +177,17 @@ namespace QQChat
             m.ShowDialog();
             Environment.Exit(Environment.ExitCode);
         }
+
+        private void LoginForm_Activated(object sender, EventArgs e)
+        {
+            if (textBoxUser.Text.Length == 0)
+            {
+                textBoxUser.Focus();
+            }
+            else
+            {
+                textBoxPass.Focus();
+            }
+        }
     }
 }

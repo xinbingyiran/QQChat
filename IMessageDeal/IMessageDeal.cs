@@ -83,6 +83,10 @@ namespace MessageDeal
         /// </summary>
         string IName { get; }
         /// <summary>
+        /// 插件状态
+        /// </summary>
+        bool Enabled { get; set; }
+        /// <summary>
         /// 获取相应的菜单项，格式为[显示内容-传递内容]
         /// </summary>
         Dictionary<string, string> Menus { get; }

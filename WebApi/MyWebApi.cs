@@ -14,22 +14,19 @@ namespace WebApi
     public class MyWebApi:IMessageDeal
     {
 
-        bool _enabled = false;
-
         public string IName
         {
             get { return "Web信息处理"; }
         }
+        public bool Enabled
+        {
+            get;
+            set;
+        }
         
-            //new cxitem("@ip","IP地址","@ip ip地址","http://api.liqwei.com/location/?ip={0}"),
-            //new cxitem("@mo","手机号码","@mo 手机号码","http://api.liqwei.com/location/?mobile={0}"),
-            //new cxitem("@tq","天气预报","@tq 城市名","http://api.liqwei.com/weather/?city={0}"),
-            //new cxitem("@b6e","Base64加密","@b6e 字符串","http://api.liqwei.com/security/?base64encode={0}"),
-            //new cxitem("@b6d","Base64解密","@b6d 加密字符串","http://api.liqwei.com/security/?base64decode={0}"),
-
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
-            {"状态","status"}
+            {"关于","about"}
         };
 
         public Dictionary<string, string> Menus
@@ -49,7 +46,10 @@ namespace WebApi
 
         public Dictionary<string, string> Filters
         {
-            get { return _filters; }
+            get
+            {
+                return _filters;
+            }
         }
 
 
@@ -172,6 +172,8 @@ namespace WebApi
 
         private string DealAllMessage(string message)
         {
+            if (!Enabled)
+                return null;
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
@@ -241,10 +243,9 @@ namespace WebApi
 
         public void MenuClicked(string menuName)
         {
-            if (menuName == "status")
+            if (menuName == "about")
             {
-                _enabled = !_enabled;
-                MessageBox.Show("现在的状态是" + (_enabled ? "启用" : "停用"), "状态指示");
+                MessageBox.Show("获取一些网页查询信息。\r\n信息来自网上，谨慎使用。","关于插件");
             }
         }
 

@@ -40,7 +40,7 @@ namespace QQChat
 
         private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("演示程序");
+            MessageBox.Show("QQ聊天程序,\r\n可编写自己的自动回复插件。\r\nDesigned by XBYR", "QQ聊天程序");
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -126,7 +126,7 @@ namespace QQChat
         private void AddMenu(Type t, dynamic o)
         {
             Dictionary<string, string> menus = o.Menus; ;
-            ToolStripItem[] subitems = new ToolStripItem[menus.Count + 1];
+            ToolStripItem[] subitems = new ToolStripItem[menus.Count + 2];
             int i = 0;
             foreach (KeyValuePair<string, string> menu in menus)
             {
@@ -135,13 +135,26 @@ namespace QQChat
                 subitems[i] = item;
                 i++;
             }
-            ToolStripItem helpitem = new ToolStripMenuItem("命令列表");
-            StringBuilder sb = new StringBuilder();
-            foreach (KeyValuePair<string, string> filter in o.Filters)
+            o.Enabled = false;
+            ToolStripMenuItem statusitem = new ToolStripMenuItem("激活状态");
+            statusitem.Click += (sender, e) =>
             {
-                sb.AppendFormat("{0} {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-            }
-            helpitem.Click += (sender, e) => { MessageBox.Show(sb.ToString()); };
+                o.Enabled = !o.Enabled;
+                statusitem.Checked = o.Enabled;
+            };
+            subitems[i] = statusitem;
+            i++;
+
+            ToolStripMenuItem helpitem = new ToolStripMenuItem("命令列表");
+            helpitem.Click += (sender, e) =>
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (KeyValuePair<string, string> filter in o.Filters)
+                {
+                    sb.AppendFormat("{0} {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+                }
+                MessageBox.Show(sb.ToString());
+            };
             subitems[i] = helpitem;
             ToolStripMenuItem newitem = new ToolStripMenuItem(o.IName);
             newitem.DropDownItems.AddRange(subitems);
@@ -682,9 +695,13 @@ namespace QQChat
                 )
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine("@help  ->  \"显示此帮助\"");
+                sb.AppendLine("@help/帮助  ->  \"显示此帮助\"");
                 foreach (var plugin in Plugins.Values)
                 {
+                    if (!plugin.Enabled)
+                    {
+                        continue;
+                    }
                     foreach (KeyValuePair<string, string> filter in plugin.Filters)
                     {
                         sb.AppendFormat("{0}  ->  \"{1}\"{2}", filter.Key, filter.Value, Environment.NewLine);
@@ -827,6 +844,12 @@ namespace QQChat
             {
                 e.Cancel = true;
             }
+        }
+
+        private void MainForm_Activated(object sender, EventArgs e)
+        {
+            if(_qq != null)
+                this.Text = string.Format("{0}[{1}]",_qq.User.QQName,_qq.User.QQNum);
         }
     }
 }

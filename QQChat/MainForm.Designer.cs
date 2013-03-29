@@ -29,16 +29,15 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关于ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControlF = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.buttonf = new System.Windows.Forms.Button();
             this.treeViewF = new System.Windows.Forms.TreeView();
             this.tabPageG = new System.Windows.Forms.TabPage();
-            this.treeViewG = new System.Windows.Forms.TreeView();
-            this.buttonf = new System.Windows.Forms.Button();
             this.buttong = new System.Windows.Forms.Button();
+            this.treeViewG = new System.Windows.Forms.TreeView();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -48,7 +47,6 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.设置ToolStripMenuItem,
             this.菜单ToolStripMenuItem,
             this.关于ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -56,12 +54,6 @@
             this.menuStrip1.Size = new System.Drawing.Size(264, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
-            // 
-            // 设置ToolStripMenuItem
-            // 
-            this.设置ToolStripMenuItem.Name = "设置ToolStripMenuItem";
-            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
-            this.设置ToolStripMenuItem.Text = "设置";
             // 
             // 菜单ToolStripMenuItem
             // 
@@ -100,6 +92,17 @@
             this.tabPage1.Text = "好友";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // buttonf
+            // 
+            this.buttonf.Dock = System.Windows.Forms.DockStyle.Top;
+            this.buttonf.Location = new System.Drawing.Point(3, 3);
+            this.buttonf.Name = "buttonf";
+            this.buttonf.Size = new System.Drawing.Size(226, 23);
+            this.buttonf.TabIndex = 1;
+            this.buttonf.Text = "刷新";
+            this.buttonf.UseVisualStyleBackColor = true;
+            this.buttonf.Click += new System.EventHandler(this.buttonf_Click);
+            // 
             // treeViewF
             // 
             this.treeViewF.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -123,27 +126,6 @@
             this.tabPageG.Text = "群";
             this.tabPageG.UseVisualStyleBackColor = true;
             // 
-            // treeViewG
-            // 
-            this.treeViewG.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.treeViewG.FullRowSelect = true;
-            this.treeViewG.Location = new System.Drawing.Point(3, 32);
-            this.treeViewG.Name = "treeViewG";
-            this.treeViewG.Size = new System.Drawing.Size(226, 287);
-            this.treeViewG.TabIndex = 0;
-            this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
-            // 
-            // buttonf
-            // 
-            this.buttonf.Dock = System.Windows.Forms.DockStyle.Top;
-            this.buttonf.Location = new System.Drawing.Point(3, 3);
-            this.buttonf.Name = "buttonf";
-            this.buttonf.Size = new System.Drawing.Size(226, 23);
-            this.buttonf.TabIndex = 1;
-            this.buttonf.Text = "刷新";
-            this.buttonf.UseVisualStyleBackColor = true;
-            this.buttonf.Click += new System.EventHandler(this.buttonf_Click);
-            // 
             // buttong
             // 
             this.buttong.Dock = System.Windows.Forms.DockStyle.Top;
@@ -154,6 +136,16 @@
             this.buttong.Text = "刷新";
             this.buttong.UseVisualStyleBackColor = true;
             this.buttong.Click += new System.EventHandler(this.buttong_Click);
+            // 
+            // treeViewG
+            // 
+            this.treeViewG.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.treeViewG.FullRowSelect = true;
+            this.treeViewG.Location = new System.Drawing.Point(3, 32);
+            this.treeViewG.Name = "treeViewG";
+            this.treeViewG.Size = new System.Drawing.Size(226, 287);
+            this.treeViewG.TabIndex = 0;
+            this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
             // 
             // MainForm
             // 
@@ -167,6 +159,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.Activated += new System.EventHandler(this.MainForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip1.ResumeLayout(false);
@@ -184,7 +177,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 菜单ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 关于ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 设置ToolStripMenuItem;
         private System.Windows.Forms.TabControl tabControlF;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TreeView treeViewF;

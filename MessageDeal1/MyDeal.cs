@@ -16,16 +16,20 @@ namespace MessageDeal1
 
         private string _filePath;
 
-        private bool _enabled = false;
-
         public string IName
         {
             get { return "示例1"; }
         }
 
+        public bool Enabled
+        {
+            get;
+            set;
+        }
+
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
-            {"状态","status"},
+            {"重载","reload"},
             {"关于","about"},
         };
 
@@ -33,7 +37,7 @@ namespace MessageDeal1
         {
             {"@学 问题 答案","学说话[问题不能有空格]"},
             {"@忘 问题","忘记学过的话"},
-            {"@查","查看我学会的话"},
+            {"@查 from","查看我学会的话,从第几条开始的十条内容"},
         };
 
         public Dictionary<string, string> Menus
@@ -68,10 +72,21 @@ namespace MessageDeal1
                 foreach (string line in lines)
                 {
                     string[] items = line.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
-                    if (items.Length == 2 && !_learning.ContainsKey(items[0]))
+                    if (items.Length == 2)
                     {
-                        _learning.Add(items[0], items[1]);
+                        if (_learning.ContainsKey(items[0]))
+                        {
+                            _learning[items[0]] += " | " + items[1];
+                        }
+                        else
+                        {
+                            _learning.Add(items[0], items[1]);
+                        }
                     }
+                }
+                if (_learning.Count != lines.Length)
+                {
+                    SaveToFile();
                 }
             }
             catch (Exception)
@@ -92,56 +107,65 @@ namespace MessageDeal1
 
         private string DealWDString(string message)
         {
-            if (_enabled)
+            if (!Enabled)
             {
-                if (string.IsNullOrEmpty(message))
+                return null;
+            }
+            if (string.IsNullOrEmpty(message))
+            {
+                return null;
+            }
+            message = message.Trim();
+            Regex r = new Regex(@"^@学\s*(\S*)\s*(.*)$");
+            Match m = r.Match(message);
+            if (m.Success)
+            {
+                if (m.Groups[1].Value.Length < 2)
                 {
-                    return null;
+                    return "呵呵，问题请至少输入两个字哦。";
                 }
-                message = message.Trim();
-                Regex r = new Regex(@"^@学\s*(\S*)\s*(.*)$");
-                Match m = r.Match(message);
-                if (m.Success)
+                if (_learning.ContainsKey(m.Groups[1].Value))
+                    _learning[m.Groups[1].Value] = m.Groups[2].Value;
+                else
+                    _learning.Add(m.Groups[1].Value, m.Groups[2].Value);
+                SaveToFile();
+                return "已经学会此问题：" + m.Groups[1].Value;
+            }
+            r = new Regex(@"^@忘\s*(\S*)$");
+            m = r.Match(message);
+            if (m.Success)
+            {
+                if (m.Groups[1].Value.Length < 2)
                 {
-                    if (m.Groups[1].Value.Length < 2)
-                    {
-                        return "呵呵，问题请至少输入两个字哦。";
-                    }
-                    if (_learning.ContainsKey(m.Groups[1].Value))
-                        _learning[m.Groups[1].Value] = m.Groups[2].Value;
-                    else
-                        _learning.Add(m.Groups[1].Value, m.Groups[2].Value);
-                    SaveToFile();
-                    return "已经学会此问题：" + m.Groups[1];
+                    return "呵呵，问题请至少输入两个字哦。";
                 }
-                r = new Regex(@"^@忘\s*(\S*)$"); 
-                m = r.Match(message);
-                if (m.Success)
+                if (_learning.ContainsKey(m.Groups[1].Value))
+                    _learning.Remove(m.Groups[1].Value);
+                SaveToFile();
+                return "已经忘记此问题：" + m.Groups[1].Value;
+            }
+            r = new Regex(@"^@查\s*(\d*)$");
+            m = r.Match(message);
+            if (m.Success)
+            {
+                int from = 0;
+                try
                 {
-                    if (m.Groups[1].Value.Length < 2)
-                    {
-                        return "呵呵，问题请至少输入两个字哦。";
-                    }
-                    if (_learning.ContainsKey(m.Groups[1].Value))
-                        _learning.Remove(m.Groups[1].Value);
-                    SaveToFile();
-                    return "已经忘记此问题：" + m.Groups[1];
+                    from = Convert.ToInt32(m.Groups[1].Value);
                 }
-                if (message == "@查")
+                catch (Exception) { }
+                StringBuilder sb = new StringBuilder();
+                foreach (KeyValuePair<string, string> filter in _learning.Skip(from).Take(10))
                 {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (KeyValuePair<string, string> filter in _learning)
-                    {
-                        sb.AppendFormat("{0}  ->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                    }
-                    return "列表：" +Environment.NewLine + sb.ToString();
+                    sb.AppendFormat("{0}  ->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
                 }
-                foreach (string key in _learning.Keys)
+                return "列表：" + Environment.NewLine + sb.ToString();
+            }
+            foreach (string key in _learning.Keys)
+            {
+                if (message.Contains(key))
                 {
-                    if (message.Contains(key))
-                    {
-                        return _learning[key];
-                    }
+                    return _learning[key];
                 }
             }
             return null;
@@ -154,20 +178,20 @@ namespace MessageDeal1
 
         public void MenuClicked(string menuName)
         {
-            if (menuName == "status")
+            if (menuName == "reload")
             {
-                _enabled = !_enabled;
-                MessageBox.Show("现在的状态是" + (_enabled ? "启用" : "停用"), "状态指示");
+                LoadFromFile();
+                MessageBox.Show("已完成重载，共" + _learning.Count + "条数据", "操作提示");
             }
             else if (menuName == "about")
             {
-                MessageBox.Show("这只是一个示例", "关于");
+                MessageBox.Show("学话鹦鹉。\r\n能学会一些对话信息。", "关于插件");
             }
         }
 
         public string StatusChanged(Dictionary<string, object> info, string newStatus)
         {
-            if (_enabled)
+            if (Enabled)
             {
                 QQStatus status = QQStatus.GetQQStatusByInternal(newStatus);
                 if (status != null && status != QQStatus.StatusOffline)
@@ -180,7 +204,7 @@ namespace MessageDeal1
 
         public string Input(Dictionary<string, object> info)
         {
-            if (_enabled)
+            if (Enabled)
             {
                 return string.Format("{0} 你好，我正在等待你的输入。", TranslateMessageUser.UserNick);
             }

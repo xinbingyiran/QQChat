@@ -48,7 +48,7 @@
             this.textBoxUser.Location = new System.Drawing.Point(80, 33);
             this.textBoxUser.Name = "textBoxUser";
             this.textBoxUser.Size = new System.Drawing.Size(197, 21);
-            this.textBoxUser.TabIndex = 4;
+            this.textBoxUser.TabIndex = 3;
             this.textBoxUser.Leave += new System.EventHandler(this.textBoxUser_Leave);
             // 
             // textBoxPass
@@ -57,14 +57,14 @@
             this.textBoxPass.Name = "textBoxPass";
             this.textBoxPass.PasswordChar = '＊';
             this.textBoxPass.Size = new System.Drawing.Size(197, 21);
-            this.textBoxPass.TabIndex = 1;
+            this.textBoxPass.TabIndex = 4;
             // 
             // textBoxCode
             // 
             this.textBoxCode.Location = new System.Drawing.Point(271, 10);
             this.textBoxCode.Name = "textBoxCode";
             this.textBoxCode.Size = new System.Drawing.Size(121, 21);
-            this.textBoxCode.TabIndex = 2;
+            this.textBoxCode.TabIndex = 1;
             // 
             // pictureBoxCode
             // 
@@ -82,7 +82,7 @@
             this.label1.Location = new System.Drawing.Point(21, 36);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 12);
-            this.label1.TabIndex = 0;
+            this.label1.TabIndex = 1;
             this.label1.Text = "用户名：";
             // 
             // label2
@@ -91,7 +91,7 @@
             this.label2.Location = new System.Drawing.Point(21, 75);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(41, 12);
-            this.label2.TabIndex = 5;
+            this.label2.TabIndex = 2;
             this.label2.Text = "密码：";
             // 
             // button1
@@ -99,7 +99,7 @@
             this.button1.Location = new System.Drawing.Point(283, 59);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(121, 43);
-            this.button1.TabIndex = 8;
+            this.button1.TabIndex = 7;
             this.button1.Text = "登录";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -111,7 +111,7 @@
             this.comboBox1.Location = new System.Drawing.Point(283, 33);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(121, 20);
-            this.comboBox1.TabIndex = 9;
+            this.comboBox1.TabIndex = 6;
             // 
             // label3
             // 
@@ -119,7 +119,7 @@
             this.label3.Location = new System.Drawing.Point(9, 10);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 12);
-            this.label3.TabIndex = 6;
+            this.label3.TabIndex = 0;
             this.label3.Text = "验证码：";
             // 
             // panel1
@@ -130,7 +130,7 @@
             this.panel1.Location = new System.Drawing.Point(12, 108);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(402, 69);
-            this.panel1.TabIndex = 10;
+            this.panel1.TabIndex = 5;
             // 
             // label4
             // 
@@ -139,7 +139,7 @@
             this.label4.Location = new System.Drawing.Point(21, 9);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(0, 12);
-            this.label4.TabIndex = 11;
+            this.label4.TabIndex = 0;
             // 
             // LoginForm
             // 
@@ -157,6 +157,7 @@
             this.Controls.Add(this.textBoxUser);
             this.Name = "LoginForm";
             this.Text = "LoginForm";
+            this.Activated += new System.EventHandler(this.LoginForm_Activated);
             this.Load += new System.EventHandler(this.LoginForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCode)).EndInit();
             this.panel1.ResumeLayout(false);
