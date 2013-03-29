@@ -14,6 +14,8 @@ namespace MessageDeal1
 
         private Dictionary<string, string> _learning;
 
+        private int _currentIndex;
+
         private string _filePath;
 
         public string IName
@@ -148,18 +150,25 @@ namespace MessageDeal1
             m = r.Match(message);
             if (m.Success)
             {
-                int from = 0;
+                int count = 10;
                 try
                 {
-                    from = Convert.ToInt32(m.Groups[1].Value);
+                    _currentIndex = Convert.ToInt32(m.Groups[1].Value);
                 }
-                catch (Exception) { }
+                catch (Exception) {
+                }
                 StringBuilder sb = new StringBuilder();
-                foreach (KeyValuePair<string, string> filter in _learning.Skip(from).Take(10))
+                if(_currentIndex >= _learning.Count)
+                {
+                    _currentIndex = 0;
+                }
+                sb.AppendLine("列表：" + _currentIndex);
+                foreach (KeyValuePair<string, string> filter in _learning.Skip(_currentIndex).Take(count))
                 {
                     sb.AppendFormat("{0}  ->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
                 }
-                return "列表：" + Environment.NewLine + sb.ToString();
+                _currentIndex += count;
+                return sb.ToString();
             }
             foreach (string key in _learning.Keys)
             {
@@ -185,7 +194,7 @@ namespace MessageDeal1
             }
             else if (menuName == "about")
             {
-                MessageBox.Show("学话鹦鹉。\r\n能学会一些对话信息。", "关于插件");
+                MessageBox.Show("学话鹦鹉。\r\n能学会一些对话信息。\r\n当前信息条数：" + _learning.Count, "关于插件");
             }
         }
 
