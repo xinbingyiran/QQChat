@@ -42,6 +42,11 @@ namespace QQChat
 
         public void SendMessage(string message)
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(() => SendMessage(message)));
+                return;
+            }
             if (string.IsNullOrEmpty(message))
                 return;
             new Task(() =>
@@ -52,7 +57,19 @@ namespace QQChat
                     {
                         msg += "[发送失败]";
                     }
-                    BeginInvoke(new MethodInvoker(() => richTextBox1.AppendLine(msg, FormHelper.PickColor())));
+                    IRichMessage imessage = new RichMessageText(msg + Environment.NewLine)
+                    {
+                        MessageColor = FormHelper.PickColor()
+                    };
+                    if (this.IsHandleCreated)
+                    {
+
+                        BeginInvoke(new MethodInvoker(() => { imessage.AppendTo(richTextBox1); }));
+                    }
+                    else
+                    {
+                        _oldMessage.Add(imessage);
+                    }
                 }).Start();
         }
 
@@ -98,13 +115,13 @@ namespace QQChat
 
         private void DealOldMessage()
         {
-            if (InvokeRequired)
-            {
-                BeginInvoke(new MethodInvoker(DealOldMessage));
-                return;
-            }
             if (this.IsHandleCreated)
             {
+                if (InvokeRequired)
+                {
+                    BeginInvoke(new MethodInvoker(DealOldMessage));
+                    return;
+                }
                 foreach (IRichMessage msg in _oldMessage)
                 {
                     msg.AppendTo(richTextBox1);

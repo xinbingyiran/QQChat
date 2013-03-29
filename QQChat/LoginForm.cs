@@ -36,6 +36,12 @@ namespace QQChat
                 comboBox1.SelectedIndex = 0;
             }
             panel1.Visible = false;
+#if(DEBUG)
+            textBoxUser.Text = "2221933016";
+            textBoxPass.Text = "ypbxyy";
+            CreateUser(textBoxUser.Text);
+            new Task(GetVerifyCode).Start();
+#endif
         }
 
         private void SetImageCode(Image image)

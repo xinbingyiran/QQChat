@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace InterTest
 {
@@ -9,8 +10,13 @@ namespace InterTest
         [TestMethod]
         public void TestMatch1()
         {
-            MessageDeal1.MessageDeal1 m1 = new MessageDeal1.MessageDeal1();
-            m1.DealFriendMessage("@问：你好 答：嗯嗯好呀 呆呵");
+            MessageDeal1.MyDeal m1 = new MessageDeal1.MyDeal();
+            m1.DealFriendMessage(
+                new Dictionary<string, object> {
+                {"uin",0},
+                {"nick","nick"},
+                {"mark","mark"}
+                }, "@问：你好 答：嗯嗯好呀 呆呵");
         }
     }
 }

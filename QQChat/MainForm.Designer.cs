@@ -37,6 +37,8 @@
             this.treeViewF = new System.Windows.Forms.TreeView();
             this.tabPageG = new System.Windows.Forms.TabPage();
             this.treeViewG = new System.Windows.Forms.TreeView();
+            this.buttonf = new System.Windows.Forms.Button();
+            this.buttong = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -88,6 +90,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.buttonf);
             this.tabPage1.Controls.Add(this.treeViewF);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
@@ -99,17 +102,18 @@
             // 
             // treeViewF
             // 
-            this.treeViewF.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewF.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.treeViewF.FullRowSelect = true;
-            this.treeViewF.Location = new System.Drawing.Point(3, 3);
+            this.treeViewF.Location = new System.Drawing.Point(3, 32);
             this.treeViewF.Name = "treeViewF";
-            this.treeViewF.Size = new System.Drawing.Size(226, 316);
+            this.treeViewF.Size = new System.Drawing.Size(226, 287);
             this.treeViewF.TabIndex = 0;
             this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
             this.treeViewF.DoubleClick += new System.EventHandler(this.treeViewF_DoubleClick);
             // 
             // tabPageG
             // 
+            this.tabPageG.Controls.Add(this.buttong);
             this.tabPageG.Controls.Add(this.treeViewG);
             this.tabPageG.Location = new System.Drawing.Point(4, 22);
             this.tabPageG.Name = "tabPageG";
@@ -121,13 +125,35 @@
             // 
             // treeViewG
             // 
-            this.treeViewG.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewG.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.treeViewG.FullRowSelect = true;
-            this.treeViewG.Location = new System.Drawing.Point(3, 3);
+            this.treeViewG.Location = new System.Drawing.Point(3, 32);
             this.treeViewG.Name = "treeViewG";
-            this.treeViewG.Size = new System.Drawing.Size(226, 316);
+            this.treeViewG.Size = new System.Drawing.Size(226, 287);
             this.treeViewG.TabIndex = 0;
             this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
+            // 
+            // buttonf
+            // 
+            this.buttonf.Dock = System.Windows.Forms.DockStyle.Top;
+            this.buttonf.Location = new System.Drawing.Point(3, 3);
+            this.buttonf.Name = "buttonf";
+            this.buttonf.Size = new System.Drawing.Size(226, 23);
+            this.buttonf.TabIndex = 1;
+            this.buttonf.Text = "刷新";
+            this.buttonf.UseVisualStyleBackColor = true;
+            this.buttonf.Click += new System.EventHandler(this.buttonf_Click);
+            // 
+            // buttong
+            // 
+            this.buttong.Dock = System.Windows.Forms.DockStyle.Top;
+            this.buttong.Location = new System.Drawing.Point(3, 3);
+            this.buttong.Name = "buttong";
+            this.buttong.Size = new System.Drawing.Size(226, 23);
+            this.buttong.TabIndex = 2;
+            this.buttong.Text = "刷新";
+            this.buttong.UseVisualStyleBackColor = true;
+            this.buttong.Click += new System.EventHandler(this.buttong_Click);
             // 
             // MainForm
             // 
@@ -141,6 +167,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -163,6 +190,8 @@
         private System.Windows.Forms.TreeView treeViewF;
         private System.Windows.Forms.TabPage tabPageG;
         private System.Windows.Forms.TreeView treeViewG;
+        private System.Windows.Forms.Button buttonf;
+        private System.Windows.Forms.Button buttong;
     }
 }
 

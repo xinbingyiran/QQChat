@@ -57,6 +57,11 @@ namespace WebQQ2.WebQQ2
 
         private static readonly string qq_cface = "http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
 
+        private static readonly string qq_deny_added_request2 = "http://s.web2.qq.com/api/deny_added_request2";
+        private static readonly string qq_allow_added_request2 = "http://s.web2.qq.com/api/allow_added_request2";
+        private static readonly string qq_allow_and_add2 = "http://s.web2.qq.com/api/allow_and_add2";
+
+
         #endregion
 
         #region postparadefine
@@ -145,6 +150,26 @@ namespace WebQQ2.WebQQ2
             {"nlk",""},
             {"vfwebqq",""}
         };
+        private Dictionary<string, object> qq_deny_added_request2_post = new Dictionary<string, object>()
+        {
+            {"account",0},
+            {"msg",""},
+            {"vfwebqq",""}
+        };
+
+        private Dictionary<string, object> qq_allow_added_request2_post = new Dictionary<string, object>()
+        {
+            {"account",0},
+            {"vfwebqq",""}
+        };
+
+        private Dictionary<string, object> qq_allow_and_add2_post = new Dictionary<string, object>()
+        {
+            {"account",0},
+            {"gid",0},
+            {"mname",""},
+            {"vfwebqq",""}
+        };
 
         #endregion
 
@@ -177,7 +202,7 @@ namespace WebQQ2.WebQQ2
         {
             _random = new Random();
             _cookiecontainer = new CookieContainer();
-            _qq_send_buddy_msg2_post_msg_id = (_random.Next(9000) + 1000) * 10000 + 1;
+            _qq_send_buddy_msg2_post_msg_id = (_random.Next(3000) + 4000) * 10000 + 1;
         }
 
         public QQ()
@@ -486,7 +511,7 @@ namespace WebQQ2.WebQQ2
             qq_poll2_post["clientid"] = _user.ClientID;
             qq_poll2_post["psessionid"] = _user.PsessionID;
             string para = QQHelper.ToPostData(qq_poll2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string str = PostUrlText(url, Encoding.Default.GetBytes(para));
+            string str = PostUrlText(url, Encoding.Default.GetBytes(para), int.MaxValue);
             try
             {
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(str);
@@ -655,8 +680,51 @@ namespace WebQQ2.WebQQ2
                                 }
                                 break;
                             case "tips":
+                                {
+                                    if (MessageFriendReceived != null)
+                                    {
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
+                                        msgs.Add("poll_type", poll_type);
+                                        foreach (string key in messagevalue.Keys)
+                                        {
+                                            msgs.Add(key, messagevalue[key]);
+                                        }
+                                        MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
+                                    }
+                                }
+                                break;
+                            case "sys_g_message":
+                                {
+                                    //{"retcode":0,"result":[{"poll_type":"sys_g_msg","value":
+                                    //{"msg_id":53435,"from_uin":4257273782,"to_uin":2221933016,
+                                    //"msg_id2":268651,"msg_type":33,"reply_ip":176498397,
+                                    //"type":"group_join","gcode":519756087,"t_gcode":70125956,
+                                    //"op_type":3,"new_member":2221933016,"t_new_member":"",
+                                    //"admin_uin":1793858042,"admin_nick":"\u521B\u5EFA\u8005"}}]}
+                                    //{"retcode":0,"result":[{"poll_type":"sys_g_msg","value":
+                                    //{"msg_id":803,"from_uin":4257273782,"to_uin":2221933016,
+                                    //"msg_id2":794855,"msg_type":34,"reply_ip":176722703,
+                                    //"type":"group_leave","gcode":519756087,"t_gcode":70125956,
+                                    //"op_type":3,"old_member":2221933016,"t_old_member":"",
+                                    //"admin_uin":1793858042,"t_admin_uin":"","admin_nick":"\u521B\u5EFA\u8005"}}]}
+                                    if (MessageFriendReceived != null)
+                                    {
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
+                                        msgs.Add("poll_type", poll_type);
+                                        foreach (string key in messagevalue.Keys)
+                                        {
+                                            msgs.Add(key, messagevalue[key]);
+                                        }
+                                        MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
+                                    }
+                                }
+                                break;
                             case "system_message":
                                 {
+                                    //{"retcode":0,"result":[{"poll_type":"system_message","value":
+                                    //{"seq":63433,"type":"verify_required","uiuin":"",
+                                    //"from_uin":4011979716,"account":841473232,
+                                    //"msg":"aaa","allow":1,"stat":10,"client_type":1}}]}
                                     if (MessageFriendReceived != null)
                                     {
                                         Dictionary<string, object> msgs = new Dictionary<string, object>();
@@ -959,6 +1027,86 @@ namespace WebQQ2.WebQQ2
             }
         }
 
+        public bool DenyFriendAdd(long account,string reason)
+        {
+            try
+            {
+                string url = qq_deny_added_request2;
+                qq_deny_added_request2_post["account"] = account;
+                qq_deny_added_request2_post["msg"] = reason??"";
+                qq_deny_added_request2_post["vfwebqq"] = _user.VfWebQQ;
+                string para = QQHelper.ToPostData(qq_deny_added_request2_post);
+                string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
+                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
+                if (root != null && root["retcode"] as int? == 0)
+                {
+                    Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+                    if(result["result"] as int? == 0)
+                        return true;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
+        public long AllowFriendAdd(long account)
+        {
+            try
+            {
+                string url = qq_allow_added_request2;
+                qq_allow_added_request2_post["account"] = account;
+                qq_allow_added_request2_post["vfwebqq"] = _user.VfWebQQ;
+                string para = QQHelper.ToPostData(qq_allow_added_request2_post);
+                string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
+                //{"retcode":0,"result":{"result":0,"client_type":1,"account":841473232,"tuin":4011979716,"stat":10}}
+                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
+                if (root != null && root["retcode"] as int? == 0)
+                {
+                    Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+                    if (result["result"] as int? == 0)
+                        if (result.Keys.Contains("tuin"))
+                        {
+                            return Convert.ToInt64(result["tuin"]);
+                        }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return -1;
+        }
+
+        public long AllowFriendAddAndAddFriend(long account, long group, string markname)
+        {
+            try
+            {
+                string url = qq_allow_and_add2;
+                qq_allow_and_add2_post["account"] = account;
+                qq_allow_and_add2_post["gid"] = group;
+                qq_allow_and_add2_post["mname"] = markname;
+                qq_allow_and_add2_post["vfwebqq"] = _user.VfWebQQ;
+                string para = QQHelper.ToPostData(qq_allow_and_add2_post);
+                string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
+                //{"retcode":0,"result":{"result1":0,"account":841473232,"tuin":4011979716,"stat":10}}
+                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
+                if (root != null && root["retcode"] as int? == 0)
+                {
+                    Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+                    if (result["result1"] as int? == 0)
+                        if (result.Keys.Contains("tuin"))
+                        {
+                            return Convert.ToInt64(result["tuin"]);
+                        }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return -1;
+        }
+
         public void GetGroupMembers(QQGroup group, int timeout)
         {
             //private static readonly string qq_get_group_info_ext2 = "http://s.web2.qq.com/api/get_group_info_ext2?gcode={0}&vfwebqq={1}&t={2}";
@@ -1013,7 +1161,7 @@ namespace WebQQ2.WebQQ2
                                 {
                                     group.leaders.Add(newitem.uin, newitem);
                                 }
-                                else if(newitem.uin == ownerid)
+                                else if (newitem.uin == ownerid)
                                 {
                                     group.owner = newitem;
                                 }
@@ -1024,7 +1172,7 @@ namespace WebQQ2.WebQQ2
                             }
                         }
                     }
-                    #endregion
+                        #endregion
 
                     #region minfo
 

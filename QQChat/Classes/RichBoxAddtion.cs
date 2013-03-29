@@ -16,7 +16,7 @@ namespace QQChat.Classes
     public interface IRichMessage
     {
         RichMessageType MessageType { get; }
-        string Message { get; }
+        object Message { get; }
         Color? MessageColor { get; set; }
         bool AppendTo(RichTextBox rtb);
     }
@@ -28,7 +28,7 @@ namespace QQChat.Classes
             get { return RichMessageType.TYPETEXT; }
         }
 
-        public string Message
+        public object Message
         {
             get;
             private set;
@@ -51,7 +51,7 @@ namespace QQChat.Classes
                 throw new ArgumentNullException();
             rtb.Select(int.MaxValue, 0);
             rtb.SelectionColor = (MessageColor == null) ? rtb.SelectionColor : MessageColor.Value;
-            rtb.SelectedText = this.Message;
+            rtb.SelectedText = this.Message as string;
             return true;
         }
     }
@@ -64,7 +64,7 @@ namespace QQChat.Classes
             get { return RichMessageType.TYPERTF; }
         }
 
-        public string Message
+        public object Message
         {
             get;
             private set;
@@ -76,9 +76,9 @@ namespace QQChat.Classes
             set;
         }
 
-        public RichMessageRtf(RichTextBox rtb, Image image)
+        public RichMessageRtf(Image image)
         {
-            Message = RTB_InsertImg.GetImageRtf(rtb, image);
+            Message = image;
         }
 
 
@@ -86,9 +86,10 @@ namespace QQChat.Classes
         {
             if (rtb == null)
                 throw new ArgumentNullException();
+            string rtf = RTB_InsertImg.GetImageRtf(rtb, Message as Image);
             rtb.Select(int.MaxValue, 0);
             rtb.SelectionColor = (MessageColor == null) ? rtb.SelectionColor : MessageColor.Value;
-            rtb.SelectedRtf = this.Message;
+            rtb.SelectedRtf = rtf;
             return true;
         }
     }

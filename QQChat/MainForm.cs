@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using QQChat.Classes;
 using System.Text.RegularExpressions;
+using System.Web.Script.Serialization;
 
 namespace QQChat
 {
@@ -28,6 +29,8 @@ namespace QQChat
         private List<GroupForm> _groups;
         private List<FriendForm> _friends;
         private SystemForm _system;
+
+        private JavaScriptSerializer _jss;
 
         public MainForm()
         {
@@ -45,6 +48,7 @@ namespace QQChat
             LoadPlugins();
             _groups = new List<GroupForm>();
             _friends = new List<FriendForm>();
+            _jss = new JavaScriptSerializer();
         }
 
         private void treeViewF_AfterSelect(object sender, TreeViewEventArgs e)
@@ -64,8 +68,7 @@ namespace QQChat
                 var f = _qq.User.GetUserFriend(uin);
                 if (f != null && f.IsValid)
                 {
-                    new Task(() =>
-                    SetFriendText(f, null)).Start();
+                    SetFriendText(f, null);
                 }
             }
         }
@@ -78,8 +81,7 @@ namespace QQChat
                 var g = _qq.User.GetUserGroup(gid);
                 if (g != null)
                 {
-                    new Task(() =>
-                    SetGroupText(g, null, null)).Start();
+                    SetGroupText(g, null, null);
                 }
             }
         }
@@ -124,7 +126,7 @@ namespace QQChat
         private void AddMenu(Type t, dynamic o)
         {
             Dictionary<string, string> menus = o.Menus; ;
-            ToolStripItem[] subitems = new ToolStripItem[menus.Count];
+            ToolStripItem[] subitems = new ToolStripItem[menus.Count + 1];
             int i = 0;
             foreach (KeyValuePair<string, string> menu in menus)
             {
@@ -133,6 +135,14 @@ namespace QQChat
                 subitems[i] = item;
                 i++;
             }
+            ToolStripItem helpitem = new ToolStripMenuItem("命令列表");
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyValuePair<string, string> filter in o.Filters)
+            {
+                sb.AppendFormat("{0} {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+            }
+            helpitem.Click += (sender, e) => { MessageBox.Show(sb.ToString()); };
+            subitems[i] = helpitem;
             ToolStripMenuItem newitem = new ToolStripMenuItem(o.IName);
             newitem.DropDownItems.AddRange(subitems);
             菜单ToolStripMenuItem.DropDownItems.Add(newitem);
@@ -143,8 +153,8 @@ namespace QQChat
             if (qq == null)
                 throw new ArgumentNullException();
             _qq = qq;
-            _qq.MessageFriendReceived += _user_MessageFriendReceived;
-            _qq.MessageGroupReceived += _user_MessageGroupReceived;
+            _qq.MessageFriendReceived += QQMessageFriendReceived;
+            _qq.MessageGroupReceived += QQMessageGroupReceived;
             new Task(() =>
             {
                 GetAllFriends();
@@ -310,25 +320,43 @@ namespace QQChat
             }
         }
 
-        private void _user_MessageGroupReceived(object sender, GroupEventArgs e)
+        private void QQMessageGroupReceived(object sender, GroupEventArgs e)
         {
+            if (e.MsgContent == null)
+                return;
             SetGroupText(e.Group, e.Member, e.MsgContent);
 
             if (e.Time > _qq.User.LoginTime)
             {
-                foreach (var p in Plugins)
+                string rmsg = InternalPickMessage(e.MsgContent);
+                if (rmsg != null)
                 {
-                    string rmsg = p.Value.DealGroupMessage(e.MsgContent);
-                    if (rmsg != null)
+                    SendGroupMessage(e.Group, e.Member, rmsg);
+                }
+                else
+                {
+                    var info = new Dictionary<string, object>
                     {
-                        SendGroupMessage(e.Group, e.Member, rmsg);
-                        break;
+                        {"gid",e.Group == null?0:e.Group.gid},
+                        {"gname",e.Group == null?null:e.Group.name},
+                        {"fuin",e.Member == null?0:e.Member.uin},
+                        {"fnick",e.Member == null?null:e.Member.card},
+                        {"fcard",e.Member == null?null:e.Member.card},
+                    };
+                    foreach (var p in Plugins)
+                    {
+                        rmsg = p.Value.DealGroupMessage(info, e.MsgContent);
+                        if (rmsg != null)
+                        {
+                            SendGroupMessage(e.Group, e.Member, rmsg);
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        private void _user_MessageFriendReceived(object sender, FriendEventArgs e)
+        private void QQMessageFriendReceived(object sender, FriendEventArgs e)
         {
             switch (e.Mtype)
             {
@@ -337,13 +365,28 @@ namespace QQChat
                         SetFriendText(e.User, e.MsgContent);
                         if (e.Time > _qq.User.LoginTime)
                         {
-                            foreach (var p in Plugins)
+                            string rmsg = InternalPickMessage(e.MsgContent);
+                            if (rmsg != null)
                             {
-                                string rmsg = p.Value.DealFriendMessage(e.MsgContent);
-                                if (rmsg != null)
+                                SendFriendMessage(e.User, rmsg);
+                            }
+                            else
+                            {
+
+                                var info = new Dictionary<string, object>
                                 {
-                                    SendFriendMessage(e.User, rmsg);
-                                    break;
+                                    {"uin",e.User == null?0:e.User.uin},
+                                    {"nick",e.User == null?null:e.User.nick},
+                                    {"mark",e.User == null?null:e.User.markname},
+                                };
+                                foreach (var p in Plugins)
+                                {
+                                    rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
+                                    if (rmsg != null)
+                                    {
+                                        SendFriendMessage(e.User, rmsg);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -379,12 +422,18 @@ namespace QQChat
                     break;
                 case MessageEventType.MESSAGE_STATUS:
                     {
+                        var info = new Dictionary<string, object>
+                            {
+                                {"uin",e.User == null?0:e.User.uin},
+                                {"nick",e.User == null?null:e.User.nick},
+                                {"mark",e.User == null?null:e.User.markname},
+                            };
                         string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, e.User.status, e.Time);
                         SetSystemText(messagestate, e.User);
                         RefreshUser(e.User);
                         foreach (var p in Plugins)
                         {
-                            string rmsg = p.Value.StatusChanged(e.User.status);
+                            string rmsg = p.Value.StatusChanged(info, e.User.status);
                             if (rmsg != null)
                             {
                                 SendFriendMessage(e.User, rmsg);
@@ -406,8 +455,23 @@ namespace QQChat
                     break;
                 case MessageEventType.MESSAGE_INPUT:
                     {
+                        var info = new Dictionary<string, object>
+                            {
+                                {"uin",e.User == null?0:e.User.uin},
+                                {"nick",e.User == null?null:e.User.nick},
+                                {"mark",e.User == null?null:e.User.markname},
+                            };
                         string msg = "输入";
                         SetFriendText(e.User, msg);
+                        foreach (var p in Plugins)
+                        {
+                            string rmsg = p.Value.Input(info);
+                            if (rmsg != null)
+                            {
+                                SendFriendMessage(e.User, rmsg);
+                                break;
+                            }
+                        }
                     }
                     break;
                 case MessageEventType.MESSAGE_KICK:
@@ -419,22 +483,42 @@ namespace QQChat
                 case MessageEventType.MESSAGE_SYSTEM:
                 case MessageEventType.MESSAGE_UNKNOW:
                     {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var i in e.Msgs)
+                        if (e.Msgs["poll_type"] as string == "system_message")
                         {
-                            sb.AppendLine(string.Format("{0}:{1}", i.Key, i.Value));
+                            if (e.Msgs["type"] as string == "verify_required")
+                            {
+                                long gid = _qq.User.QQFriends.GroupList.Keys.FirstOrDefault();
+                                if (gid < 0) gid = 0;
+                                long uin = _qq.AllowFriendAddAndAddFriend(Convert.ToInt64(e.Msgs["account"]), gid, "");
+                                if (uin > 0)
+                                {
+                                    SetSystemText("新用户添加", null);
+                                    new Task(GetAllFriends).Start();
+                                    break;
+                                }
+                            }
                         }
-                        SetSystemText(sb.ToString().Trim(), null);
+                        else if (e.Msgs["poll_type"] as string == "sys_g_message")
+                        {
+                            if (e.Msgs["type"] as string == "group_join")
+                            {
+                                SetSystemText("新群添加 by " + e.Msgs["admin_nick"] as string, null);
+                                new Task(GetAllGroups).Start();
+                                break;
+                            }
+                            else if (e.Msgs["type"] as string == "group_leave")
+                            {
+                                SetSystemText("旧群移除 by " + e.Msgs["admin_nick"] as string, null);
+                                new Task(GetAllGroups).Start();
+                                break;
+                            }
+                        }
+                        SetSystemText(_jss.Serialize(e.Msgs), null);
                     }
                     break;
                 default:
                     {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var i in e.Msgs)
-                        {
-                            sb.AppendLine(string.Format("{0}:{1}", i.Key, i.Value));
-                        }
-                        SetSystemText(sb.ToString().Trim(), null);
+                        SetSystemText(_jss.Serialize(e.Msgs), null);
                     }
                     break;
             }
@@ -588,6 +672,28 @@ namespace QQChat
             return msg;
         }
 
+        public string InternalPickMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+                return null;
+            message = message.Trim();
+            if (message == "@help"
+                || message == "@帮助"
+                )
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("@help  ->  \"显示此帮助\"");
+                foreach (var plugin in Plugins.Values)
+                {
+                    foreach (KeyValuePair<string, string> filter in plugin.Filters)
+                    {
+                        sb.AppendFormat("{0}  ->  \"{1}\"{2}", filter.Key, filter.Value, Environment.NewLine);
+                    }
+                }
+                return sb.ToString();
+            }
+            return null;
+        }
 
         public List<IRichMessage> TransMessage(RichTextBox rtb, string msg, string uin)
         {
@@ -613,7 +719,7 @@ namespace QQChat
                     {
                         messages.Add(new RichMessageText(t[0]));
                     }
-                    messages.Add(new RichMessageRtf(rtb, bm));
+                    messages.Add(new RichMessageRtf(bm));
                     if (t.Length > 1)
                     {
                         sstr = t[1];
@@ -637,14 +743,15 @@ namespace QQChat
                     rmessages.Add(imessage);
                     continue;
                 }
-                MatchCollection mc2 = r2.Matches(imessage.Message);
+                string strMsg = imessage.Message as string;
+                MatchCollection mc2 = r2.Matches(strMsg);
                 if (mc2.Count == 0)
                 {
                     rmessages.Add(imessage);
                 }
                 else
                 {
-                    sstr = imessage.Message;
+                    sstr = strMsg;
                     foreach (Match m in mc2)
                     {
                         Bitmap bm = null;
@@ -662,7 +769,7 @@ namespace QQChat
                         {
                             rmessages.Add(new RichMessageText(t[0]));
                         }
-                        rmessages.Add(new RichMessageRtf(rtb, bm));
+                        rmessages.Add(new RichMessageRtf(bm));
                         if (t.Length > 1)
                         {
                             sstr = t[1];
@@ -691,6 +798,34 @@ namespace QQChat
             else
             {
                 return QQChat.Properties.Resources.ResourceManager.GetObject("_" + faceid) as Bitmap;
+            }
+        }
+
+        private void buttonf_Click(object sender, EventArgs e)
+        {
+            new Task(() =>
+                {
+                    GetAllFriends();
+                }).Start();
+        }
+
+        private void buttong_Click(object sender, EventArgs e)
+        {
+            new Task(() =>
+            {
+                GetAllGroups();
+            }).Start();
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (MessageBox.Show("你确定要退出吗？", "退出确认", MessageBoxButtons.YesNoCancel) == System.Windows.Forms.DialogResult.Yes)
+            {
+                _qq.LogOutQQ2();
+            }
+            else
+            {
+                e.Cancel = true;
             }
         }
     }

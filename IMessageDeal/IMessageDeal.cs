@@ -93,15 +93,18 @@ namespace MessageDeal
         /// <summary>
         /// 处理用户消息，并返回处理结果
         /// </summary>
+        /// <param name="info">用户信息{"uin":用户标识,"nick":"用户名","mark":"标志名"}</param>
         /// <param name="message">要处理的消息</param>
         /// <returns>如果不需要回应，只需设置为null即</returns>
-        string DealFriendMessage(string message);
+        string DealFriendMessage(Dictionary<string,object> info,string message);
         /// <summary>
         /// 处理群消息，并返回处理结果
         /// </summary>
+        /// 
+        /// <param name="info">用户信息{"gid":群标识,"gname":"群名称","fuin":用户标识,"fnick":"用户名","fcard":用户名片}</param>
         /// <param name="message">要处理的消息</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
-        string DealGroupMessage(string message);
+        string DealGroupMessage(Dictionary<string, object> info, string message);
         /// <summary>
         /// 菜单处理程序
         /// </summary>
@@ -111,14 +114,15 @@ namespace MessageDeal
         /// <summary>
         /// 用户状态改变
         /// </summary>
+        /// <param name="info">用户信息{"uin":用户标识,"nick":"用户名","mark":"标志名"}</param>
         /// <param name="newStatus">新状态[传递内容]</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
-        string StatusChanged(string newStatus);
+        string StatusChanged(Dictionary<string, object> info, string newStatus);
         /// <summary>
         /// 用户正在输入
         /// </summary>
-        /// <param name="newStatus">新状态[传递内容]</param>
+        /// <param name="info">用户信息{"uin":用户标识,"nick":"用户名","mark":"标志名"}</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
-        string Input();
+        string Input(Dictionary<string, object> info);
     }
 }

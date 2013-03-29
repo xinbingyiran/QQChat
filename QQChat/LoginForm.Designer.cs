@@ -48,7 +48,7 @@
             this.textBoxUser.Location = new System.Drawing.Point(80, 33);
             this.textBoxUser.Name = "textBoxUser";
             this.textBoxUser.Size = new System.Drawing.Size(197, 21);
-            this.textBoxUser.TabIndex = 0;
+            this.textBoxUser.TabIndex = 4;
             this.textBoxUser.Leave += new System.EventHandler(this.textBoxUser_Leave);
             // 
             // textBoxPass
@@ -82,7 +82,7 @@
             this.label1.Location = new System.Drawing.Point(21, 36);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 12);
-            this.label1.TabIndex = 4;
+            this.label1.TabIndex = 0;
             this.label1.Text = "用户名：";
             // 
             // label2
