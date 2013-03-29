@@ -74,7 +74,7 @@ namespace MessageDeal1
                 foreach (string line in lines)
                 {
                     string[] items = line.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
-                    if (items.Length == 2)
+                    if (items.Length == 2 && items[0].Length >= 2)
                     {
                         if (_learning.ContainsKey(items[0]))
                         {
