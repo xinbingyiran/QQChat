@@ -45,6 +45,7 @@ namespace QQChat
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            LoadStatus();
             LoadPlugins();
             _groups = new List<GroupForm>();
             _friends = new List<FriendForm>();
@@ -83,6 +84,19 @@ namespace QQChat
                 {
                     SetGroupText(g, null, null);
                 }
+            }
+        }
+
+        private void LoadStatus()
+        {
+            foreach (QQStatus status in QQStatus.AllStatus)
+            {
+                ToolStripMenuItem newitem = new ToolStripMenuItem(status.Status);
+                newitem.Click += (sender, e) =>
+                {
+                    _qq.ChangeStatus(status.StatusInternal);
+                };
+                状态ToolStripMenuItem.DropDownItems.Add(newitem);
             }
         }
 
@@ -864,8 +878,8 @@ namespace QQChat
 
         private void MainForm_Activated(object sender, EventArgs e)
         {
-            if(_qq != null)
-                this.Text = string.Format("{0}[{1}]",_qq.User.QQName,_qq.User.QQNum);
+            if (_qq != null)
+                this.Text = string.Format("{0}[{1}]", _qq.User.QQName, _qq.User.QQNum);
         }
     }
 }

@@ -38,6 +38,7 @@
             this.tabPageG = new System.Windows.Forms.TabPage();
             this.buttong = new System.Windows.Forms.Button();
             this.treeViewG = new System.Windows.Forms.TreeView();
+            this.状态ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -47,6 +48,7 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.状态ToolStripMenuItem,
             this.菜单ToolStripMenuItem,
             this.关于ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -147,6 +149,12 @@
             this.treeViewG.TabIndex = 0;
             this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
             // 
+            // 状态ToolStripMenuItem
+            // 
+            this.状态ToolStripMenuItem.Name = "状态ToolStripMenuItem";
+            this.状态ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.状态ToolStripMenuItem.Text = "状态";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -184,6 +192,7 @@
         private System.Windows.Forms.TreeView treeViewG;
         private System.Windows.Forms.Button buttonf;
         private System.Windows.Forms.Button buttong;
+        private System.Windows.Forms.ToolStripMenuItem 状态ToolStripMenuItem;
     }
 }
 
