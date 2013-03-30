@@ -485,10 +485,7 @@ namespace WebQQ2.WebQQ2
                 }
                 _messageTask = null;
             }
-            if (_messageTaskCts == null)
-            {
-                _messageTaskCts = new CancellationTokenSource();
-            }
+            _messageTaskCts = new CancellationTokenSource();
             _messageTask = new Task(() =>
                 {
                     _messageTaskCts.Token.ThrowIfCancellationRequested();

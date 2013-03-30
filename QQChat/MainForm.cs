@@ -95,6 +95,8 @@ namespace QQChat
                 newitem.Click += (sender, e) =>
                 {
                     _qq.ChangeStatus(status.StatusInternal);
+                    if (status.StatusInternal != QQStatus.StatusOffline.StatusInternal)
+                        _qq.StartGetMessage();
                 };
                 状态ToolStripMenuItem.DropDownItems.Add(newitem);
             }
