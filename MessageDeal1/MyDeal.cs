@@ -14,6 +14,8 @@ namespace MessageDeal1
 
         private Dictionary<string, string> _learning;
 
+        private static readonly string lineSep = @"<br/>";
+
         private int _currentIndex;
 
         private string _filePath;
@@ -78,7 +80,7 @@ namespace MessageDeal1
                     {
                         if (_learning.ContainsKey(items[0]))
                         {
-                            _learning[items[0]] += " | " + items[1];
+                            _learning[items[0]] += lineSep + items[1];
                         }
                         else
                         {
@@ -117,7 +119,7 @@ namespace MessageDeal1
             {
                 return null;
             }
-            message = message.Trim();
+            message = message.Trim().Replace(Environment.NewLine,lineSep);
             Regex r = new Regex(@"^@学\s*(\S*)\s*(.*)$");
             Match m = r.Match(message);
             if (m.Success)
@@ -174,7 +176,7 @@ namespace MessageDeal1
             {
                 if (message.Contains(key))
                 {
-                    return _learning[key];
+                    return _learning[key].Replace(lineSep,Environment.NewLine);
                 }
             }
             return null;
@@ -200,23 +202,23 @@ namespace MessageDeal1
 
         public string StatusChanged(Dictionary<string, object> info, string newStatus)
         {
-            if (Enabled)
-            {
-                QQStatus status = QQStatus.GetQQStatusByInternal(newStatus);
-                if (status != null && status != QQStatus.StatusOffline)
-                {
-                    return string.Format("{0} 你好，你现在的状态是:{1}", TranslateMessageUser.UserNick, status.Status);
-                }
-            }
+            //if (Enabled)
+            //{
+            //    QQStatus status = QQStatus.GetQQStatusByInternal(newStatus);
+            //    if (status != null && status != QQStatus.StatusOffline)
+            //    {
+            //        return string.Format("{0} 你好，你现在的状态是:{1}", TranslateMessageUser.UserNick, status.Status);
+            //    }
+            //}
             return null;
         }
 
         public string Input(Dictionary<string, object> info)
         {
-            if (Enabled)
-            {
-                return string.Format("{0} 你好，我正在等待你的输入。", TranslateMessageUser.UserNick);
-            }
+            //if (Enabled)
+            //{
+            //    return string.Format("{0} 你好，我正在等待你的输入。", TranslateMessageUser.UserNick);
+            //}
             return null;
         }
     }
