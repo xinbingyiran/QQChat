@@ -85,6 +85,10 @@ namespace QQChat
                     else
                     {
                         _oldMessage.Add(imessage);
+                        if (_oldMessage.Count > 50)
+                        {
+                            _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
+                        }
                     }
                 }).Start();
         }
@@ -126,6 +130,10 @@ namespace QQChat
                 {
                     _oldMessage.AddRange(messages);
                     _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = c });
+                    if (_oldMessage.Count > 50)
+                    {
+                        _oldMessage.RemoveRange(0,_oldMessage.Count - 50);
+                    }
                 }
             }).Start();
         }
