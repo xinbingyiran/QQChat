@@ -47,6 +47,7 @@ namespace QQChat
         {
             LoadStatus();
             LoadPlugins();
+            CheckQQStatus();
             _groups = new List<GroupForm>();
             _friends = new List<FriendForm>();
             _jss = new JavaScriptSerializer();
@@ -89,16 +90,58 @@ namespace QQChat
 
         private void LoadStatus()
         {
+            ToolStripMenuItem loginitem = new ToolStripMenuItem("重新登录");
+            loginitem.Click += (sender, e) =>
+            {
+                _qq.LogOutQQ2();
+                this.DialogResult = System.Windows.Forms.DialogResult.Retry;
+                this.Close();
+            };
+            状态ToolStripMenuItem.DropDownItems.Add(loginitem);
             foreach (QQStatus status in QQStatus.AllStatus)
             {
-                ToolStripMenuItem newitem = new ToolStripMenuItem(status.Status);
+                ToolStripMenuItem newitem = new ToolStripMenuItem(status.Status)
+                {
+                    Tag = status
+                };
                 newitem.Click += (sender, e) =>
                 {
-                    _qq.ChangeStatus(status.StatusInternal);
-                    if (status.StatusInternal != QQStatus.StatusOffline.StatusInternal)
-                        _qq.StartGetMessage();
+                    CheckQQStatus();
+                    new Task(() =>
+                        {
+                            string result = _qq.ChangeStatus(status.StatusInternal);
+                            if (result != null)
+                            {
+                                BeginInvoke(new MethodInvoker(() =>
+                                    {
+                                        MessageBox.Show(result, "状态更新出错。");
+                                    }));
+                            }
+                            else
+                            {
+                                if (status.StatusInternal != QQStatus.StatusOffline.StatusInternal)
+                                    _qq.StartGetMessage();
+                            }
+                        }).Start();
                 };
                 状态ToolStripMenuItem.DropDownItems.Add(newitem);
+            }
+        }
+
+        private void CheckQQStatus()
+        {
+            if (InvokeRequired)
+            {
+                this.BeginInvoke(new MethodInvoker(CheckQQStatus));
+                return;
+            }
+            foreach (ToolStripItem item in 状态ToolStripMenuItem.DropDownItems)
+            {
+                if (item.Tag is QQStatus && (item as ToolStripMenuItem) != null)
+                {
+                    (item as ToolStripMenuItem).Checked = (item.Tag as QQStatus).StatusInternal == _qq.User.Status;
+                }
+
             }
         }
 
@@ -722,12 +765,12 @@ namespace QQChat
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
-            if (message == "@help"
-                || message == "@帮助"
+            if (message == "--help"
+                || message == "--帮助"
                 )
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine("@help/帮助  ->  \"显示此帮助\"");
+                sb.AppendLine("--help/帮助  ->  \"显示此帮助\"");
                 foreach (var plugin in Plugins.Values)
                 {
                     if (!plugin.Enabled)
@@ -868,13 +911,28 @@ namespace QQChat
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("你确定要退出吗？", "退出确认", MessageBoxButtons.YesNoCancel) == System.Windows.Forms.DialogResult.Yes)
+            if (DialogResult != System.Windows.Forms.DialogResult.Retry)
             {
-                _qq.LogOutQQ2();
-            }
-            else
-            {
-                e.Cancel = true;
+                if (MessageBox.Show("你确定要退出吗？", "退出确认", MessageBoxButtons.YesNoCancel) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    if (_system != null)
+                        _system.Close();
+                    foreach (var f in _friends.ToArray())
+                    {
+                        f.Close();
+                    }
+                    foreach (var g in _groups.ToArray())
+                    {
+                        g.Close();
+                    }
+                    this.Hide();
+                    this.DialogResult = DialogResult.Abort;
+                    _qq.LogOutQQ2();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
             }
         }
 

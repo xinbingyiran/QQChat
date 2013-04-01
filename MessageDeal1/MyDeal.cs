@@ -39,9 +39,12 @@ namespace MessageDeal1
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
-            {"@学 问题 答案","学说话[问题不能有空格]"},
-            {"@忘 问题","忘记学过的话"},
-            {"@查 from","查看我学会的话,从第几条开始的十条内容"},
+            {"-学 问题 答案","学说话[问题不能有空格]"},
+            {"-忘 问题","忘记学过的话"},
+            {"-列[ 开始位置]","列出学会的问题,从开始位置开始的相临五条内容"},
+            {"-查 问题关键字","查看学会的问题,从问题查答案"},
+            {"-反 回答关键字","查看学会的问题,从答案查问题"},
+            {"-问 问题","问问题"},
         };
 
         public Dictionary<string, string> Menus
@@ -119,65 +122,133 @@ namespace MessageDeal1
             {
                 return null;
             }
-            message = message.Trim().Replace(Environment.NewLine,lineSep);
-            Regex r = new Regex(@"^@学\s*(\S*)\s*(.*)$");
-            Match m = r.Match(message);
-            if (m.Success)
+            if (message.Length < 2 || message[0] != '-')
+                return null;
+            message = message.Trim().Replace(Environment.NewLine, lineSep);
+            var tag = message[1];
+            message = message.Substring(2).Trim();
+            switch (tag)
             {
-                if (m.Groups[1].Value.Length < 2)
-                {
-                    return "呵呵，问题请至少输入两个字哦。";
-                }
-                if (_learning.ContainsKey(m.Groups[1].Value))
-                    _learning[m.Groups[1].Value] = m.Groups[2].Value;
-                else
-                    _learning.Add(m.Groups[1].Value, m.Groups[2].Value);
-                SaveToFile();
-                return "已经学会此问题：" + m.Groups[1].Value;
-            }
-            r = new Regex(@"^@忘\s*(\S*)$");
-            m = r.Match(message);
-            if (m.Success)
-            {
-                if (m.Groups[1].Value.Length < 2)
-                {
-                    return "呵呵，问题请至少输入两个字哦。";
-                }
-                if (_learning.ContainsKey(m.Groups[1].Value))
-                    _learning.Remove(m.Groups[1].Value);
-                SaveToFile();
-                return "已经忘记此问题：" + m.Groups[1].Value;
-            }
-            r = new Regex(@"^@查\s*(\d*)$");
-            m = r.Match(message);
-            if (m.Success)
-            {
-                int count = 10;
-                try
-                {
-                    _currentIndex = Convert.ToInt32(m.Groups[1].Value);
-                }
-                catch (Exception) {
-                }
-                StringBuilder sb = new StringBuilder();
-                if(_currentIndex >= _learning.Count)
-                {
-                    _currentIndex = 0;
-                }
-                sb.AppendLine("列表：" + _currentIndex);
-                foreach (KeyValuePair<string, string> filter in _learning.Skip(_currentIndex).Take(count))
-                {
-                    sb.AppendFormat("{0}  ->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                }
-                _currentIndex += count;
-                return sb.ToString();
-            }
-            foreach (string key in _learning.Keys)
-            {
-                if (message.Contains(key))
-                {
-                    return _learning[key].Replace(lineSep,Environment.NewLine);
-                }
+                case '学':
+                    {
+                        var wd = message.Split(new char[] { ' ' }, StringSplitOptions.None);
+                        if (wd.Length != 2)
+                        {
+                            return null;
+                        }
+                        if (wd[0].Length < 2)
+                        {
+                            return null;
+                        }
+                        if (_learning.ContainsKey(wd[0]))
+                            _learning[wd[0]] = wd[1];
+                        else
+                            _learning.Add(wd[0], wd[1]);
+                        SaveToFile();
+                        return "已经学会此问题：" + wd[0];
+                    }
+                case '忘':
+                    {
+                        if (message.Length < 2)
+                        {
+                            return "呵呵，问题请至少输入两个字哦。";
+                        }
+                        if (_learning.ContainsKey(message))
+                            _learning.Remove(message);
+                        SaveToFile();
+                        return "已经忘记此问题：" + message;
+                    }
+                case '列':
+                    {
+                        int count = 5;
+                        try
+                        {
+                            _currentIndex = Convert.ToInt32(message);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        StringBuilder sb = new StringBuilder();
+                        if (_currentIndex >= _learning.Count)
+                        {
+                            _currentIndex = 0;
+                        }
+                        sb.AppendLine("问题列表：" + _currentIndex);
+                        foreach (KeyValuePair<string, string> filter in _learning.Skip(_currentIndex).Take(count))
+                        {
+                            sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+                        }
+                        _currentIndex += count;
+                        return sb.ToString();
+                    }
+                case '查':
+                    {
+                        var list = new Dictionary<string,string>();
+                        foreach (KeyValuePair<string,string> item in _learning)
+                        {
+                            if (item.Key.Contains(message))
+                            {
+                                list.Add(item.Key,item.Value);
+                            }
+                            if (list.Count == 5)
+                                break;
+                        }
+                        if (list.Count > 0)
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            foreach (KeyValuePair<string, string> filter in list)
+                            {
+                                sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+                            }
+                            return sb.ToString();
+                        }
+                        else
+                        {
+                            return "没有找到合适的结果。";
+                        }
+                    }
+                    break;
+                case '反':
+                    {
+                        var list = new Dictionary<string, string>();
+                        foreach (KeyValuePair<string, string> item in _learning)
+                        {
+                            if (item.Value.Contains(message))
+                            {
+                                list.Add(item.Key, item.Value);
+                            }
+                            if (list.Count == 5)
+                                break;
+                        }
+                        if (list.Count > 0)
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            foreach (KeyValuePair<string, string> filter in list)
+                            {
+                                sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+                            }
+                            return sb.ToString();
+                        }
+                        else
+                        {
+                            return "没有找到合适的结果。";
+                        }
+                    }
+                    break;
+                case '问':
+                    {
+                        foreach (string key in _learning.Keys)
+                        {
+                            var itemindex = message.IndexOf(key);
+                            if (itemindex >= 0 && itemindex <= 5)
+                            {
+                                return _learning[key].Replace(lineSep, Environment.NewLine);
+                            }
+                        }
+                        return "这个问题的答案还没人教过我哎。";
+                    }
+                default:
+                    break;
             }
             return null;
         }

@@ -36,12 +36,15 @@ namespace WebApi
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
-            {"@ip ip地址","IP地址"},
-            {"@mo/手机 手机号码","手机号码"},
-            {"@tq/天气 城市名","天气预报"},
-            {"@b6e 字符串","Base64加密"},
-            {"@b6d 字符串","Base64解密"},
-            {"@i 对话","与机器人对话"},
+            {"-ip ip地址","IP地址"},
+            {"-mo/手机 手机号码","手机号码"},
+            {"-tq/天气 城市名","天气预报"},
+            {"-md5 字符串","32位md5加密"},
+            {"-cfs 字符串","cfs加密"},
+            {"-4e 字符串","Base64加密"},
+            {"-4d 字符串","Base64解密"},
+            {"-fy 字符串","中文到英文翻译"},
+            {"-i 对话","与朋友对话"},
         };
 
         public Dictionary<string, string> Filters
@@ -177,10 +180,7 @@ namespace WebApi
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
-            if (message.Length < 2 || message[0] != '@')
-                return null;
-            message = message.Substring(1);
-            string[] substring = message.Split(new char[]{' '},StringSplitOptions.None);
+            string[] substring = message.Split(new char[]{' '},2,StringSplitOptions.None);
             string rstr = null;
             try
             {
@@ -191,29 +191,41 @@ namespace WebApi
                     //{"tq","http://api.liqwei.com/weather/?city={0}"},
                     //{"b6e","http://api.liqwei.com/security/?base64encode={0}"},
                     //{"b6d","http://api.liqwei.com/security/?base64decode={0}"},
-                    case "ip":
+                    case "-ip":
                         rstr = GetUrlText(string.Format("http://api.liqwei.com/location/?ip={0}",
                             System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
                         break;
-                    case "mo":
-                    case "手机":
+                    case "-mo":
+                    case "-手机":
                         rstr = GetUrlText(string.Format("http://api.liqwei.com/location/?mobile={0}",
                         System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
                         break;
-                    case "tq":
-                    case "天气":
+                    case "-tq":
+                    case "-天气":
                         rstr = GetUrlText(string.Format("http://api.liqwei.com/weather/?city={0}",
                         System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
                         break;
-                    case "b6e":
+                    case "-md5":
+                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?md5={0}",
+                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
+                        break;
+                    case "-cfs":
+                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?cfs={0}",
+                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
+                        break;
+                    case "-4e":
                         rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?base64encode={0}",
                         System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
                         break;
-                    case "b6d":
+                    case "-4d":
                         rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?base64decode={0}",
                         System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
                         break;
-                    case "i":
+                    case "-fy":
+                        rstr = GetUrlText(string.Format("http://api.liqwei.com/translate/?language=zh-CN|en&content={0}",
+                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
+                        break;
+                    case "-i":
                         rstr = GetBotMessage(substring[1]);
                         break;
                     default:

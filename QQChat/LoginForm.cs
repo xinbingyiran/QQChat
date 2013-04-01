@@ -174,8 +174,12 @@ namespace QQChat
             this.Hide();
             MainForm m = new MainForm();
             m.InitUser(_qq);
-            m.ShowDialog();
-            Environment.Exit(Environment.ExitCode);
+            if (m.ShowDialog() != System.Windows.Forms.DialogResult.Retry)
+            {
+                Environment.Exit(Environment.ExitCode);
+            }
+            new Task(GetVerifyCode).Start();
+            this.Show();
         }
 
         private void LoginForm_Activated(object sender, EventArgs e)
