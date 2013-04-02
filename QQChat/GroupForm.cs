@@ -1,5 +1,6 @@
 ﻿using QQChat.Classes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -51,7 +52,7 @@ namespace QQChat
                 return;
             new Task(() =>
                 {
-                    var result = QQ.SendGroupMessage(Group, message);
+                    var result = QQ.SendGroupMessage(Group, MainForm.mainForm.TransSendMessage(message));
                     var msg = string.Format("发送：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message);
                     if (result == false)
                     {
@@ -77,22 +78,22 @@ namespace QQChat
                 }).Start();
         }
 
-        public void AppendMessage(string message, object member)
+        public void AppendMessage(string message, object member, DateTime time)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => AppendMessage(message, member)));
+                BeginInvoke(new MethodInvoker(() => AppendMessage(message, member, time)));
                 return;
             }
             QQGroupMember gmember = member as QQGroupMember;
             if (string.IsNullOrEmpty(message))
                 return;
-            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card == null ? gmember.nick : gmember.card, gmember.uin));
+            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card == null ? gmember.nick : gmember.card, gmember.uin));
             Color c = FormHelper.PickColor();
             //richTextBox1.AppendLine(rmessage, c);
             new Task(() =>
             {
-                List<IRichMessage> messages = MainForm.mainForm.TransMessage(richTextBox1, rmessage, gmember.uin.ToString());
+                List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, gmember.uin.ToString());
 
                 foreach (IRichMessage msg in messages)
                 {

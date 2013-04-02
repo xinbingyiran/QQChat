@@ -10,7 +10,7 @@ namespace WebQQ2.WebQQ2
     {
         private QQFriend _user = null;
         private long _msg_id = 0;
-        private DateTime? _time = null;
+        private DateTime _time;
         private MessageEventType _mtype = MessageEventType.MESSAGE_UNKNOW;
 
         public MessageEventType Mtype
@@ -30,7 +30,7 @@ namespace WebQQ2.WebQQ2
             get { return _user; }
         }
 
-        public DateTime? Time
+        public DateTime Time
         {
             get { return _time; }
         }
@@ -94,7 +94,7 @@ namespace WebQQ2.WebQQ2
             return o.ToString();
         }
 
-        internal FriendEventArgs(QQFriend user, long msgid, DateTime? time, MessageEventType mtype, Dictionary<string, object> msgs)
+        internal FriendEventArgs(QQFriend user, long msgid, DateTime time, MessageEventType mtype, Dictionary<string, object> msgs)
         {
             this._user = user;
             this._msg_id = msgid;
@@ -103,7 +103,7 @@ namespace WebQQ2.WebQQ2
             this._msgs = msgs;
         }
 
-        internal FriendEventArgs(QQFriend user, long msgid, DateTime? time, MessageEventType mtype, string singleMsg)
+        internal FriendEventArgs(QQFriend user, long msgid, DateTime time, MessageEventType mtype, string singleMsg)
         {
             this._user = user;
             this._msg_id = msgid;
@@ -112,7 +112,7 @@ namespace WebQQ2.WebQQ2
             this._msgs = new Dictionary<string, object>() { { "message", singleMsg } };
         }
 
-        internal FriendEventArgs(QQFriend user, long msgid, DateTime? time, MessageEventType mtype)
+        internal FriendEventArgs(QQFriend user, long msgid, DateTime time, MessageEventType mtype)
         {
             this._user = user;
             this._msg_id = msgid;

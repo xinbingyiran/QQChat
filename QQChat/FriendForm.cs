@@ -1,5 +1,6 @@
 ﻿using QQChat.Classes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -67,7 +68,7 @@ namespace QQChat
                 return;
             new Task(() =>
                 {
-                    var result = QQ.SendFriendMessage(Friend, message);
+                    var result = QQ.SendFriendMessage(Friend, MainForm.mainForm.TransSendMessage(message));
                     var msg = string.Format("发送：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message);
                     if (result == false)
                     {
@@ -93,11 +94,11 @@ namespace QQChat
                 }).Start();
         }
 
-        public void AppendMessage(string message, object friend)
+        public void AppendMessage(string message, object friend, DateTime time)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => AppendMessage(message, friend)));
+                BeginInvoke(new MethodInvoker(() => AppendMessage(message, friend, time)));
                 return;
             }
             if (string.IsNullOrEmpty(message))
@@ -105,12 +106,12 @@ namespace QQChat
             QQFriend qfriend = friend as QQFriend;
             if (qfriend != this.Friend)
                 return;
-            string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message);
+            string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message);
             Color c = FormHelper.PickColor();
             //richTextBox1.AppendLine(rmessage, c);
             new Task(() =>
             {
-                List<IRichMessage> messages = MainForm.mainForm.TransMessage(richTextBox1, rmessage, qfriend.uin.ToString());
+                List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, qfriend.uin.ToString());
                 foreach (IRichMessage msg in messages)
                 {
                     msg.MessageColor = c;
@@ -132,7 +133,7 @@ namespace QQChat
                     _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = c });
                     if (_oldMessage.Count > 50)
                     {
-                        _oldMessage.RemoveRange(0,_oldMessage.Count - 50);
+                        _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
                     }
                 }
             }).Start();
@@ -165,7 +166,5 @@ namespace QQChat
         {
             DealOldMessage();
         }
-
-
     }
 }

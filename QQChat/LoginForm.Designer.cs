@@ -58,6 +58,7 @@
             this.textBoxPass.PasswordChar = '＊';
             this.textBoxPass.Size = new System.Drawing.Size(197, 21);
             this.textBoxPass.TabIndex = 4;
+            this.textBoxPass.Leave += new System.EventHandler(this.textBoxPass_Leave);
             // 
             // textBoxCode
             // 

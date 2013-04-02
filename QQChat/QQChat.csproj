@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Classes\ChatFormMethod.cs" />
     <Compile Include="Classes\FormHelper.cs" />
+    <Compile Include="Classes\PassHelper.cs" />
     <Compile Include="Classes\RichBoxAddtion.cs" />
     <Compile Include="Classes\RTFIMAGE.cs" />
     <Compile Include="Classes\TranslateMessage.cs" />

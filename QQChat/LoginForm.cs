@@ -9,6 +9,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Security.Cryptography;
+using QQChat.Classes;
 
 namespace QQChat
 {
@@ -16,9 +19,12 @@ namespace QQChat
     {
         private QQ _qq;
 
+        private string _fileName;
+
         public LoginForm()
         {
             InitializeComponent();
+            _fileName = Application.StartupPath + "\\QQUser.dat";
         }
 
         private void LoginForm_Load(object sender, EventArgs e)
@@ -41,6 +47,14 @@ namespace QQChat
             textBoxPass.Text = "ypbxyy";
             CreateUser(textBoxUser.Text);
             new Task(GetVerifyCode).Start();
+#else
+            try
+            {
+                var lines = File.ReadAllLines(_fileName);
+                textBoxUser.Text = PassHelper.AESDecrypt(lines[0]);
+                textBoxPass.Text = PassHelper.AESDecrypt(lines[1]);
+            }
+            catch (Exception) { }
 #endif
         }
 
@@ -192,6 +206,21 @@ namespace QQChat
             {
                 textBoxPass.Focus();
             }
+        }
+
+        private void textBoxPass_Leave(object sender, EventArgs e)
+        {
+#if!(DEBUG)
+            try
+            {
+                string[] lines = new[] { PassHelper.AESEncrypt(textBoxUser.Text), PassHelper.AESEncrypt(textBoxPass.Text) };
+                new Task(() =>
+                    {
+                        File.WriteAllLines(_fileName,lines);
+                    }).Start();
+            }
+            catch (Exception) { }
+#endif
         }
     }
 }

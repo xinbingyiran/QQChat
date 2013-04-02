@@ -14,6 +14,7 @@ using System.Threading;
 using QQChat.Classes;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
+using System.Collections;
 
 namespace QQChat
 {
@@ -29,6 +30,7 @@ namespace QQChat
         private List<GroupForm> _groups;
         private List<FriendForm> _friends;
         private SystemForm _system;
+        private object _createlock;
 
         private JavaScriptSerializer _jss;
 
@@ -36,6 +38,7 @@ namespace QQChat
         {
             InitializeComponent();
             mainForm = this;
+            _createlock = new object();
         }
 
         private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -70,7 +73,7 @@ namespace QQChat
                 var f = _qq.User.GetUserFriend(uin);
                 if (f != null && f.IsValid)
                 {
-                    SetFriendText(f, null);
+                    SetFriendText(f, null, DateTime.Now);
                 }
             }
         }
@@ -83,7 +86,7 @@ namespace QQChat
                 var g = _qq.User.GetUserGroup(gid);
                 if (g != null)
                 {
-                    SetGroupText(g, null, null);
+                    SetGroupText(g, null, null, DateTime.Now);
                 }
             }
         }
@@ -396,7 +399,7 @@ namespace QQChat
         {
             if (e.MsgContent == null)
                 return;
-            SetGroupText(e.Group, e.Member, e.MsgContent);
+            SetGroupText(e.Group, e.Member, e.MsgContent, e.Time);
 
             if (e.Time > _qq.User.LoginTime)
             {
@@ -438,7 +441,7 @@ namespace QQChat
             {
                 case MessageEventType.MESSAGE_COMMON:
                     {
-                        SetFriendText(e.User, e.MsgContent);
+                        SetFriendText(e.User, e.MsgContent, e.Time);
                         if (e.Time > _qq.User.LoginTime)
                         {
                             string rmsg = InternalPickMessage(e.MsgContent);
@@ -481,14 +484,14 @@ namespace QQChat
                             //string refurl = _user.RefuseFileURL(e.Msgs["from_uin"].ToString(), e.Msgs["session_id"].ToString());
                             //refurl = _user.GetFileTrueUrl(refurl);
                             string msg = string.Format("对方尝试发送文件[{0}]:{1}", e.Msgs["session_id"], e.Msgs["name"]);
-                            SetFriendText(e.User, msg);
+                            SetFriendText(e.User, msg, e.Time);
                             //告知对方发送离线文件
                             msg = string.Format("不能接收文件[{0}],请发离线或邮箱。", e.Msgs["name"]);
                             SendFriendMessage(e.User, msg);
                         }
                         else if (e.Msgs["mode"].ToString() == "refuse")
                         {
-                            SetFriendText(e.User, string.Format("对方取消发送文件[{0}]", e.Msgs["session_id"]));
+                            SetFriendText(e.User, string.Format("对方取消发送文件[{0}]", e.Msgs["session_id"]), e.Time);
                         }
                     }
                     break;
@@ -497,7 +500,7 @@ namespace QQChat
                         string accurl = _qq.GetOfffileURL(e.Msgs["ip"].ToString(), e.Msgs["port"].ToString(), e.Msgs["name"].ToString(), e.Msgs["rkey"].ToString());
                         //string refurl = _user.RefuleOfffileURL(e.Msgs["from_uin"].ToString(), e.Msgs["name"].ToString(), e.Msgs["size"].ToString());
                         string msg = string.Format("对方发送离线文件:{0}\r\n下载:{1}", e.Msgs["name"].ToString(), accurl);
-                        SetFriendText(e.User, msg);
+                        SetFriendText(e.User, msg, e.Time);
                     }
                     break;
                 case MessageEventType.MESSAGE_STATUS:
@@ -509,7 +512,7 @@ namespace QQChat
                                 {"mark",e.User == null?null:e.User.markname},
                             };
                         string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, e.User.status, e.Time);
-                        SetSystemText(messagestate, e.User);
+                        SetSystemText(messagestate, e.User, e.Time);
                         RefreshUser(e.User);
                         foreach (var p in Plugins)
                         {
@@ -529,7 +532,7 @@ namespace QQChat
                 case MessageEventType.MESSAGE_SHAKE:
                     {
                         string msg = "抖动";
-                        SetFriendText(e.User, msg);
+                        SetFriendText(e.User, msg, e.Time);
                     }
                     break;
                 case MessageEventType.MESSAGE_USER:
@@ -546,7 +549,7 @@ namespace QQChat
                                 {"mark",e.User == null?null:e.User.markname},
                             };
                         string msg = "输入";
-                        SetFriendText(e.User, msg);
+                        SetFriendText(e.User, msg, e.Time);
                         foreach (var p in Plugins)
                         {
                             if (!p.Value.Enabled)
@@ -565,7 +568,7 @@ namespace QQChat
                 case MessageEventType.MESSAGE_KICK:
                     {
                         string msg = string.Format("掉线：@ {0}\r\n{1}", e.Time, e.Msgs["reason"]);
-                        SetSystemText(msg, null);
+                        SetSystemText(msg, null, e.Time);
                     }
                     break;
                 case MessageEventType.MESSAGE_SYSTEM:
@@ -580,7 +583,7 @@ namespace QQChat
                                 long uin = _qq.AllowFriendAddAndAddFriend(Convert.ToInt64(e.Msgs["account"]), gid, "");
                                 if (uin > 0)
                                 {
-                                    SetSystemText("新用户添加", null);
+                                    SetSystemText("新用户添加", null, e.Time);
                                     new Task(GetAllFriends).Start();
                                     break;
                                 }
@@ -590,67 +593,74 @@ namespace QQChat
                         {
                             if (e.Msgs["type"] as string == "group_join")
                             {
-                                SetSystemText("新群添加 by " + e.Msgs["admin_nick"] as string, null);
+                                SetSystemText("新群添加 by " + e.Msgs["admin_nick"] as string, null, e.Time);
                                 new Task(GetAllGroups).Start();
                                 break;
                             }
                             else if (e.Msgs["type"] as string == "group_leave")
                             {
-                                SetSystemText("旧群移除 by " + e.Msgs["admin_nick"] as string, null);
+                                SetSystemText("旧群移除 by " + e.Msgs["admin_nick"] as string, null, e.Time);
                                 new Task(GetAllGroups).Start();
                                 break;
                             }
                         }
-                        SetSystemText(_jss.Serialize(e.Msgs), null);
+                        SetSystemText(_jss.Serialize(e.Msgs), null, e.Time);
                     }
                     break;
                 default:
                     {
-                        SetSystemText(_jss.Serialize(e.Msgs), null);
+                        SetSystemText(_jss.Serialize(e.Msgs), null, e.Time);
                     }
                     break;
             }
         }
 
-        public void SetSystemText(string message, QQFriend friend)
+        public void SetSystemText(string message, QQFriend friend, DateTime time)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => { SetSystemText(message, friend); }));
+                BeginInvoke(new MethodInvoker(() => { SetSystemText(message, friend, time); }));
                 return;
             }
-            if (_system == null)
+            lock (_createlock)
             {
-                _system = new SystemForm();
-                _system.FormClosed += SystemForm_FormClosed;
+                if (_system == null)
+                {
+                    _system = new SystemForm();
+                    _system.FormClosed += SystemForm_FormClosed;
+                }
             }
             _system.Show();
+            _system.BringToFront();
             _system.UpdateTitle();
-            _system.AppendMessage(message, friend);
+            _system.AppendMessage(message, friend, time);
         }
 
-        public void SetGroupText(QQGroup group, QQGroupMember member, string msg)
+        public void SetGroupText(QQGroup group, QQGroupMember member, string msg, DateTime time)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => { SetGroupText(group, member, msg); }));
+                BeginInvoke(new MethodInvoker(() => { SetGroupText(group, member, msg, time); }));
                 return;
             }
             var f = _groups.Find(g => g.ID == "G|" + group.gid);
-            if (f == null)
+            lock (_createlock)
             {
-                f = new GroupForm()
+                if (f == null)
                 {
-                    Group = group,
-                    QQ = _qq,
-                };
-                f.FormClosed += GroupForm_FormClosed;
-                _groups.Add(f);
-                f.UpdateTitle();
+                    f = new GroupForm()
+                    {
+                        Group = group,
+                        QQ = _qq,
+                    };
+                    f.FormClosed += GroupForm_FormClosed;
+                    _groups.Add(f);
+                    f.UpdateTitle();
+                }
             }
             if (msg != null)
             {
-                f.AppendMessage(msg, member);
+                f.AppendMessage(msg, member, time);
                 if (!f.Visible)
                 {
                     RefreshGroup(group, true);
@@ -659,32 +669,36 @@ namespace QQChat
             else
             {
                 f.Show();
+                f.BringToFront();
                 RefreshGroup(group, false);
             }
         }
 
-        public void SetFriendText(QQFriend friend, string msg)
+        public void SetFriendText(QQFriend friend, string msg, DateTime time)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => { SetFriendText(friend, msg); }));
+                BeginInvoke(new MethodInvoker(() => { SetFriendText(friend, msg, time); }));
                 return;
             }
             var f = _friends.Find(g => g.ID == "F|" + friend.uin);
-            if (f == null)
+            lock (_createlock)
             {
-                f = new FriendForm()
+                if (f == null)
                 {
-                    Friend = friend,
-                    QQ = _qq,
-                };
-                f.FormClosed += FriendForm_FormClosed;
-                _friends.Add(f);
-                f.UpdateTitle();
+                    f = new FriendForm()
+                    {
+                        Friend = friend,
+                        QQ = _qq,
+                    };
+                    f.FormClosed += FriendForm_FormClosed;
+                    _friends.Add(f);
+                    f.UpdateTitle();
+                }
             }
             if (msg != null)
             {
-                f.AppendMessage(msg, friend);
+                f.AppendMessage(msg, friend, time);
                 if (!f.Visible)
                 {
                     RefreshUser(friend, true);
@@ -693,6 +707,7 @@ namespace QQChat
             else
             {
                 f.Show();
+                f.BringToFront();
                 RefreshUser(friend, false);
             }
         }
@@ -787,64 +802,26 @@ namespace QQChat
             return null;
         }
 
-        public List<IRichMessage> TransMessage(RichTextBox rtb, string msg, string uin)
+        public List<IRichMessage> TransMessageFace(List<IRichMessage> oldmessages, string uin)
         {
-            if (rtb == null || msg == null)
-                return null;
-            List<IRichMessage> messages = new List<IRichMessage>();
-            Regex r = new Regex(@"\[offpic,success:1\r\nfile_path:(?<picpath>\/[^\]]*)\]", RegexOptions.IgnoreCase);
-            string sstr;
-            MatchCollection mc = r.Matches(msg);
-            if (mc.Count == 0)
+            Regex r = new Regex(@"\[face,(?<faceid>\d*)\]", RegexOptions.IgnoreCase);
+            List<IRichMessage> newmessages = new List<IRichMessage>();
+            foreach (IRichMessage oldmessage in oldmessages)
             {
-                messages.Add(new RichMessageText(msg));
-            }
-            else
-            {
-                sstr = msg;
-                foreach (Match m in mc)
+                if (oldmessage.MessageType != RichMessageType.TYPETEXT)
                 {
-                    Stream s = _qq.GetOffPic(m.Groups["picpath"].Value, uin);
-                    Bitmap bm = (Bitmap)Bitmap.FromStream(s);
-                    string[] t = sstr.Split(new string[] { m.Value }, 2, StringSplitOptions.None);
-                    if (t[0].Length > 0)
-                    {
-                        messages.Add(new RichMessageText(t[0]));
-                    }
-                    messages.Add(new RichMessageRtf(bm));
-                    if (t.Length > 1)
-                    {
-                        sstr = t[1];
-                    }
-                    else
-                    {
-                        sstr = "";
-                    }
-                }
-                if (!string.IsNullOrEmpty(sstr))
-                {
-                    messages.Add(new RichMessageText(sstr));
-                }
-            }
-            Regex r2 = new Regex(@"\[face,(?<faceid>\d*)\]", RegexOptions.IgnoreCase);
-            List<IRichMessage> rmessages = new List<IRichMessage>();
-            foreach (IRichMessage imessage in messages)
-            {
-                if (imessage.MessageType == RichMessageType.TYPERTF)
-                {
-                    rmessages.Add(imessage);
+                    newmessages.Add(oldmessage);
                     continue;
                 }
-                string strMsg = imessage.Message as string;
-                MatchCollection mc2 = r2.Matches(strMsg);
-                if (mc2.Count == 0)
+                string strMsg = oldmessage.Message as string;
+                MatchCollection mc = r.Matches(strMsg);
+                if (mc.Count == 0)
                 {
-                    rmessages.Add(imessage);
+                    newmessages.Add(oldmessage);
                 }
                 else
                 {
-                    sstr = strMsg;
-                    foreach (Match m in mc2)
+                    foreach (Match m in mc)
                     {
                         Bitmap bm = null;
                         try
@@ -854,30 +831,235 @@ namespace QQChat
                         catch (Exception) { bm = null; }
                         if (bm == null)
                         {
+                            try
+                            {
+                                string url = _qq.GetFaceUrl(m.Groups["faceid"]);
+                                Stream s = _qq.GetUrlStream(url);
+                                Bitmap nbm = Bitmap.FromStream(s) as Bitmap;
+                                bm = nbm;
+                            }
+                            catch (Exception) { bm = null; }
+                        }
+                        if (bm == null)
+                        {
                             bm = QQChat.Properties.Resources.err;
                         }
-                        string[] t = sstr.Split(new string[] { m.Value }, 2, StringSplitOptions.None);
+                        string[] t = strMsg.Split(new string[] { m.Value }, 2, StringSplitOptions.None);
                         if (t[0].Length > 0)
                         {
-                            rmessages.Add(new RichMessageText(t[0]));
+                            newmessages.Add(new RichMessageText(t[0]));
                         }
-                        rmessages.Add(new RichMessageRtf(bm));
+                        newmessages.Add(new RichMessageByte(bm));
                         if (t.Length > 1)
                         {
-                            sstr = t[1];
+                            strMsg = t[1];
                         }
                         else
                         {
-                            sstr = "";
+                            strMsg = "";
                         }
                     }
-                    if (!string.IsNullOrEmpty(sstr))
+                    if (!string.IsNullOrEmpty(strMsg))
                     {
-                        rmessages.Add(new RichMessageText(sstr));
+                        newmessages.Add(new RichMessageText(strMsg));
                     }
                 }
             }
-            return rmessages;
+            return newmessages;
+        }
+
+
+        public List<IRichMessage> TransMessageCFace(List<IRichMessage> oldmessages, string uin)
+        {
+            Regex r = new Regex(@"\[cface,name:(?<name>[^\]]*)\r\nfile_id:(?<file_id>\d*)\r\nkey:(?<key>[^\]]*)\r\nserver:(?<server>[^\]]*)\]", RegexOptions.IgnoreCase);
+            List<IRichMessage> newmessages = new List<IRichMessage>();
+            foreach (IRichMessage oldmessage in oldmessages)
+            {
+                if (oldmessage.MessageType != RichMessageType.TYPETEXT)
+                {
+                    newmessages.Add(oldmessage);
+                    continue;
+                }
+                string strMsg = oldmessage.Message as string;
+                MatchCollection mc = r.Matches(strMsg);
+                if (mc.Count == 0)
+                {
+                    newmessages.Add(oldmessage);
+                }
+                else
+                {
+                    foreach (Match m in mc)
+                    {
+                        Bitmap bm = null;
+                        try
+                        {
+                            string url = _qq.GetCFaceUrl(m.Groups["name"].Value, m.Groups["file_id"].Value);
+                            Stream s = _qq.GetUrlStream(url);
+                            bm = (Bitmap)Bitmap.FromStream(s);
+                        }
+                        catch (Exception)
+                        {
+                            bm = null;
+                        }
+                        string[] t = strMsg.Split(new string[] { m.Value }, 2, StringSplitOptions.None);
+                        if (t[0].Length > 0)
+                        {
+                            newmessages.Add(new RichMessageText(t[0]));
+                        }
+                        if (bm == null)
+                        {
+                            newmessages.Add(new RichMessageText(m.Value));
+                        }
+                        else
+                        {
+                            newmessages.Add(new RichMessageByte(bm));
+                        }
+                        if (t.Length > 1)
+                        {
+                            strMsg = t[1];
+                        }
+                        else
+                        {
+                            strMsg = "";
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(strMsg))
+                    {
+                        newmessages.Add(new RichMessageText(strMsg));
+                    }
+                }
+            }
+            return newmessages;
+        }
+
+
+        public List<IRichMessage> TransMessageOffpic(List<IRichMessage> oldmessages, string uin)
+        {
+            Regex r = new Regex(@"\[offpic,success:1\r\nfile_path:(?<picpath>\/[^\]]*)\]", RegexOptions.IgnoreCase);
+            List<IRichMessage> newmessages = new List<IRichMessage>();
+            foreach (IRichMessage oldmessage in oldmessages)
+            {
+                if (oldmessage.MessageType != RichMessageType.TYPETEXT)
+                {
+                    newmessages.Add(oldmessage);
+                    continue;
+                }
+                string strMsg = oldmessage.Message as string;
+                MatchCollection mc = r.Matches(strMsg);
+                if (mc.Count == 0)
+                {
+                    newmessages.Add(oldmessage);
+                }
+                else
+                {
+                    foreach (Match m in mc)
+                    {
+                        Bitmap bm = null;
+                        try
+                        {
+                            Stream s = _qq.GetOffPic(m.Groups["picpath"].Value, uin);
+                            bm = (Bitmap)Bitmap.FromStream(s);
+                        }
+                        catch (Exception)
+                        {
+                            bm = null;
+                        }
+                        string[] t = strMsg.Split(new string[] { m.Value }, 2, StringSplitOptions.None);
+                        if (t[0].Length > 0)
+                        {
+                            newmessages.Add(new RichMessageText(t[0]));
+                        }
+                        if (bm == null)
+                        {
+                            newmessages.Add(new RichMessageText(m.Value));
+                        }
+                        else
+                        {
+                            newmessages.Add(new RichMessageByte(bm));
+                        }
+                        if (t.Length > 1)
+                        {
+                            strMsg = t[1];
+                        }
+                        else
+                        {
+                            strMsg = "";
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(strMsg))
+                    {
+                        newmessages.Add(new RichMessageText(strMsg));
+                    }
+                }
+            }
+            return newmessages;
+        }
+
+        public List<IRichMessage> TransMessage(string msg, string uin)
+        {
+            if (msg == null)
+                return null;
+            List<IRichMessage> messages = new List<IRichMessage>();
+            messages.Add(new RichMessageText(msg));
+            return TransMessageOffpic(TransMessageCFace(TransMessageFace(messages, uin), uin), uin);
+        }
+
+
+        public ArrayList TransSendFaceMessage(ArrayList oldmessages)
+        {
+            if (oldmessages == null || oldmessages.Count == 0)
+                return oldmessages;
+            Regex r = new Regex(@"\[face,(?<faceid>\d*)\]", RegexOptions.IgnoreCase);
+            ArrayList newmessages = new ArrayList();
+            foreach (var oldmessage in oldmessages)
+            {
+                if (oldmessage is string)
+                {
+                    string strMsg = oldmessage as string;
+                    MatchCollection mc = r.Matches(strMsg);
+                    if (mc.Count == 0)
+                    {
+                        newmessages.Add(oldmessage);
+                    }
+                    else
+                    {
+                        foreach (Match m in mc)
+                        {
+                            string[] t = strMsg.Split(new string[] { m.Value }, 2, StringSplitOptions.None);
+                            if (t[0].Length > 0)
+                            {
+                                newmessages.Add(t[0]);
+                            }
+                            newmessages.Add(new ArrayList { "face", Convert.ToInt64(m.Groups["faceid"].Value) });
+                            if (t.Length > 1)
+                            {
+                                strMsg = t[1];
+                            }
+                            else
+                            {
+                                strMsg = "";
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(strMsg))
+                        {
+                            newmessages.Add(strMsg);
+                        }
+                    }
+                }
+                else
+                {
+                    newmessages.Add(oldmessage);
+                }
+            }
+            return newmessages;
+        }
+
+        public ArrayList TransSendMessage(string msg)
+        {
+            if (msg == null)
+                return null;
+            ArrayList oldmessages = new ArrayList { msg };
+            return TransSendFaceMessage(oldmessages);
         }
 
         public static Bitmap GetFace(int faceid)
@@ -915,16 +1097,6 @@ namespace QQChat
             {
                 if (MessageBox.Show("你确定要退出吗？", "退出确认", MessageBoxButtons.YesNoCancel) == System.Windows.Forms.DialogResult.Yes)
                 {
-                    if (_system != null)
-                        _system.Close();
-                    foreach (var f in _friends.ToArray())
-                    {
-                        f.Close();
-                    }
-                    foreach (var g in _groups.ToArray())
-                    {
-                        g.Close();
-                    }
                     this.Hide();
                     this.DialogResult = DialogResult.Abort;
                     _qq.LogOutQQ2();
@@ -932,7 +1104,19 @@ namespace QQChat
                 else
                 {
                     e.Cancel = true;
+                    return;
                 }
+            }
+
+            if (_system != null)
+                _system.Close();
+            foreach (var f in _friends.ToArray())
+            {
+                f.Close();
+            }
+            foreach (var g in _groups.ToArray())
+            {
+                g.Close();
             }
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
 
 namespace QQChat.Classes
 {
@@ -11,6 +12,7 @@ namespace QQChat.Classes
     {
         TYPETEXT = 1,
         TYPERTF = 2,
+        TYPEBYTE = 3,
     }
 
     public interface IRichMessage
@@ -94,9 +96,71 @@ namespace QQChat.Classes
         }
     }
 
-    public static class RichBoxAddtion
+    public class RichMessageByte : IRichMessage
     {
 
+        public RichMessageType MessageType
+        {
+            get { return RichMessageType.TYPERTF; }
+        }
+
+        public object Message
+        {
+            get;
+            private set;
+        }
+
+        public Color? MessageColor
+        {
+            get;
+            set;
+        }
+
+        public RichMessageByte(Image image)
+        {
+            Message = image;
+        }
+
+
+        public bool AppendTo(RichTextBox rtb)
+        {
+            if (rtb == null)
+                throw new ArgumentNullException();
+            Image image = Message as Image;
+            //MemoryStream stream = new MemoryStream();
+            //image.Save(stream, image.RawFormat);
+            rtb.AppendImage(image);
+            return true;
+        }
+    }
+
+    public static class RichBoxAddtion
+    {
+        //public static void AppendImage(this RichTextBox textbox, Image image)
+        //{
+        //    if (image == null)
+        //    {
+        //        return;
+        //    }
+        //    MemoryStream stream = new MemoryStream();
+        //    image.Save(stream, image.RawFormat);
+        //    var imageBytes = stream.GetBuffer();
+        //    if (stream == null)
+        //    {
+        //        return;
+        //    }
+        //    string _Guid = BitConverter.ToString(Guid.NewGuid().ToByteArray()).Replace("-", "");
+        //    StringBuilder _RtfText = new StringBuilder(@"{\rtf1\ansi\ansicpg936\deff0\deflang1033\deflangfe2052{\fonttbl{\f0\fnil\fcharset134 \'cb\'ce\'cc\'e5;}}\uc1\pard\lang2052\f0\fs18{\object\objemb{\*\objclass Paint.Picture}");
+        //    int _Width = image.Width * 15;
+        //    int _Height = image.Height * 15;
+        //    _RtfText.Append(@"\objw" + _Width.ToString() + @"\objh" + _Height.ToString());
+        //    _RtfText.AppendLine(@"{\*\objdata");
+        //    _RtfText.AppendLine(@"010500000200000007000000504272757368000000000000000000" + BitConverter.ToString(BitConverter.GetBytes(imageBytes.Length + 20)).Replace("-", ""));
+        //    _RtfText.Append("7A676B65" + _Guid); //标记            
+        //    _RtfText.AppendLine(BitConverter.ToString(imageBytes).Replace("-", ""));
+        //    _RtfText.AppendLine(@"0105000000000000}{\result{\pict\wmetafile0}}}}");
+        //    textbox.SelectedRtf = _RtfText.ToString();
+        //}
 
         public static void AppendLine(this RichTextBox textbox, string lineStr)
         {

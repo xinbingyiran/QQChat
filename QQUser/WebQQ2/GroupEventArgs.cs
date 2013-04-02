@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WebQQ2.Extends;
 
 namespace WebQQ2.WebQQ2
 {
@@ -11,7 +12,7 @@ namespace WebQQ2.WebQQ2
         private QQGroup _group = null;
         private QQGroupMember _member = null;
         private long _msg_id = 0;
-        private DateTime? _time = null;
+        private DateTime _time;
         private Dictionary<string, object> _msgs = null;
 
         public QQGroup Group
@@ -29,7 +30,7 @@ namespace WebQQ2.WebQQ2
             get { return _msg_id; }
         }
 
-        public DateTime? Time
+        public DateTime Time
         {
             get { return _time; }
         }
@@ -43,6 +44,7 @@ namespace WebQQ2.WebQQ2
         {
             get
             {
+                //return QQHelper.ToJson(Msgs);
                 if (_msgs.Count == 1 && _msgs.Keys.Contains("content"))
                 {
                     ArrayList content = _msgs["content"] as ArrayList;
@@ -93,7 +95,7 @@ namespace WebQQ2.WebQQ2
             return o.ToString();
         }
 
-        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime? time, Dictionary<string, object> msgs)
+        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime time, Dictionary<string, object> msgs)
         {
             this._group = group;
             this._msg_id = msgid;
@@ -102,7 +104,7 @@ namespace WebQQ2.WebQQ2
             this._msgs = msgs;
         }
 
-        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime? time, string singleMsg)
+        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime time, string singleMsg)
         {
             this._group = group;
             this._msg_id = msgid;
