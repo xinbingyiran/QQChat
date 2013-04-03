@@ -25,6 +25,11 @@ namespace QQChat
             get { return "G|" + Group.gid; }
         }
 
+        public bool HasMessage
+        {
+            get { return _oldMessage != null && _oldMessage.Count > 0; }
+        }
+
         public void UpdateTitle()
         {
             this.Text = Group.LongName;

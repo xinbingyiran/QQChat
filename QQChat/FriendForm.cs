@@ -27,6 +27,11 @@ namespace QQChat
             get { return "F|" + Friend.uin; }
         }
 
+        public bool HasMessage
+        {
+            get { return _oldMessage != null && _oldMessage.Count > 0; }
+        }
+
         public void UpdateTitle()
         {
             this.Text = Friend.LongNameWithStatus;

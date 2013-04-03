@@ -21,6 +21,11 @@ namespace QQChat
             get { return "S|0"; }
         }
 
+        public bool HasMessage
+        {
+            get { return false; }
+        }
+
         public void UpdateTitle()
         {
             this.Text = "系统消息";

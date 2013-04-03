@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.状态ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关于ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControlF = new System.Windows.Forms.TabControl();
@@ -38,7 +39,9 @@
             this.tabPageG = new System.Windows.Forms.TabPage();
             this.buttong = new System.Windows.Forms.Button();
             this.treeViewG = new System.Windows.Forms.TreeView();
-            this.状态ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.好友弹窗ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.群组弹窗ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -48,6 +51,7 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.设置ToolStripMenuItem,
             this.状态ToolStripMenuItem,
             this.菜单ToolStripMenuItem,
             this.关于ToolStripMenuItem});
@@ -56,6 +60,12 @@
             this.menuStrip1.Size = new System.Drawing.Size(264, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // 状态ToolStripMenuItem
+            // 
+            this.状态ToolStripMenuItem.Name = "状态ToolStripMenuItem";
+            this.状态ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.状态ToolStripMenuItem.Text = "状态";
             // 
             // 菜单ToolStripMenuItem
             // 
@@ -149,11 +159,28 @@
             this.treeViewG.TabIndex = 0;
             this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
             // 
-            // 状态ToolStripMenuItem
+            // 设置ToolStripMenuItem
             // 
-            this.状态ToolStripMenuItem.Name = "状态ToolStripMenuItem";
-            this.状态ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
-            this.状态ToolStripMenuItem.Text = "状态";
+            this.设置ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.好友弹窗ToolStripMenuItem,
+            this.群组弹窗ToolStripMenuItem});
+            this.设置ToolStripMenuItem.Name = "设置ToolStripMenuItem";
+            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.设置ToolStripMenuItem.Text = "设置";
+            // 
+            // 好友弹窗ToolStripMenuItem
+            // 
+            this.好友弹窗ToolStripMenuItem.Name = "好友弹窗ToolStripMenuItem";
+            this.好友弹窗ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.好友弹窗ToolStripMenuItem.Text = "好友弹窗";
+            this.好友弹窗ToolStripMenuItem.Click += new System.EventHandler(this.好友弹窗ToolStripMenuItem_Click);
+            // 
+            // 群组弹窗ToolStripMenuItem
+            // 
+            this.群组弹窗ToolStripMenuItem.Name = "群组弹窗ToolStripMenuItem";
+            this.群组弹窗ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.群组弹窗ToolStripMenuItem.Text = "群组弹窗";
+            this.群组弹窗ToolStripMenuItem.Click += new System.EventHandler(this.群组弹窗ToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -193,6 +220,9 @@
         private System.Windows.Forms.Button buttonf;
         private System.Windows.Forms.Button buttong;
         private System.Windows.Forms.ToolStripMenuItem 状态ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 设置ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 好友弹窗ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 群组弹窗ToolStripMenuItem;
     }
 }
 

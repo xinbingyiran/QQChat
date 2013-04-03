@@ -13,6 +13,10 @@ namespace QQChat.Classes
         /// </summary>
         string ID { get; }
         /// <summary>
+        /// 标识
+        /// </summary>
+        bool HasMessage { get; }
+        /// <summary>
         /// 更新窗口
         /// </summary>
         void UpdateTitle();

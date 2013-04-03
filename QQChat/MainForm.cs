@@ -293,6 +293,29 @@ namespace QQChat
             if (isMessage.HasValue)
             {
                 list[0].ForeColor = isMessage.Value ? Color.Red : treeViewF.ForeColor;
+                var pnode = list[0].Parent;
+                while (pnode != null)
+                {
+                    var find = false;
+                    foreach (TreeNode node in pnode.Nodes)
+                    {
+                        if (node.ForeColor == Color.Red)
+                        {
+                            find = true;
+                            break;
+                        }
+                    }
+                    if (find)
+                    {
+                        pnode.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        pnode.ForeColor = treeViewF.ForeColor;
+                    }
+                    pnode = pnode.Parent;
+                }
+
             }
             var f = _friends.Find(ele => ele.ID == "F|" + friend.uin);
             if (f != null)
@@ -660,17 +683,27 @@ namespace QQChat
             }
             if (msg != null)
             {
-                f.AppendMessage(msg, member, time);
-                if (!f.Visible)
+                if (!f.HasMessage && f.Visible == false)
                 {
                     RefreshGroup(group, true);
                 }
+                f.AppendMessage(msg, member, time);
+            }
+            else if (f.Visible == false)
+            {
+                f.Show();
+                RefreshGroup(group, false);
+                f.BringToFront();
             }
             else
             {
-                f.Show();
                 f.BringToFront();
+            }
+            if (群组弹窗ToolStripMenuItem.Checked && f.Visible == false)
+            {
+                f.Show();
                 RefreshGroup(group, false);
+                f.BringToFront();
             }
         }
 
@@ -696,19 +729,30 @@ namespace QQChat
                     f.UpdateTitle();
                 }
             }
+
             if (msg != null)
             {
-                f.AppendMessage(msg, friend, time);
-                if (!f.Visible)
+                if (!f.HasMessage && f.Visible == false)
                 {
                     RefreshUser(friend, true);
                 }
+                f.AppendMessage(msg, friend, time);
+            }
+            else if (f.Visible == false)
+            {
+                f.Show();
+                RefreshUser(friend, false);
+                f.BringToFront();
             }
             else
             {
-                f.Show();
                 f.BringToFront();
+            }
+            if (好友弹窗ToolStripMenuItem.Checked && f.Visible == false)
+            {
+                f.Show();
                 RefreshUser(friend, false);
+                f.BringToFront();
             }
         }
 
@@ -1124,6 +1168,16 @@ namespace QQChat
         {
             if (_qq != null)
                 this.Text = string.Format("{0}[{1}]", _qq.User.QQName, _qq.User.QQNum);
+        }
+
+        private void 好友弹窗ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            好友弹窗ToolStripMenuItem.Checked = !好友弹窗ToolStripMenuItem.Checked;
+        }
+
+        private void 群组弹窗ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            群组弹窗ToolStripMenuItem.Checked = !群组弹窗ToolStripMenuItem.Checked;
         }
     }
 }
