@@ -14,6 +14,8 @@ namespace WebApi
     public class MyWebApi:IMessageDeal
     {
 
+        private bool _autoreplay = false;
+
         public string IName
         {
             get { return "Web信息处理"; }
@@ -26,6 +28,9 @@ namespace WebApi
         
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
+            {"启用","start"},
+            {"停用","stop"},
+            {"状态","status"},
             {"关于","about"}
         };
 
@@ -45,6 +50,7 @@ namespace WebApi
             {"-4d 字符串","Base64解密"},
             {"-fy 字符串","中文到英文翻译"},
             {"-i 对话","与朋友对话"},
+            {"-s 查/启/停","状态切换与查询[查询/自动对话/-i对话]"},
         };
 
         public Dictionary<string, string> Filters
@@ -228,7 +234,27 @@ namespace WebApi
                     case "-i":
                         rstr = GetBotMessage(substring[1]);
                         break;
+                    case "-s":
+                        if (substring[1].Contains('查'))
+                        {
+                            return "当前回复状态为" + (_autoreplay ? "启用" : "停用");
+                        }
+                        else if (substring[1].Contains('启'))
+                        {
+                            _autoreplay = true;
+                            return "当前回复状态为启用";
+                        }
+                        else if (substring[1].Contains('停'))
+                        {
+                            _autoreplay = false;
+                            return "当前回复状态为停用";
+                        }
+                        break;
                     default:
+                        if (_autoreplay)
+                        {
+                            rstr = GetBotMessage(message);
+                        }
                         break;
                 }
             }
@@ -258,6 +284,20 @@ namespace WebApi
             if (menuName == "about")
             {
                 MessageBox.Show("Web信息处理。\r\n信息来自网上，谨慎使用。", "关于插件");
+            }
+            else if (menuName == "start")
+            {
+                _autoreplay = true;
+                MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
+            }
+            else if (menuName == "stop")
+            {
+                _autoreplay = false;
+                MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
+            }
+            else if (menuName == "status")
+            {
+                MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
             }
         }
 

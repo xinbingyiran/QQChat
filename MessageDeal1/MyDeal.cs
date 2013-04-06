@@ -14,6 +14,8 @@ namespace MessageDeal1
 
         private Dictionary<string, string> _learning;
 
+        private bool _autoreplay;
+
         private static readonly string lineSep = @"<br/>";
 
         private int _currentIndex;
@@ -34,6 +36,9 @@ namespace MessageDeal1
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
             {"重载","reload"},
+            {"启用","start"},
+            {"停用","stop"},
+            {"状态","status"},
             {"关于","about"},
         };
 
@@ -44,7 +49,8 @@ namespace MessageDeal1
             {"-列[ 开始位置]","列出学会的问题,从开始位置开始的相临五条内容"},
             {"-查 问题关键字","查看学会的问题,从问题查答案"},
             {"-反 回答关键字","查看学会的问题,从答案查问题"},
-            {"-问 问题","问问题"},
+            {"-问/答 问题","问问题"},
+            {"-状[ 查/启/停]","自动回答问题状态查询/启用/停用"},
         };
 
         public Dictionary<string, string> Menus
@@ -63,6 +69,7 @@ namespace MessageDeal1
         public MyDeal()
         {
             _learning = new Dictionary<string, string>();
+            _autoreplay = true;
             var assemblay = this.GetType().Assembly;
             _filePath = assemblay.Location;
             _filePath = _filePath.Substring(0, _filePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
@@ -123,15 +130,20 @@ namespace MessageDeal1
                 return null;
             }
             if (message.Length < 2 || message[0] != '-')
-                return null;
+            {
+                if (_autoreplay)
+                {
+                    return GetReturnMessage(message);
+                }
+            }
             message = message.Trim().Replace(Environment.NewLine, lineSep);
             var tag = message[1];
-            message = message.Substring(2).Trim();
+            var submessage = message.Substring(2).Trim();
             switch (tag)
             {
                 case '学':
                     {
-                        var wd = message.Split(new char[] { ' ' }, StringSplitOptions.None);
+                        var wd = submessage.Split(new char[] { ' ' }, StringSplitOptions.None);
                         if (wd.Length != 2)
                         {
                             return null;
@@ -149,21 +161,21 @@ namespace MessageDeal1
                     }
                 case '忘':
                     {
-                        if (message.Length < 2)
+                        if (submessage.Length < 2)
                         {
                             return "呵呵，问题请至少输入两个字哦。";
                         }
-                        if (_learning.ContainsKey(message))
-                            _learning.Remove(message);
+                        if (_learning.ContainsKey(submessage))
+                            _learning.Remove(submessage);
                         SaveToFile();
-                        return "已经忘记此问题：" + message;
+                        return "已经忘记此问题：" + submessage;
                     }
                 case '列':
                     {
                         int count = 5;
                         try
                         {
-                            _currentIndex = Convert.ToInt32(message);
+                            _currentIndex = Convert.ToInt32(submessage);
                         }
                         catch (Exception)
                         {
@@ -183,37 +195,10 @@ namespace MessageDeal1
                     }
                 case '查':
                     {
-                        var list = new Dictionary<string,string>();
-                        foreach (KeyValuePair<string,string> item in _learning)
-                        {
-                            if (item.Key.Contains(message))
-                            {
-                                list.Add(item.Key,item.Value);
-                            }
-                            if (list.Count == 5)
-                                break;
-                        }
-                        if (list.Count > 0)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            foreach (KeyValuePair<string, string> filter in list)
-                            {
-                                sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                            }
-                            return sb.ToString();
-                        }
-                        else
-                        {
-                            return "没有找到合适的结果。";
-                        }
-                    }
-                    break;
-                case '反':
-                    {
                         var list = new Dictionary<string, string>();
                         foreach (KeyValuePair<string, string> item in _learning)
                         {
-                            if (item.Value.Contains(message))
+                            if (item.Key.Contains(submessage))
                             {
                                 list.Add(item.Key, item.Value);
                             }
@@ -234,21 +219,68 @@ namespace MessageDeal1
                             return "没有找到合适的结果。";
                         }
                     }
-                    break;
-                case '问':
+                case '反':
                     {
-                        foreach (string key in _learning.Keys)
+                        var list = new Dictionary<string, string>();
+                        foreach (KeyValuePair<string, string> item in _learning)
                         {
-                            var itemindex = message.IndexOf(key);
-                            if (itemindex >= 0 && itemindex <= 5)
+                            if (item.Value.Contains(submessage))
                             {
-                                return _learning[key].Replace(lineSep, Environment.NewLine);
+                                list.Add(item.Key, item.Value);
                             }
+                            if (list.Count == 5)
+                                break;
                         }
-                        return "这个问题的答案还没人教过我哎。";
+                        if (list.Count > 0)
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            foreach (KeyValuePair<string, string> filter in list)
+                            {
+                                sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+                            }
+                            return sb.ToString();
+                        }
+                        else
+                        {
+                            return "没有找到合适的结果。";
+                        }
                     }
+                case '问':
+                case '答':
+                    return GetReturnMessage(submessage) ?? "这个问题的答案还没人教过我哎。";
+                case '状':
+                    {
+                        if (submessage.Contains('查'))
+                        {
+                            return "当前自动回答问题状态为" + (_autoreplay ? "启用" : "停用");
+                        }
+                        else if (submessage.Contains('启'))
+                        {
+                            _autoreplay = true;
+                            return "当前自动回答问题状态为启用";
+                        }
+                        else if (submessage.Contains('停'))
+                        {
+                            _autoreplay = false;
+                            return "当前自动回答问题状态为停用";
+                        }
+                    }
+                    break;
                 default:
                     break;
+            }
+            return null;
+        }
+
+        private string GetReturnMessage(string message)
+        {
+            foreach (string key in _learning.Keys)
+            {
+                var itemindex = message.IndexOf(key);
+                if (itemindex >= 0 && itemindex <= 5)
+                {
+                    return _learning[key].Replace(lineSep, Environment.NewLine);
+                }
             }
             return null;
         }
@@ -264,6 +296,20 @@ namespace MessageDeal1
             {
                 LoadFromFile();
                 MessageBox.Show("已完成重载，共" + _learning.Count + "条数据", "操作提示");
+            }
+            else if (menuName == "start")
+            {
+                _autoreplay = true;
+                MessageBox.Show("当前自动回答问题状态为启用", "状态指示");
+            }
+            else if (menuName == "stop")
+            {
+                _autoreplay = false;
+                MessageBox.Show("当前自动回答问题状态为停用", "状态指示");
+            }
+            else if (menuName == "status")
+            {
+                MessageBox.Show("当前自动回答问题状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
             }
             else if (menuName == "about")
             {

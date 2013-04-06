@@ -571,8 +571,8 @@ namespace QQChat
                                 {"nick",e.User == null?null:e.User.nick},
                                 {"mark",e.User == null?null:e.User.markname},
                             };
-                        string msg = "输入";
-                        SetFriendText(e.User, msg, e.Time);
+                        //string msg = "-----正在输入-----";
+                        //SetFriendText(e.User, msg, e.Time);
                         foreach (var p in Plugins)
                         {
                             if (!p.Value.Enabled)
@@ -653,9 +653,12 @@ namespace QQChat
                     _system.FormClosed += SystemForm_FormClosed;
                 }
             }
-            _system.Show();
-            _system.BringToFront();
-            _system.UpdateTitle();
+            if (!_system.Visible)
+            {
+                _system.Show();
+                _system.BringToFront();
+                _system.UpdateTitle();
+            }
             _system.AppendMessage(message, friend, time);
         }
 
