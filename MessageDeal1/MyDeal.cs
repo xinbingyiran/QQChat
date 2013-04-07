@@ -237,7 +237,7 @@ namespace MessageDeal1
                         for (; index < _learning.Count && count > 0; index++)
                         {
                             var filter = _learning[index];
-                            if (filter.Key.Contains(submessage))
+                            if (filter.Value.Contains(submessage))
                             {
                                 count--;
                                 sb.AppendFormat("{0}  -->  {1} @{2}{3}", filter.Key, filter.Value, index, Environment.NewLine);
