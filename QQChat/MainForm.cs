@@ -96,6 +96,8 @@ namespace QQChat
             ToolStripMenuItem loginitem = new ToolStripMenuItem("重新登录");
             loginitem.Click += (sender, e) =>
             {
+                _qq.MessageFriendReceived -= QQMessageFriendReceived;
+                _qq.MessageGroupReceived -= QQMessageGroupReceived;
                 _qq.LogOutQQ2();
                 this.DialogResult = System.Windows.Forms.DialogResult.Retry;
                 this.Close();

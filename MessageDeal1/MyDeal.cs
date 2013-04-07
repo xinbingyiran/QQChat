@@ -9,16 +9,23 @@ using System.IO;
 
 namespace MessageDeal1
 {
+
+    internal struct FindIndex
+    {
+        public string find;
+        public int index;
+    };
     public class MyDeal : IMessageDeal
     {
 
-        private Dictionary<string, string> _learning;
+        private List<KeyValuePair<string, string>> _learning;
+
 
         private bool _autoreplay;
 
-        private static readonly string lineSep = @"<br/>";
+        public static readonly string lineSep = @"<br/>";
 
-        private int _currentIndex;
+        private Dictionary<string, FindIndex> _currentIndex;
 
         private string _filePath;
 
@@ -68,7 +75,8 @@ namespace MessageDeal1
 
         public MyDeal()
         {
-            _learning = new Dictionary<string, string>();
+            _learning = new List<KeyValuePair<string, string>>();
+            _currentIndex = new Dictionary<string, FindIndex>();
             _autoreplay = true;
             var assemblay = this.GetType().Assembly;
             _filePath = assemblay.Location;
@@ -83,21 +91,23 @@ namespace MessageDeal1
             try
             {
                 string[] lines = File.ReadAllLines(_filePath);
+                Dictionary<string, string> dir = new Dictionary<string, string>();
                 foreach (string line in lines)
                 {
                     string[] items = line.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
                     if (items.Length == 2 && items[0].Length >= 2)
                     {
-                        if (_learning.ContainsKey(items[0]))
+                        if (dir.ContainsKey(items[0]))
                         {
-                            _learning[items[0]] += lineSep + items[1];
+                            dir[items[0]] = dir[items[0]] + lineSep + items[1];
                         }
                         else
                         {
-                            _learning.Add(items[0], items[1]);
+                            dir.Add(items[0], items[1]);
                         }
                     }
                 }
+                _learning = dir.ToList();
                 if (_learning.Count != lines.Length)
                 {
                     SaveToFile();
@@ -152,10 +162,7 @@ namespace MessageDeal1
                         {
                             return null;
                         }
-                        if (_learning.ContainsKey(wd[0]))
-                            _learning[wd[0]] = wd[1];
-                        else
-                            _learning.Add(wd[0], wd[1]);
+                        _learning.ReplacePair(wd[0], wd[1]);
                         SaveToFile();
                         return "已经学会此问题：" + wd[0];
                     }
@@ -165,85 +172,79 @@ namespace MessageDeal1
                         {
                             return "呵呵，问题请至少输入两个字哦。";
                         }
-                        if (_learning.ContainsKey(submessage))
-                            _learning.Remove(submessage);
+                        _learning.RemovePair(submessage);
                         SaveToFile();
                         return "已经忘记此问题：" + submessage;
                     }
                 case '列':
                     {
                         int count = 5;
+                        int index = 0;
                         try
                         {
-                            _currentIndex = Convert.ToInt32(submessage);
+                            index = Convert.ToInt32(submessage);
                         }
                         catch (Exception)
                         {
+                            index = _currentIndex.FindIndex("列", null);
                         }
                         StringBuilder sb = new StringBuilder();
-                        if (_currentIndex >= _learning.Count)
+                        if (index >= _learning.Count)
                         {
-                            _currentIndex = 0;
+                            index = 0;
                         }
-                        sb.AppendLine("问题列表：" + _currentIndex);
-                        foreach (KeyValuePair<string, string> filter in _learning.Skip(_currentIndex).Take(count))
+                        sb.AppendLine("问题列表：" + _currentIndex + Environment.NewLine);
+                        for (; index < _learning.Count && count > 0; index++, count--)
                         {
+                            var filter = _learning[index];
                             sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
                         }
-                        _currentIndex += count;
+                        _currentIndex.SetIndex("列", null, index);
                         return sb.ToString();
                     }
                 case '查':
                     {
+                        int count = 5;
                         var list = new Dictionary<string, string>();
-                        foreach (KeyValuePair<string, string> item in _learning)
+                        int index = _currentIndex.FindIndex("查", submessage);
+                        if (index >= _learning.Count)
                         {
-                            if (item.Key.Contains(submessage))
+                            index = 0;
+                        }
+                        var sb = new StringBuilder("查找结果：" + Environment.NewLine);
+                        for (; index < _learning.Count && count > 0; index++)
+                        {
+                            var filter = _learning[index];
+                            if (filter.Key.Contains(submessage))
                             {
-                                list.Add(item.Key, item.Value);
+                                count--;
+                                sb.AppendFormat("{0}  -->  {1} @{2}{3}", filter.Key, filter.Value, index, Environment.NewLine);
                             }
-                            if (list.Count == 5)
-                                break;
                         }
-                        if (list.Count > 0)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            foreach (KeyValuePair<string, string> filter in list)
-                            {
-                                sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                            }
-                            return sb.ToString();
-                        }
-                        else
-                        {
-                            return "没有找到合适的结果。";
-                        }
+                        _currentIndex.SetIndex("查", submessage, index);
+                        return sb.ToString();
                     }
                 case '反':
                     {
+                        int count = 5;
                         var list = new Dictionary<string, string>();
-                        foreach (KeyValuePair<string, string> item in _learning)
+                        int index = _currentIndex.FindIndex("反", submessage);
+                        if (index >= _learning.Count)
                         {
-                            if (item.Value.Contains(submessage))
+                            index = 0;
+                        }
+                        var sb = new StringBuilder("反向查找结果：" + Environment.NewLine);
+                        for (; index < _learning.Count && count > 0; index++)
+                        {
+                            var filter = _learning[index];
+                            if (filter.Key.Contains(submessage))
                             {
-                                list.Add(item.Key, item.Value);
+                                count--;
+                                sb.AppendFormat("{0}  -->  {1} @{2}{3}", filter.Key, filter.Value, index, Environment.NewLine);
                             }
-                            if (list.Count == 5)
-                                break;
                         }
-                        if (list.Count > 0)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            foreach (KeyValuePair<string, string> filter in list)
-                            {
-                                sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                            }
-                            return sb.ToString();
-                        }
-                        else
-                        {
-                            return "没有找到合适的结果。";
-                        }
+                        _currentIndex.SetIndex("反", submessage, index);
+                        return sb.ToString();
                     }
                 case '问':
                 case '答':
@@ -274,15 +275,22 @@ namespace MessageDeal1
 
         private string GetReturnMessage(string message)
         {
-            foreach (string key in _learning.Keys)
+            string retstr = null;
+            int sub = int.MaxValue;
+            for (int i = 0; i < _learning.Count; i++)
             {
-                var itemindex = message.IndexOf(key);
+                var itemindex = message.IndexOf(_learning[i].Key);
                 if (itemindex >= 0 && itemindex <= 5)
                 {
-                    return _learning[key].Replace(lineSep, Environment.NewLine);
+                    int si = message.Length - _learning[i].Key.Length;
+                    if (si < sub)
+                    {
+                        retstr = _learning[i].Value;
+                        sub = si;
+                    }
                 }
             }
-            return null;
+            return retstr;
         }
 
         public string DealGroupMessage(Dictionary<string, object> info, string message)
@@ -337,6 +345,81 @@ namespace MessageDeal1
             //    return string.Format("{0} 你好，我正在等待你的输入。", TranslateMessageUser.UserNick);
             //}
             return null;
+        }
+    }
+
+    internal static class Extends
+    {
+        internal static void AppendPair(this List<KeyValuePair<string, string>> list, string key, string value)
+        {
+            int i = 0;
+            for (; i < list.Count; i++)
+            {
+                if (list[i].Key == key)
+                {
+                    list[i] = new KeyValuePair<string, string>(key, list[i].Value + MyDeal.lineSep + value);
+                    break;
+                }
+            }
+            if (i == list.Count)
+            {
+                list.Add(new KeyValuePair<string, string>(key, value));
+            }
+        }
+
+        internal static void ReplacePair(this List<KeyValuePair<string, string>> list, string key, string value)
+        {
+            int i = 0;
+            for (; i < list.Count; i++)
+            {
+                if (list[i].Key == key)
+                {
+                    list[i] = new KeyValuePair<string, string>(key, value);
+                    break;
+                }
+            }
+            if (i == list.Count)
+            {
+                list.Add(new KeyValuePair<string, string>(key, value));
+            }
+        }
+
+        internal static void RemovePair(this List<KeyValuePair<string, string>> list, string key)
+        {
+            int i = 0;
+            for (; i < list.Count; i++)
+            {
+                if (list[i].Key == key)
+                {
+                    list.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        internal static int FindIndex(this Dictionary<string, FindIndex> dir, string key, string find)
+        {
+            if (dir.ContainsKey(key) && dir[key].find == find)
+            {
+                return dir[key].index;
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+
+        internal static void SetIndex(this Dictionary<string, FindIndex> dir, string key, string find, int index)
+        {
+            if (dir.ContainsKey(key))
+            {
+                dir[key] = new FindIndex { find = find, index = index };
+            }
+            else
+            {
+                dir.Add(key, new FindIndex { find = find, index = index });
+            }
         }
     }
 }
