@@ -127,7 +127,7 @@ namespace MeIn
 
         public string DealGroupMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, info["gnum"].ToString(), info["fnum"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fcard"] as string : info["fnick"] as string);
+            return DealMessage(message, info["gnum"].ToString(), info["fnum"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fnick"] as string : info["fcard"] as string);
         }
 
         private string _personStr = "[gmemo]";
