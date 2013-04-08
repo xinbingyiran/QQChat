@@ -204,6 +204,8 @@ namespace MessageDeal1
                     }
                 case '查':
                     {
+                        if (String.IsNullOrEmpty(submessage))
+                            return "呵呵，想查什么呢。";
                         int count = 5;
                         var list = new Dictionary<string, string>();
                         int index = _currentIndex.FindIndex("查", submessage);
@@ -226,6 +228,8 @@ namespace MessageDeal1
                     }
                 case '反':
                     {
+                        if (String.IsNullOrEmpty(submessage))
+                            return "呵呵，想查什么呢。";
                         int count = 5;
                         var list = new Dictionary<string, string>();
                         int index = _currentIndex.FindIndex("反", submessage);
@@ -248,6 +252,12 @@ namespace MessageDeal1
                     }
                 case '问':
                 case '答':
+                    if (String.IsNullOrEmpty(submessage))
+                        return "呵呵，想问查什么呢。";
+                    if (submessage.Length < 2)
+                    {
+                        return "呵呵，问题请至少输入两个字哦。";
+                    }
                     return GetReturnMessage(submessage) ?? "这个问题的答案还没人教过我哎。";
                 case '状':
                     {
