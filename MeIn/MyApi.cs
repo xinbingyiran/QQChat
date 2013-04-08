@@ -16,6 +16,7 @@ namespace MeIn
 
     public class MyApi : IMessageDeal
     {
+        private Random r = new Random();
         private string _filePath;
         private Dictionary<string, meinItem> _meinAll;
         public string IName
@@ -158,7 +159,7 @@ namespace MeIn
 注册当前用户成功，
 现在可以使用签到服务了。
 {1}";
-        private Int64 timespan = new TimeSpan(4, 0, 0).Ticks;
+        private Int64 timespan = new TimeSpan(2, 0, 0).Ticks;
 
         private string DealMessage(string message, string p1, string p2, string nick)
         {
@@ -174,7 +175,6 @@ namespace MeIn
                     {
                         return string.Format(_timeoutStr, nick, new DateTime(_meinAll[uin].time).ToString("yyyy-MM-dd HH:mm:ss"), _meinAll[uin].score, _personStr);
                     }
-                    Random r = new Random();
                     Int32 i = r.Next(14) + 1;
                     _meinAll[uin] = new meinItem() { score = _meinAll[uin].score + i, time = DateTime.Now.Ticks };
                     SaveToFile();
