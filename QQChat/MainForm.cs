@@ -863,12 +863,26 @@ namespace QQChat
             msg = msg.Replace(TranslateMessageUser.UserNum, user.num.ToString());
             msg = msg.Replace(TranslateMessageUser.UserShortName, user.ShortName);
             msg = msg.Replace(TranslateMessageUser.UserLongName, user.LongName);
+            msg = msg.Replace(TranslateMessageGroup.GroupName, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupNum, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupShortName, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupLongName, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupMemo, "");
+            msg = msg.Replace(TranslateMessageGroup.MemberNum, user.num.ToString());
+            msg = msg.Replace(TranslateMessageGroup.MemberNick, user.nick);
+            msg = msg.Replace(TranslateMessageGroup.MemberCard, user.markname);
             return msg;
         }
 
         private string GetGroupMsg(QQGroup group, QQGroupMember member, string msg)
         {
             if (msg == null) return null;
+            msg = msg.Replace(TranslateMessageUser.UserName, member.nick);
+            msg = msg.Replace(TranslateMessageUser.UserNick, member.nick);
+            msg = msg.Replace(TranslateMessageUser.UserMarkName, member.card);
+            msg = msg.Replace(TranslateMessageUser.UserNum, member.num.ToString());
+            msg = msg.Replace(TranslateMessageUser.UserShortName, member.nick);
+            msg = msg.Replace(TranslateMessageUser.UserLongName, member.nick);
             msg = msg.Replace(TranslateMessageGroup.GroupName, group.name);
             msg = msg.Replace(TranslateMessageGroup.GroupNum, group.num.ToString());
             msg = msg.Replace(TranslateMessageGroup.GroupShortName, group.ShortName);
