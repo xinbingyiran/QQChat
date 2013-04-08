@@ -28,11 +28,11 @@ namespace WebQQ2.WebQQ2
         public QQGroup GetQQGroup(long gid)
         {
             var member = GroupList.FirstOrDefault(ele => ele.Value.gid == gid).Value;
-            if (member == null)
-            {
-                member = new QQGroup() { gid = gid };
-                GroupList.Add(gid, member);
-            }
+            //if (member == null)
+            //{
+            //    member = new QQGroup() { gid = gid,owner = null };
+            //    GroupList.Add(gid, member);
+            //}
             return member;
         }
     }

@@ -37,11 +37,11 @@ namespace WebQQ2.WebQQ2
         public QQFriend GetQQFriend(long uin)
         {
             var member = FriendList.FirstOrDefault(ele => ele.Value.uin == uin).Value;
-            if (member == null)
-            {
-                member = new QQFriend() { uin = uin };
-                FriendList.Add(uin,member);
-            }
+            //if (member == null)
+            //{
+            //    member = new QQFriend() { categories = -1, uin = uin };
+            //    FriendList.Add(uin,member);
+            //}
             return member;
         }
     }

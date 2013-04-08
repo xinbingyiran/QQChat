@@ -20,17 +20,11 @@ namespace WebQQ2.WebQQ2
         public long categories { get; set; }
         public string status { get; set; }
 
-        public bool ShowMarkName { get; set; }
-
         public string LongName
         {
             get
             {
-                if (this.nick == null && this.num == 0)
-                {
-                    return this.uin.ToString();
-                }
-                if (this.markname != null && ShowMarkName)
+                if (this.markname != null)
                 {
                     return string.Format("{0}[{1}]({2})", this.nick, this.markname, this.num);
                 }
@@ -42,11 +36,7 @@ namespace WebQQ2.WebQQ2
         {
             get
             {
-                if (this.nick == null && this.num == 0)
-                {
-                    return this.uin.ToString();
-                }
-                if (this.markname != null && ShowMarkName)
+                if (this.markname != null)
                 {
                     return string.Format("{0}[{1}]", this.nick, this.markname);
                 }
@@ -82,11 +72,6 @@ namespace WebQQ2.WebQQ2
             }
         }
 
-        public bool IsValid
-        {
-            get { return this.nick != null; }
-        }
-
         public bool IsFull
         {
             get { return this.num != 0; }
@@ -94,7 +79,6 @@ namespace WebQQ2.WebQQ2
 
         public QQFriend()
         {
-            ShowMarkName = true;
             status = "offline";
         }
 

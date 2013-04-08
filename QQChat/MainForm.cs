@@ -80,7 +80,7 @@ namespace QQChat
             {
                 var uin = Convert.ToInt64(treeViewF.SelectedNode.Tag);
                 var f = _qq.User.GetUserFriend(uin);
-                if (f != null && f.IsValid)
+                if (f != null)
                 {
                     SetFriendText(f, null, DateTime.Now);
                 }
@@ -281,20 +281,26 @@ namespace QQChat
         private void GetFriendNum(long uin)
         {
             var f = _qq.User.GetUserFriend(uin);
-            if (f != null && f.IsValid && _qq.User.QQFriends.FriendList.Values.Contains(f))
+            if (f != null && _qq.User.QQFriends.FriendList.Values.Contains(f))
             {
-                _qq.GetFriendQQNum(f);
-                RefreshUser(f);
+                if (f.num == 0)
+                {
+                    _qq.GetFriendQQNum(f);
+                    RefreshUser(f);
+                }
             }
         }
 
         private void GetGroupNum(long uin)
         {
             var g = _qq.User.GetUserGroup(uin);
-            if (g != null && g.IsValid && _qq.User.QQGroups.GroupList.Values.Contains(g))
+            if (g != null && _qq.User.QQGroups.GroupList.Values.Contains(g))
             {
-                _qq.GetGroupQQNum(g);
-                RefreshGroup(g);
+                if (g.num == 0)
+                {
+                    _qq.GetGroupQQNum(g);
+                    RefreshGroup(g);
+                }
             }
         }
 

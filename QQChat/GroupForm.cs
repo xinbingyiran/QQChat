@@ -189,7 +189,7 @@ namespace QQChat
         private void InsertQQGroupMember(QQGroupMember member, int type)
         {
             if (member == null) return;
-            var item = new ListViewItem(new string[] { member.card == null ? member.nick : member.card, member.uin.ToString() })
+            var item = new ListViewItem(new string[] { member.card == null ? member.nick : member.card, member.num.ToString() })
             {
                 ForeColor = colors[type],
                 Tag = member
@@ -204,12 +204,23 @@ namespace QQChat
                 var member = e.Item.Tag as QQGroupMember;
                 if (member != null)
                 {
-                    richTextBox3.Clear();
-                    richTextBox3.AppendLine(string.Format("昵称:{0}", member.nick));
-                    richTextBox3.AppendLine(string.Format("备注:{0}", member.card));
-                    richTextBox3.AppendLine(string.Format("地址:{0}|{1}|{2}", member.country, member.province, member.city));
-                    richTextBox3.AppendLine(string.Format("mflag:{0}", member.mflag));
-                    richTextBox3.AppendLine(string.Format("stat:{0}", member.stat));
+                    new Task(() =>
+                        {
+                            if (member.num == 0)
+                            {
+                                GetQQMemberNum(member);
+                            }
+                            BeginInvoke(new MethodInvoker(() =>
+                            {
+                                richTextBox3.Clear();
+                                richTextBox3.AppendLine(string.Format("昵称:{0}", member.nick));
+                                richTextBox3.AppendLine(string.Format("名片:{0}", member.card));
+                                richTextBox3.AppendLine(string.Format("号码:{0}", member.num));
+                                richTextBox3.AppendLine(string.Format("地址:{0}|{1}|{2}", member.country, member.province, member.city));
+                                richTextBox3.AppendLine(string.Format("mflag:{0}", member.mflag));
+                                richTextBox3.AppendLine(string.Format("stat:{0}", member.stat));
+                            }));
+                        }).Start();
                 }
             }
         }
@@ -230,6 +241,11 @@ namespace QQChat
         private void GroupForm_Shown(object sender, EventArgs e)
         {
             DealOldMessage();
+        }
+
+        private void GetQQMemberNum(QQGroupMember member)
+        {
+            QQ.GetGroupMemberQQNum(Group, member);
         }
     }
 }

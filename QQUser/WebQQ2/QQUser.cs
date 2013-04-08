@@ -65,7 +65,7 @@ namespace WebQQ2.WebQQ2
 
         public QQGroup GetUserGroup(long gid)
         {
-            return QQGroups.GroupList.SingleOrDefault(ele => ele.Key == gid).Value;
+            return QQGroups.GetQQGroup(gid);
         }
 
         public QQFriend GetUserFriend(long uin)

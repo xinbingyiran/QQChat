@@ -65,13 +65,5 @@ namespace WebQQ2.WebQQ2
             leaders.Clear();
             owner = null;
         }
-
-        public bool IsValid
-        {
-            get
-            {
-                return this.name != null;
-            }
-        }
     }
 }

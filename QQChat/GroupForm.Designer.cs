@@ -105,7 +105,7 @@
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "识别码";
+            this.columnHeader2.Text = "QQ号";
             this.columnHeader2.Width = 77;
             // 
             // GroupForm
