@@ -209,9 +209,15 @@ namespace QQChat
                             if (member.num == 0)
                             {
                                 GetQQMemberNum(member);
+
+                                BeginInvoke(new MethodInvoker(() =>
+                                {
+                                    e.Item.SubItems[1].Text = member.num.ToString();
+                                }));
                             }
                             BeginInvoke(new MethodInvoker(() =>
                             {
+                                e.Item.SubItems[1].Text = member.num.ToString();
                                 richTextBox3.Clear();
                                 richTextBox3.AppendLine(string.Format("昵称:{0}", member.nick));
                                 richTextBox3.AppendLine(string.Format("名片:{0}", member.card));
