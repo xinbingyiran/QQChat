@@ -15,6 +15,13 @@ namespace WebQQ2.WebQQ2
         private DateTime _time;
         private Dictionary<string, object> _msgs = null;
 
+        private MessageEventType _mtype = MessageEventType.MESSAGE_UNKNOW;
+
+        public MessageEventType Mtype
+        {
+            get { return _mtype; }
+        }
+
         public QQGroup Group
         {
             get { return _group; }
@@ -95,21 +102,23 @@ namespace WebQQ2.WebQQ2
             return o.ToString();
         }
 
-        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime time, Dictionary<string, object> msgs)
+        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime time,MessageEventType type, Dictionary<string, object> msgs)
         {
             this._group = group;
             this._msg_id = msgid;
             this._member = member;
             this._time = time;
+            this._mtype = type;
             this._msgs = msgs;
         }
 
-        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime time, string singleMsg)
+        internal GroupEventArgs(QQGroup group, QQGroupMember member, long msgid, DateTime time, MessageEventType type, string singleMsg)
         {
             this._group = group;
             this._msg_id = msgid;
             this._member = member;
             this._time = time;
+            this._mtype = type;
             this._msgs = new Dictionary<string, object>() { { "message", singleMsg } };
         }
     }

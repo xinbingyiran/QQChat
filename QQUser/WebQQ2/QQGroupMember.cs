@@ -8,6 +8,7 @@ namespace WebQQ2.WebQQ2
     public class QQGroupMember
     {
         public long uin { get; set; }
+        public long num { get; set; }
         public string nick { get; set; }
         public string card { get; set; }
         public string province { get; set; }

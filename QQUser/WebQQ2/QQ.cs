@@ -40,7 +40,8 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_poll2 = "http://d.web2.qq.com/channel/poll2";
         private static readonly string qq_send_buddy_msg2 = "http://d.web2.qq.com/channel/send_buddy_msg2";
         private static readonly string qq_get_qq_level2 = "http://s.web2.qq.com/api/get_qq_level2?tuin={0}&vfwebqq={1}&t={2}";
-        private static readonly string qq_get_friend_uin2 = "http://s.web2.qq.com/api/get_friend_uin2?tuin={0}&verifysession=&type=1&code=&vfwebqq={1}&t={2}";
+        private static readonly string qq_get_friend_uin2_user = "http://s.web2.qq.com/api/get_friend_uin2?tuin={0}&verifysession=&type=1&code=&vfwebqq={1}&t={2}";
+        private static readonly string qq_get_friend_uin2_group = "http://s.web2.qq.com/api/get_friend_uin2?tuin={0}&verifysession=&type=4&code=&vfwebqq={1}&t={2}";
         private static readonly string qq_change_status2 = "http://d.web2.qq.com/channel/change_status2?newstatus={0}&clientid={1}&psessionid={2}&t={3}";
         private static readonly string qq_logout2 = "http://d.web2.qq.com/channel/logout2?ids=&clientid={0}&psessionid={1}&t={2}";
         private static readonly string qq_search_qq_by_uin2 = "http://s.web2.qq.com/api/search_qq_by_uin2?tuin={0}&verifysession={1}&code={2}&vfwebqq={3}&t={4}";
@@ -246,7 +247,7 @@ namespace WebQQ2.WebQQ2
 
         public string GetCFaceUrl(string pic, string gid)
         {
-            string url = string.Format(qq_cface, pic,gid,QQHelper.GetTime()); ;
+            string url = string.Format(qq_cface, pic, gid, QQHelper.GetTime()); ;
             return GetFileTrueUrl(url);
         }
 
@@ -438,7 +439,7 @@ namespace WebQQ2.WebQQ2
         {
             try
             {
-                string url = string.Format(qq_get_friend_uin2, friend.uin, _user.VfWebQQ, QQHelper.GetTime());
+                string url = string.Format(qq_get_friend_uin2_user, friend.uin, _user.VfWebQQ, QQHelper.GetTime());
                 string retstr = GetUrlText(url);
                 if (retstr != null && retstr.Length > 0)
                 {
@@ -453,6 +454,82 @@ namespace WebQQ2.WebQQ2
                             if (MessageFriendReceived != null)
                             {
                                 MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_USER));
+                            }
+                            return qqacc.ToString();
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    else
+                    {
+                        return QQHelper.ToJson(root);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return null;
+        }
+
+        public string GetGroupQQNum(QQGroup group)
+        {
+            try
+            {
+                string url = string.Format(qq_get_friend_uin2_user, group.code, _user.VfWebQQ, QQHelper.GetTime());
+                string retstr = GetUrlText(url);
+                if (retstr != null && retstr.Length > 0)
+                {
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+                        try
+                        {
+                            long qqacc = Convert.ToInt64(result["account"]);
+                            group.num = qqacc;
+                            if (MessageGroupReceived != null)
+                            {
+                                MessageGroupReceived(this, new GroupEventArgs(group, null, 0, DateTime.Now, MessageEventType.MESSAGE_USER, string.Empty));
+                            }
+                            return qqacc.ToString();
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    else
+                    {
+                        return QQHelper.ToJson(root);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return null;
+        }
+
+        public string GetGroupMemberQQNum(QQGroup group, QQGroupMember member)
+        {
+            try
+            {
+                string url = string.Format(qq_get_friend_uin2_user, member.uin, _user.VfWebQQ, QQHelper.GetTime());
+                string retstr = GetUrlText(url);
+                if (retstr != null && retstr.Length > 0)
+                {
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+                        try
+                        {
+                            long qqacc = Convert.ToInt64(result["account"]);
+                            member.num = qqacc;
+                            if (MessageGroupReceived != null)
+                            {
+                                MessageGroupReceived(this, new GroupEventArgs(group, member, 0, DateTime.Now, MessageEventType.MESSAGE_USER, string.Empty));
                             }
                             return qqacc.ToString();
                         }
@@ -515,7 +592,7 @@ namespace WebQQ2.WebQQ2
                 if (root["retcode"] as int? == 0)
                 {
                     System.Collections.ArrayList list = root["result"] as System.Collections.ArrayList;
-                    for (int i = list.Count - 1; i >= 0;i --)//倒序
+                    for (int i = list.Count - 1; i >= 0; i--)//倒序
                     {
                         Dictionary<string, object> ele = list[i] as Dictionary<string, object>;
                         if (ele == null) continue;
@@ -594,7 +671,7 @@ namespace WebQQ2.WebQQ2
                                             }).Start();
                                         }
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), msgs));
+                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
                                     }
                                 }
                                 break;
@@ -619,7 +696,7 @@ namespace WebQQ2.WebQQ2
                                             }).Start();
                                         }
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, msgs));
+                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
                                     }
                                 }
                                 break;
@@ -1045,13 +1122,13 @@ namespace WebQQ2.WebQQ2
             }
         }
 
-        public bool DenyFriendAdd(long account,string reason)
+        public bool DenyFriendAdd(long account, string reason)
         {
             try
             {
                 string url = qq_deny_added_request2;
                 qq_deny_added_request2_post["account"] = account;
-                qq_deny_added_request2_post["msg"] = reason??"";
+                qq_deny_added_request2_post["msg"] = reason ?? "";
                 qq_deny_added_request2_post["vfwebqq"] = _user.VfWebQQ;
                 string para = QQHelper.ToPostData(qq_deny_added_request2_post);
                 string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
@@ -1059,7 +1136,7 @@ namespace WebQQ2.WebQQ2
                 if (root != null && root["retcode"] as int? == 0)
                 {
                     Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
-                    if(result["result"] as int? == 0)
+                    if (result["result"] as int? == 0)
                         return true;
                 }
             }

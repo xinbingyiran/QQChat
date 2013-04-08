@@ -8,6 +8,7 @@ namespace WebQQ2.WebQQ2
     public class QQGroup
     {
         public long flag { get; set; }
+        public long num { get; set; }
         public string name { get; set; }
         public long gid { get; set; }
         public long code { get; set; }
@@ -42,7 +43,7 @@ namespace WebQQ2.WebQQ2
         {
             get
             {
-                return string.Format("{0}[{1}]", name, code);
+                return string.Format("{0}[{1}]", name, num);
             }
         }
 

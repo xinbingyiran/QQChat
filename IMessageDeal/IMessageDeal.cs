@@ -8,21 +8,23 @@ namespace MessageDeal
 
     public class TranslateMessageUser
     {
-        public static readonly string UserName = "[name]";
-        public static readonly string UserNick = "[nick]";
-        public static readonly string UserMarkName = "[mark]";
-        public static readonly string UserNum = "[num]";
-        public static readonly string UserShortName = "[sname]";
-        public static readonly string UserLongName = "[lname]";
+        public static readonly string UserName = "[fname]";
+        public static readonly string UserNick = "[fnick]";
+        public static readonly string UserMarkName = "[fmark]";
+        public static readonly string UserNum = "[fnum]";
+        public static readonly string UserShortName = "[fsname]";
+        public static readonly string UserLongName = "[flname]";
     }
     public class TranslateMessageGroup
     {
-        public static readonly string GroupName = "[name]";
-        public static readonly string GroupShortName = "[sname]";
-        public static readonly string GroupLongName = "[lname]";
-        public static readonly string GroupMemo= "[memo]";
-        public static readonly string MemberNick = "[nick]";
-        public static readonly string MemberCard = "[card]";
+        public static readonly string GroupName = "[gname]";
+        public static readonly string GroupNum = "[gnum]";
+        public static readonly string GroupShortName = "[gsname]";
+        public static readonly string GroupLongName = "[glname]";
+        public static readonly string GroupMemo = "[gmemo]";
+        public static readonly string MemberNum = "[mnum]";
+        public static readonly string MemberNick = "[mnick]";
+        public static readonly string MemberCard = "[mcard]";
     }
 
     public class QQStatus
@@ -97,7 +99,7 @@ namespace MessageDeal
         /// <summary>
         /// 处理用户消息，并返回处理结果
         /// </summary>
-        /// <param name="info">用户信息{"uin":用户标识,"nick":"用户名","mark":"标志名"}</param>
+        /// <param name="info">用户信息{"num":用户号码,"nick":"用户名","mark":"标志名"}</param>
         /// <param name="message">要处理的消息</param>
         /// <returns>如果不需要回应，只需设置为null即</returns>
         string DealFriendMessage(Dictionary<string,object> info,string message);
@@ -105,7 +107,7 @@ namespace MessageDeal
         /// 处理群消息，并返回处理结果
         /// </summary>
         /// 
-        /// <param name="info">用户信息{"gid":群标识,"gname":"群名称","fuin":用户标识,"fnick":"用户名","fcard":用户名片}</param>
+        /// <param name="info">用户信息{"gnum":群号码,"gname":"群名称","fnum":用户号码,"fnick":"用户名","fcard":用户名片}</param>
         /// <param name="message">要处理的消息</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
         string DealGroupMessage(Dictionary<string, object> info, string message);
@@ -118,14 +120,14 @@ namespace MessageDeal
         /// <summary>
         /// 用户状态改变
         /// </summary>
-        /// <param name="info">用户信息{"uin":用户标识,"nick":"用户名","mark":"标志名"}</param>
+        /// <param name="info">用户信息{"num":用户号码,"nick":"用户名","mark":"标志名"}</param>
         /// <param name="newStatus">新状态[传递内容]</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
         string StatusChanged(Dictionary<string, object> info, string newStatus);
         /// <summary>
         /// 用户正在输入
         /// </summary>
-        /// <param name="info">用户信息{"uin":用户标识,"nick":"用户名","mark":"标志名"}</param>
+        /// <param name="info">用户信息{"num":用户号码,"nick":"用户名","mark":"标志名"}</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
         string Input(Dictionary<string, object> info);
     }

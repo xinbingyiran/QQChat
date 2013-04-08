@@ -48,7 +48,7 @@ namespace WebQQ2.WebQQ2
                 }
                 if (this.markname != null && ShowMarkName)
                 {
-                    return string.Format("{0}[{1}]({2})", this.nick, this.markname);
+                    return string.Format("{0}[{1}]", this.nick, this.markname);
                 }
                 return string.Format("{0}", this.nick);
             }

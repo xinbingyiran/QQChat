@@ -422,41 +422,75 @@ namespace QQChat
 
         private void QQMessageGroupReceived(object sender, GroupEventArgs e)
         {
-            if (e.MsgContent == null)
-                return;
-            SetGroupText(e.Group, e.Member, e.MsgContent, e.Time);
-
-            if (e.Time > _qq.User.LoginTime)
+            switch (e.Mtype)
             {
-                string rmsg = InternalPickMessage(e.MsgContent);
-                if (rmsg != null)
-                {
-                    SendGroupMessage(e.Group, e.Member, rmsg);
-                }
-                else
-                {
-                    var info = new Dictionary<string, object>
+                case MessageEventType.MESSAGE_COMMON:
                     {
-                        {"gid",e.Group == null?0:e.Group.gid},
-                        {"gname",e.Group == null?null:e.Group.name},
-                        {"fuin",e.Member == null?0:e.Member.uin},
-                        {"fnick",e.Member == null?null:e.Member.card},
-                        {"fcard",e.Member == null?null:e.Member.card},
-                    };
-                    foreach (var p in Plugins)
-                    {
-                        if (!p.Value.Enabled)
+
+                        if (e.MsgContent == null)
+                            return;
+                        SetGroupText(e.Group, e.Member, e.MsgContent, e.Time);
+                        new Task(() =>
                         {
-                            continue;
+                            if (e.Group.num == 0)
+                            {
+                                _qq.GetGroupQQNum(e.Group);
+                            }
+                            if (e.Member.num == 0)
+                            {
+                                _qq.GetGroupMemberQQNum(e.Group, e.Member);
+                            }
+
+                            if (e.Time > _qq.User.LoginTime)
+                            {
+                                string rmsg = InternalPickMessage(e.MsgContent);
+                                if (rmsg != null)
+                                {
+                                    SendGroupMessage(e.Group, e.Member, rmsg);
+                                }
+                                else
+                                {
+                                    var info = new Dictionary<string, object>
+                                {
+                                    {"gnum",e.Group == null?0:e.Group.num},
+                                    {"gname",e.Group == null?null:e.Group.name},
+                                    {"fnum",e.Member == null?0:e.Member.num},
+                                    {"fnick",e.Member == null?null:e.Member.card},
+                                    {"fcard",e.Member == null?null:e.Member.card},
+                                };
+                                    foreach (var p in Plugins)
+                                    {
+                                        if (!p.Value.Enabled)
+                                        {
+                                            continue;
+                                        }
+                                        rmsg = p.Value.DealGroupMessage(info, e.MsgContent);
+                                        if (rmsg != null)
+                                        {
+                                            SendGroupMessage(e.Group, e.Member, rmsg);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }).Start();
+                    }
+                    break;
+                case MessageEventType.MESSAGE_USER:
+                    {
+                        if (e.Member == null)
+                        {
+                            //is group message
+                            RefreshGroup(e.Group);
                         }
-                        rmsg = p.Value.DealGroupMessage(info, e.MsgContent);
-                        if (rmsg != null)
+                        else
                         {
-                            SendGroupMessage(e.Group, e.Member, rmsg);
-                            break;
+                            //is member message
                         }
                     }
-                }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -476,26 +510,32 @@ namespace QQChat
                             }
                             else
                             {
-
-                                var info = new Dictionary<string, object>
+                                new Task(() =>
                                 {
-                                    {"uin",e.User == null?0:e.User.uin},
-                                    {"nick",e.User == null?null:e.User.nick},
-                                    {"mark",e.User == null?null:e.User.markname},
-                                };
-                                foreach (var p in Plugins)
-                                {
-                                    if (!p.Value.Enabled)
+                                    if (e.User.num == 0)
                                     {
-                                        continue;
+                                        _qq.GetFriendQQNum(e.User);
                                     }
-                                    rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
-                                    if (rmsg != null)
+                                    var info = new Dictionary<string, object>
                                     {
-                                        SendFriendMessage(e.User, rmsg);
-                                        break;
+                                        {"num",e.User == null?0:e.User.num},
+                                        {"nick",e.User == null?null:e.User.nick},
+                                        {"mark",e.User == null?null:e.User.markname},
+                                    };
+                                    foreach (var p in Plugins)
+                                    {
+                                        if (!p.Value.Enabled)
+                                        {
+                                            continue;
+                                        }
+                                        rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
+                                        if (rmsg != null)
+                                        {
+                                            SendFriendMessage(e.User, rmsg);
+                                            break;
+                                        }
                                     }
-                                }
+                                }).Start();
                             }
                         }
                     }
@@ -530,28 +570,35 @@ namespace QQChat
                     break;
                 case MessageEventType.MESSAGE_STATUS:
                     {
-                        var info = new Dictionary<string, object>
+                        new Task(() =>
+                        {
+                            if (e.User.num == 0)
                             {
-                                {"uin",e.User == null?0:e.User.uin},
+                                _qq.GetFriendQQNum(e.User);
+                            }
+                            var info = new Dictionary<string, object>
+                            {
+                                {"num",e.User == null?0:e.User.num},
                                 {"nick",e.User == null?null:e.User.nick},
                                 {"mark",e.User == null?null:e.User.markname},
                             };
-                        string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, e.User.status, e.Time);
-                        SetSystemText(messagestate, e.User, e.Time);
-                        RefreshUser(e.User);
-                        foreach (var p in Plugins)
-                        {
-                            if (!p.Value.Enabled)
+                            string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, e.User.status, e.Time);
+                            SetSystemText(messagestate, e.User, e.Time);
+                            RefreshUser(e.User);
+                            foreach (var p in Plugins)
                             {
-                                continue;
+                                if (!p.Value.Enabled)
+                                {
+                                    continue;
+                                }
+                                string rmsg = p.Value.StatusChanged(info, e.User.status);
+                                if (rmsg != null)
+                                {
+                                    SendFriendMessage(e.User, rmsg);
+                                    break;
+                                }
                             }
-                            string rmsg = p.Value.StatusChanged(info, e.User.status);
-                            if (rmsg != null)
-                            {
-                                SendFriendMessage(e.User, rmsg);
-                                break;
-                            }
-                        }
+                        }).Start();
                     }
                     break;
                 case MessageEventType.MESSAGE_SHAKE:
@@ -567,27 +614,34 @@ namespace QQChat
                     break;
                 case MessageEventType.MESSAGE_INPUT:
                     {
-                        var info = new Dictionary<string, object>
+                        new Task(() =>
+                        {
+                            if (e.User.num == 0)
                             {
-                                {"uin",e.User == null?0:e.User.uin},
+                                _qq.GetFriendQQNum(e.User);
+                            }
+                            var info = new Dictionary<string, object>
+                            {
+                                {"num",e.User == null?0:e.User.num},
                                 {"nick",e.User == null?null:e.User.nick},
                                 {"mark",e.User == null?null:e.User.markname},
                             };
-                        //string msg = "-----正在输入-----";
-                        //SetFriendText(e.User, msg, e.Time);
-                        foreach (var p in Plugins)
-                        {
-                            if (!p.Value.Enabled)
+                            //string msg = "-----正在输入-----";
+                            //SetFriendText(e.User, msg, e.Time);
+                            foreach (var p in Plugins)
                             {
-                                continue;
+                                if (!p.Value.Enabled)
+                                {
+                                    continue;
+                                }
+                                string rmsg = p.Value.Input(info);
+                                if (rmsg != null)
+                                {
+                                    SendFriendMessage(e.User, rmsg);
+                                    break;
+                                }
                             }
-                            string rmsg = p.Value.Input(info);
-                            if (rmsg != null)
-                            {
-                                SendFriendMessage(e.User, rmsg);
-                                break;
-                            }
-                        }
+                        }).Start();
                     }
                     break;
                 case MessageEventType.MESSAGE_KICK:
@@ -816,9 +870,11 @@ namespace QQChat
         {
             if (msg == null) return null;
             msg = msg.Replace(TranslateMessageGroup.GroupName, group.name);
+            msg = msg.Replace(TranslateMessageGroup.GroupNum, group.num.ToString());
             msg = msg.Replace(TranslateMessageGroup.GroupShortName, group.ShortName);
             msg = msg.Replace(TranslateMessageGroup.GroupLongName, group.LongName);
             msg = msg.Replace(TranslateMessageGroup.GroupMemo, group.memo);
+            msg = msg.Replace(TranslateMessageGroup.MemberNum, member.num.ToString());
             msg = msg.Replace(TranslateMessageGroup.MemberNick, member.nick);
             msg = msg.Replace(TranslateMessageGroup.MemberCard, member.card);
             return msg;

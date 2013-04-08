@@ -121,15 +121,15 @@ namespace MeIn
 
         public string DealFriendMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, "000000", info["uin"].ToString(), info["nick"].ToString());
+            return DealMessage(message, "000000", info["num"].ToString(), info["nick"].ToString());
         }
 
         public string DealGroupMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, info["gid"].ToString(), info["fuin"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fcard"].ToString() : info["fnick"].ToString());
+            return DealMessage(message, info["gnum"].ToString(), info["fnum"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fcard"].ToString() : info["fnick"].ToString());
         }
 
-        private string _personStr = "[memo]";
+        private string _personStr = "[gmemo]";
         private string _successStr =
 @"{0}，签到成功：
 本次签到获取{1}积分，
