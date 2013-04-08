@@ -122,12 +122,12 @@ namespace MeIn
 
         public string DealFriendMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, "000000", info["num"].ToString(), info["nick"].ToString());
+            return DealMessage(message, "000000", info["num"].ToString(), info["nick"] as string);
         }
 
         public string DealGroupMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, info["gnum"].ToString(), info["fnum"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fcard"].ToString() : info["fnick"].ToString());
+            return DealMessage(message, info["gnum"].ToString(), info["fnum"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fcard"] as string : info["fnick"] as string);
         }
 
         private string _personStr = "[gmemo]";
