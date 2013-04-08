@@ -200,7 +200,7 @@ namespace MessageDeal1
                             sb.AppendFormat("{0}  -->  {1}{2}", filter.Key, filter.Value, Environment.NewLine);
                         }
                         _currentIndex.SetIndex("列", null, index);
-                        return sb.ToString();
+                        return sb.ToString().Replace(lineSep, Environment.NewLine);
                     }
                 case '查':
                     {
@@ -224,7 +224,7 @@ namespace MessageDeal1
                             }
                         }
                         _currentIndex.SetIndex("查", submessage, index);
-                        return sb.ToString();
+                        return sb.ToString().Replace(lineSep, Environment.NewLine);
                     }
                 case '反':
                     {
@@ -248,7 +248,7 @@ namespace MessageDeal1
                             }
                         }
                         _currentIndex.SetIndex("反", submessage, index);
-                        return sb.ToString();
+                        return sb.ToString().Replace(lineSep, Environment.NewLine);
                     }
                 case '问':
                 case '答':
@@ -295,7 +295,7 @@ namespace MessageDeal1
                     int si = message.Length - _learning[i].Key.Length;
                     if (si < sub)
                     {
-                        retstr = _learning[i].Value;
+                        retstr = _learning[i].Value.Replace(lineSep, Environment.NewLine);
                         sub = si;
                     }
                 }
