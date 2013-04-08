@@ -122,15 +122,23 @@ namespace MeIn
 
         public string DealFriendMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, "000000", info["num"].ToString(), info["nick"] as string);
+            string p1 = "000000";
+            string p2 = info["num"].ToString();
+            string nick = info["nick"] as string ?? "";
+            nick = string.Format("{0}[{1}]", nick, p2);
+            return DealMessage(message, p1, p2, nick);
         }
 
         public string DealGroupMessage(Dictionary<string, object> info, string message)
         {
-            return DealMessage(message, info["gnum"].ToString(), info["fnum"].ToString(), string.IsNullOrEmpty(info["fcard"] as string) ? info["fnick"] as string : info["fcard"] as string);
+            string p1 = info["gnum"].ToString();
+            string p2 = info["fnum"].ToString();
+            string nick = string.IsNullOrEmpty(info["fcard"] as string) ? info["fnick"] as string : info["fcard"] as string;
+            nick = string.Format("{0}[{1}]", nick, p2);
+            return DealMessage(message, p1, p2, nick);
         }
 
-        private string _personStr = "[gmemo]";
+        private string _personStr = "";
         private string _successStr =
 @"{0}，签到成功：
 本次签到获取{1}积分，
@@ -143,12 +151,12 @@ namespace MeIn
 当前拥有{2}积分
 感谢使用签到服务。
 {3}";
-        private string _unregStr =
-@"{0}，签到失败：
-由于当前用户尚未注册，
-暂时无法提供此服务
-请发送""注册""进行用户注册。
-{1}";
+        //        private string _unregStr =
+        //@"{0}，签到失败：
+        //由于当前用户尚未注册，
+        //暂时无法提供此服务
+        //请发送""注册""进行用户注册。
+        //{1}";
         private string _hasregedStr =
 @"{0}，注册失败：
 当前用户已进行过注册了，
@@ -169,21 +177,19 @@ namespace MeIn
             if (message == "签到")
             {
                 string uin = p1 + '|' + p2;
-                if (_meinAll.ContainsKey(uin))
+                if (!_meinAll.ContainsKey(uin))
                 {
-                    if (DateTime.Now.Ticks - _meinAll[uin].time < timespan)
-                    {
-                        return string.Format(_timeoutStr, nick, new DateTime(_meinAll[uin].time).ToString("yyyy-MM-dd HH:mm:ss"), _meinAll[uin].score, _personStr);
-                    }
-                    Int32 i = r.Next(14) + 1;
-                    _meinAll[uin] = new meinItem() { score = _meinAll[uin].score + i, time = DateTime.Now.Ticks };
-                    SaveToFile();
-                    return string.Format(_successStr, nick, i, _meinAll[uin].score, _personStr);
+                    //return string.Format(_unregStr, nick, _personStr);
+                    _meinAll.Add(uin, new meinItem() { score = 0, time = DateTime.MinValue.Ticks });
                 }
-                else
+                else if (DateTime.Now.Ticks - _meinAll[uin].time < timespan)
                 {
-                    return string.Format(_unregStr, nick, _personStr);
+                    return string.Format(_timeoutStr, nick, new DateTime(_meinAll[uin].time).ToString("yyyy-MM-dd HH:mm:ss"), _meinAll[uin].score, _personStr);
                 }
+                Int32 i = r.Next(14) + 1;
+                _meinAll[uin] = new meinItem() { score = _meinAll[uin].score + i, time = DateTime.Now.Ticks };
+                SaveToFile();
+                return string.Format(_successStr, nick, i, _meinAll[uin].score, _personStr);
             }
             else if (message == "注册")
             {

@@ -876,40 +876,40 @@ namespace QQChat
         private string GetUserMsg(QQFriend user, string msg)
         {
             if (msg == null) return null;
-            msg = msg.Replace(TranslateMessageUser.UserName, user.Name);
-            msg = msg.Replace(TranslateMessageUser.UserNick, user.nick);
-            msg = msg.Replace(TranslateMessageUser.UserMarkName, user.markname);
-            msg = msg.Replace(TranslateMessageUser.UserNum, user.num.ToString());
-            msg = msg.Replace(TranslateMessageUser.UserShortName, user.ShortName);
-            msg = msg.Replace(TranslateMessageUser.UserLongName, user.LongName);
-            msg = msg.Replace(TranslateMessageGroup.GroupName, "");
-            msg = msg.Replace(TranslateMessageGroup.GroupNum, "");
-            msg = msg.Replace(TranslateMessageGroup.GroupShortName, "");
-            msg = msg.Replace(TranslateMessageGroup.GroupLongName, "");
-            msg = msg.Replace(TranslateMessageGroup.GroupMemo, "");
-            msg = msg.Replace(TranslateMessageGroup.MemberNum, user.num.ToString());
-            msg = msg.Replace(TranslateMessageGroup.MemberNick, user.nick);
-            msg = msg.Replace(TranslateMessageGroup.MemberCard, user.markname);
+            msg = msg.Replace(TranslateMessageUser.UserName.Key, user.Name);
+            msg = msg.Replace(TranslateMessageUser.UserNick.Key, user.nick);
+            msg = msg.Replace(TranslateMessageUser.UserMarkName.Key, user.markname);
+            msg = msg.Replace(TranslateMessageUser.UserNum.Key, user.num.ToString());
+            msg = msg.Replace(TranslateMessageUser.UserShortName.Key, user.ShortName);
+            msg = msg.Replace(TranslateMessageUser.UserLongName.Key, user.LongName);
+            msg = msg.Replace(TranslateMessageGroup.GroupName.Key, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupNum.Key, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupShortName.Key, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupLongName.Key, "");
+            msg = msg.Replace(TranslateMessageGroup.GroupMemo.Key, "");
+            msg = msg.Replace(TranslateMessageGroup.MemberNum.Key, user.num.ToString());
+            msg = msg.Replace(TranslateMessageGroup.MemberNick.Key, user.nick);
+            msg = msg.Replace(TranslateMessageGroup.MemberCard.Key, user.markname);
             return msg;
         }
 
         private string GetGroupMsg(QQGroup group, QQGroupMember member, string msg)
         {
             if (msg == null) return null;
-            msg = msg.Replace(TranslateMessageUser.UserName, member.nick);
-            msg = msg.Replace(TranslateMessageUser.UserNick, member.nick);
-            msg = msg.Replace(TranslateMessageUser.UserMarkName, member.card);
-            msg = msg.Replace(TranslateMessageUser.UserNum, member.num.ToString());
-            msg = msg.Replace(TranslateMessageUser.UserShortName, member.nick);
-            msg = msg.Replace(TranslateMessageUser.UserLongName, member.nick);
-            msg = msg.Replace(TranslateMessageGroup.GroupName, group.name);
-            msg = msg.Replace(TranslateMessageGroup.GroupNum, group.num.ToString());
-            msg = msg.Replace(TranslateMessageGroup.GroupShortName, group.ShortName);
-            msg = msg.Replace(TranslateMessageGroup.GroupLongName, group.LongName);
-            msg = msg.Replace(TranslateMessageGroup.GroupMemo, group.memo);
-            msg = msg.Replace(TranslateMessageGroup.MemberNum, member.num.ToString());
-            msg = msg.Replace(TranslateMessageGroup.MemberNick, member.nick);
-            msg = msg.Replace(TranslateMessageGroup.MemberCard, member.card);
+            msg = msg.Replace(TranslateMessageUser.UserName.Key, member.nick);
+            msg = msg.Replace(TranslateMessageUser.UserNick.Key, member.nick);
+            msg = msg.Replace(TranslateMessageUser.UserMarkName.Key, member.card);
+            msg = msg.Replace(TranslateMessageUser.UserNum.Key, member.num.ToString());
+            msg = msg.Replace(TranslateMessageUser.UserShortName.Key, member.nick);
+            msg = msg.Replace(TranslateMessageUser.UserLongName.Key, member.nick);
+            msg = msg.Replace(TranslateMessageGroup.GroupName.Key, group.name);
+            msg = msg.Replace(TranslateMessageGroup.GroupNum.Key, group.num.ToString());
+            msg = msg.Replace(TranslateMessageGroup.GroupShortName.Key, group.ShortName);
+            msg = msg.Replace(TranslateMessageGroup.GroupLongName.Key, group.LongName);
+            msg = msg.Replace(TranslateMessageGroup.GroupMemo.Key, group.memo);
+            msg = msg.Replace(TranslateMessageGroup.MemberNum.Key, member.num.ToString());
+            msg = msg.Replace(TranslateMessageGroup.MemberNick.Key, member.nick);
+            msg = msg.Replace(TranslateMessageGroup.MemberCard.Key, member.card);
             return msg;
         }
 
@@ -918,24 +918,26 @@ namespace QQChat
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
-            if (message == "--help"
-                || message == "--帮助"
-                )
+            switch (message)
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("--help/帮助  ->  \"显示此帮助\"");
-                foreach (var plugin in Plugins.Values)
-                {
-                    if (!plugin.Enabled)
+                case "--help":
+                case "--帮助":
                     {
-                        continue;
+                        StringBuilder sb = new StringBuilder();
+                        sb.AppendLine("--help/帮助  ->  \"显示此帮助\"");
+                        foreach (var plugin in Plugins.Values)
+                        {
+                            if (!plugin.Enabled)
+                            {
+                                continue;
+                            }
+                            foreach (KeyValuePair<string, string> filter in plugin.Filters)
+                            {
+                                sb.AppendFormat("{0}  ->  \"{1}\"{2}", filter.Key, filter.Value, Environment.NewLine);
+                            }
+                        }
+                        return sb.ToString();
                     }
-                    foreach (KeyValuePair<string, string> filter in plugin.Filters)
-                    {
-                        sb.AppendFormat("{0}  ->  \"{1}\"{2}", filter.Key, filter.Value, Environment.NewLine);
-                    }
-                }
-                return sb.ToString();
             }
             return null;
         }

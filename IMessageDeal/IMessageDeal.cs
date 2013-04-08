@@ -6,25 +6,46 @@ using System.Text;
 namespace MessageDeal
 {
 
+
     public class TranslateMessageUser
     {
-        public static readonly string UserName = "[fname]";
-        public static readonly string UserNick = "[fnick]";
-        public static readonly string UserMarkName = "[fmark]";
-        public static readonly string UserNum = "[fnum]";
-        public static readonly string UserShortName = "[fsname]";
-        public static readonly string UserLongName = "[flname]";
+        public static readonly KeyValuePair<string, string> UserName = new KeyValuePair<string, string>("[fname]", "用户名");
+        public static readonly KeyValuePair<string, string> UserNick = new KeyValuePair<string, string>("[fnick]", "用户昵称");
+        public static readonly KeyValuePair<string, string> UserMarkName = new KeyValuePair<string, string>("[fmark]", "用户备注");
+        public static readonly KeyValuePair<string, string> UserNum = new KeyValuePair<string, string>("[fnum]", "用户号码");
+        public static readonly KeyValuePair<string, string> UserShortName = new KeyValuePair<string, string>("[fsname]", "短用户名");
+        public static readonly KeyValuePair<string, string> UserLongName = new KeyValuePair<string, string>("[flname]", "长用户名");
+        public static readonly List<KeyValuePair<string, string>> AllMessage = new List<KeyValuePair<string, string>>
+        {
+            UserName,
+            UserNick,
+            UserMarkName,
+            UserNum,
+            UserShortName,
+            UserLongName
+        };
     }
     public class TranslateMessageGroup
     {
-        public static readonly string GroupName = "[gname]";
-        public static readonly string GroupNum = "[gnum]";
-        public static readonly string GroupShortName = "[gsname]";
-        public static readonly string GroupLongName = "[glname]";
-        public static readonly string GroupMemo = "[gmemo]";
-        public static readonly string MemberNum = "[mnum]";
-        public static readonly string MemberNick = "[mnick]";
-        public static readonly string MemberCard = "[mcard]";
+        public static readonly KeyValuePair<string, string> GroupName = new KeyValuePair<string, string>("[gname]", "群名称");
+        public static readonly KeyValuePair<string, string> GroupNum = new KeyValuePair<string, string>("[gnum]", "群号码");
+        public static readonly KeyValuePair<string, string> GroupShortName = new KeyValuePair<string, string>("[gsname]", "短群名称");
+        public static readonly KeyValuePair<string, string> GroupLongName = new KeyValuePair<string, string>("[glname]", "长群名称");
+        public static readonly KeyValuePair<string, string> GroupMemo = new KeyValuePair<string, string>("[gmemo]", "群规");
+        public static readonly KeyValuePair<string, string> MemberNum = new KeyValuePair<string, string>("[mnum]", "发言号码");
+        public static readonly KeyValuePair<string, string> MemberNick = new KeyValuePair<string, string>("[mnick]", "发言昵称");
+        public static readonly KeyValuePair<string, string> MemberCard = new KeyValuePair<string, string>("[mcard]", "发言名片");
+        public static readonly List<KeyValuePair<string, string>> AllMessage = new List<KeyValuePair<string, string>>
+        {
+            GroupName,
+            GroupNum,
+            GroupShortName,
+            GroupLongName,
+            GroupMemo,
+            MemberNum,
+            MemberNick,
+            MemberCard
+        };
     }
 
     public class QQStatus
