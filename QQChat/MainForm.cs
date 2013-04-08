@@ -65,6 +65,15 @@ namespace QQChat
             }
         }
 
+        private void treeViewG_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (treeViewG.SelectedNode != null)
+            {
+                var uin = Convert.ToInt64(treeViewG.SelectedNode.Tag);
+                new Task(() => GetGroupNum(uin)).Start();
+            }
+        }
+
         private void treeViewF_DoubleClick(object sender, EventArgs e)
         {
             if (treeViewF.SelectedNode != null)
@@ -276,6 +285,16 @@ namespace QQChat
             {
                 _qq.GetFriendQQNum(f);
                 RefreshUser(f);
+            }
+        }
+
+        private void GetGroupNum(long uin)
+        {
+            var g = _qq.User.GetUserGroup(uin);
+            if (g != null && g.IsValid && _qq.User.QQGroups.GroupList.Values.Contains(g))
+            {
+                _qq.GetGroupQQNum(g);
+                RefreshGroup(g);
             }
         }
 
@@ -1254,5 +1273,6 @@ namespace QQChat
         {
             群组弹窗ToolStripMenuItem.Checked = !群组弹窗ToolStripMenuItem.Checked;
         }
+
     }
 }
