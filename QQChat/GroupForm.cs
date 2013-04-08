@@ -93,7 +93,7 @@ namespace QQChat
             QQGroupMember gmember = member as QQGroupMember;
             if (string.IsNullOrEmpty(message))
                 return;
-            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card == null ? gmember.nick : gmember.card, gmember.uin));
+            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card == null ? gmember.nick : gmember.card, gmember.num));
             Color c = FormHelper.PickColor();
             //richTextBox1.AppendLine(rmessage, c);
             new Task(() =>
@@ -231,6 +231,7 @@ namespace QQChat
             {
                 richTextBox3.Clear();
                 richTextBox3.AppendLine(string.Format("名称:{0}", Group.LongName));
+                richTextBox3.AppendLine(string.Format("号码:{0}", Group.num));
                 richTextBox3.AppendLine(string.Format("Level:{0}", Group.level));
                 richTextBox3.AppendLine(string.Format("备注:{0}", Group.memo));
                 richTextBox3.AppendLine(string.Format("fmemo:{0}", Group.fingermemo));

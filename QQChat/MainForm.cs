@@ -454,7 +454,6 @@ namespace QQChat
 
                         if (e.MsgContent == null)
                             return;
-                        SetGroupText(e.Group, e.Member, e.MsgContent, e.Time);
                         new Task(() =>
                         {
                             if (e.Group.num == 0)
@@ -465,7 +464,7 @@ namespace QQChat
                             {
                                 _qq.GetGroupMemberQQNum(e.Group, e.Member);
                             }
-
+                            SetGroupText(e.Group, e.Member, e.MsgContent, e.Time);
                             if (e.Time > _qq.User.LoginTime)
                             {
                                 string rmsg = InternalPickMessage(e.MsgContent);
