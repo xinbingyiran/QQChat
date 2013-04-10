@@ -75,6 +75,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ExcelOp\ExcelOp.csproj">
+      <Project>{66112f55-cdb3-4883-b273-36f1f3055c1d}</Project>
+      <Name>ExcelOp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IMessageDeal\MessageDeal.csproj">
       <Project>{5d7192b6-a4bc-4f48-9cf2-9513527f254e}</Project>
       <Name>MessageDeal</Name>

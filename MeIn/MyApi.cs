@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace MeIn
 {
@@ -74,42 +75,25 @@ namespace MeIn
                 Int64 loadtime = DateTime.Now.Ticks;
                 foreach (string line in lines)
                 {
-                    string[] items = line.Split(new char[] { ' ' }, 5, StringSplitOptions.None);
-                    if (items.Length == 5)
+                    KeyValuePair<string, meinItem> item;
+                    try
                     {
-                        Int64 score;
-                        Int64 time;
-                        if (!Int64.TryParse(items[1], out score))
-                        {
-                            score = 0;
-                        }
-                        if (!Int64.TryParse(items[2], out time))
-                        {
-                            time = loadtime;
-                        }
-                        string nick = items[3].Replace("<space/>", " ").Substring(1);
-                        string mark = items[4].Replace("<space/>", " ").Substring(1);
-                        if (_meinAll.ContainsKey(items[0]))
-                        {
-                            score += _meinAll[items[0]].score;
-                            _meinAll[items[0]] = new meinItem()
-                            {
-                                score = score,
-                                time = time,
-                                nick = nick,
-                                mark = mark,
-                            };
-                        }
-                        else
-                        {
-                            _meinAll.Add(items[0], new meinItem()
-                            {
-                                score = score,
-                                time = time,
-                                nick = nick,
-                                mark = mark,
-                            });
-                        }
+                        item = JsonConvert.DeserializeObject<KeyValuePair<string, meinItem>>(line);
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+
+                    if (_meinAll.ContainsKey(item.Key))
+                    {
+                        var newitem = item.Value;
+                        newitem.score += _meinAll[item.Key].score;
+                        _meinAll[item.Key] = newitem;
+                    }
+                    else
+                    {
+                        _meinAll.Add(item.Key, item.Value);
                     }
                 }
                 if (_meinAll.Count != lines.Length)
@@ -124,13 +108,13 @@ namespace MeIn
 
         public void SaveToFile()
         {
-            var lines = _meinAll.Select(ele =>
-                ele.Key + " "
-                + ele.Value.score + " "
-                + ele.Value.time + " -"
-                + ele.Value.nick.Replace(" ", "<space/>") + " -"
-                + ele.Value.mark.Replace(" ", "<space/>") + " "
-                );
+            var lines = new string[_meinAll.Count];
+            int index = 0;
+            foreach (KeyValuePair<string, meinItem> i in _meinAll)
+            {
+                lines[index] = JsonConvert.SerializeObject(i);
+                index++;
+            }
             File.WriteAllLines(_filePath, lines);
         }
 
@@ -140,7 +124,6 @@ namespace MeIn
             string p2 = info[TranslateMessageUser.UserNum.Key].ToString();
             string nick = info[TranslateMessageUser.UserNick.Key] as string ?? "";
             string mark = info[TranslateMessageUser.UserMarkName.Key] as string ?? "";
-            nick = string.Format("{0}[{1}]", nick, p2);
             return DealMessage(message, p1, p2, nick, mark, false);
         }
 
@@ -150,7 +133,6 @@ namespace MeIn
             string p2 = info[TranslateMessageGroup.MemberNum.Key].ToString();
             string nick = info[TranslateMessageGroup.MemberNick.Key] as string;
             string card = info[TranslateMessageGroup.MemberCard.Key] as string;
-            nick = string.Format("{0}[{1}]", nick, p2);
             return DealMessage(message, p1, p2, nick, card, true);
         }
 
@@ -190,7 +172,7 @@ namespace MeIn
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
-            string name = isGroup ? (string.IsNullOrEmpty(mark) ? nick : mark) : nick;
+            string name = string.Format("{0}[{1}]", isGroup ? (string.IsNullOrEmpty(mark) ? nick : mark) : nick, p2);
             if (message == "签到")
             {
                 string uin = p1 + '|' + p2;

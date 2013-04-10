@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.IO;
 
 namespace InterTest
 {
@@ -8,15 +9,17 @@ namespace InterTest
     public class UnitTest1
     {
         [TestMethod]
-        public void TestMatch1()
+        public void TestExcel()
         {
-            MessageDeal1.MyDeal m1 = new MessageDeal1.MyDeal();
-            m1.DealFriendMessage(
-                new Dictionary<string, object> {
-                {"uin",0},
-                {"nick","nick"},
-                {"mark","mark"}
-                }, "@问：你好 答：嗯嗯好呀 呆呵");
+            string filename = "test.xls";
+            ExcelOp.ExcelFile file = null;
+            if (!File.Exists(filename))
+            {
+                file = new ExcelOp.ExcelFile();
+                file.SaveAs(filename);
+            }
+            file = ExcelOp.ExcelFile.LoadFromFile(filename);
+            file.Save();         
         }
     }
 }
