@@ -285,11 +285,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>md "%25USERPROFILE%25\Desktop\QQ\"
-md "%25USERPROFILE%25\Desktop\QQ\plugin\"
-copy "$(TargetPath)" "%25USERPROFILE%25\Desktop\QQ\"
-copy "$(TargetDir)\*.dll" "%25USERPROFILE%25\Desktop\QQ\"
-copy "$(TargetDir)\plugin\*.dll" "%25USERPROFILE%25\Desktop\QQ\plugin\"</PostBuildEvent>
+    <PostBuildEvent>md "E:\installed\QQChat"
+md "E:\installed\QQChat\plugin\"
+copy "$(TargetPath)" "E:\installed\QQChat"
+copy "$(TargetDir)\*.dll" "E:\installed\QQChat"
+copy "$(TargetDir)\plugin\*.dll" "E:\installed\QQChat\plugin\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

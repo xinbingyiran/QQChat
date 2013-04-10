@@ -475,13 +475,13 @@ namespace QQChat
                                 else
                                 {
                                     var info = new Dictionary<string, object>
-                                {
-                                    {"gnum",e.Group == null?0:e.Group.num},
-                                    {"gname",e.Group == null?"":e.Group.name},
-                                    {"fnum",e.Member == null?0:e.Member.num},
-                                    {"fnick",e.Member == null?"":e.Member.nick},
-                                    {"fcard",e.Member == null?"":e.Member.card},
-                                };
+                                    {
+                                        {TranslateMessageGroup.GroupNum.Key,e.Group == null?0:e.Group.num},
+                                        {TranslateMessageGroup.GroupName.Key,e.Group == null?"":e.Group.name},
+                                        {TranslateMessageGroup.MemberNum.Key,e.Member == null?0:e.Member.num},
+                                        {TranslateMessageGroup.MemberNick.Key,e.Member == null?"":e.Member.nick},
+                                        {TranslateMessageGroup.MemberCard.Key,e.Member == null?"":e.Member.card},
+                                    };
                                     foreach (var p in Plugins)
                                     {
                                         if (!p.Value.Enabled)
@@ -542,9 +542,9 @@ namespace QQChat
                                     }
                                     var info = new Dictionary<string, object>
                                     {
-                                        {"num",e.User == null?0:e.User.num},
-                                        {"nick",e.User == null?"":e.User.nick},
-                                        {"mark",e.User == null?"":e.User.markname},
+                                        {TranslateMessageUser.UserNum.Key,e.User == null?0:e.User.num},
+                                        {TranslateMessageUser.UserNick.Key,e.User == null?"":e.User.nick},
+                                        {TranslateMessageUser.UserMarkName.Key,e.User == null?"":e.User.markname},
                                     };
                                     foreach (var p in Plugins)
                                     {
@@ -602,9 +602,9 @@ namespace QQChat
                             }
                             var info = new Dictionary<string, object>
                             {
-                                {"num",e.User == null?0:e.User.num},
-                                {"nick",e.User == null?"":e.User.nick},
-                                {"mark",e.User == null?"":e.User.markname},
+                                {TranslateMessageUser.UserNum.Key,e.User == null?0:e.User.num},
+                                {TranslateMessageUser.UserNick.Key,e.User == null?"":e.User.nick},
+                                {TranslateMessageUser.UserMarkName.Key,e.User == null?"":e.User.markname},
                             };
                             string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, e.User.status, e.Time);
                             SetSystemText(messagestate, e.User, e.Time);
@@ -646,9 +646,9 @@ namespace QQChat
                             }
                             var info = new Dictionary<string, object>
                             {
-                                {"num",e.User == null?0:e.User.num},
-                                {"nick",e.User == null?"":e.User.nick},
-                                {"mark",e.User == null?"":e.User.markname},
+                                {TranslateMessageUser.UserNum.Key,e.User == null?0:e.User.num},
+                                {TranslateMessageUser.UserNick.Key,e.User == null?"":e.User.nick},
+                                {TranslateMessageUser.UserMarkName.Key,e.User == null?"":e.User.markname},
                             };
                             //string msg = "-----正在输入-----";
                             //SetFriendText(e.User, msg, e.Time);
