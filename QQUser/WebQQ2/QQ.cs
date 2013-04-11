@@ -912,7 +912,7 @@ namespace WebQQ2.WebQQ2
             msg.AddRange(qq_send_buddy_msg2_post_content_append);
             qq_send_buddy_msg2_post["content"] = QQHelper.ToJson(msg);
             string para = QQHelper.ToPostData(qq_send_buddy_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para));
+            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para),5000);
             bool ret = false;
             if (retstr != null && retstr.Length > 0)
             {
@@ -947,7 +947,7 @@ namespace WebQQ2.WebQQ2
             msg.AddRange(qq_send_buddy_msg2_post_content_append);
             qq_send_sess_msg2_post["content"] = QQHelper.ToJson(msg);
             string para = QQHelper.ToPostData(qq_send_sess_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para));
+            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para),5000);
             bool ret = false;
             if (retstr != null && retstr.Length > 0)
             {
@@ -981,7 +981,7 @@ namespace WebQQ2.WebQQ2
             msg.AddRange(qq_send_qun_msg2_post_content_append);
             qq_send_qun_msg2_post["content"] = QQHelper.ToJson(msg);
             string para = QQHelper.ToPostData(qq_send_qun_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para));
+            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para),5000);
             bool ret = false;
             if (retstr != null && retstr.Length > 0)
             {
