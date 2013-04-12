@@ -34,18 +34,6 @@ namespace MeIn
         private string _inifilePath;
         private Dictionary<string, meinItem> _meinAll;
         private iniItem _iniItem;
-        private string _successStr =
-@"{0}，签到成功：
-本次签到获取{1}{5}，
-共成功签到{2}次,获得{3}{5},
-感谢使用签到服务。
-{4}";
-        private string _timeoutStr =
-@"{0}，签到失败：
-上次签到时间为{1}
-共成功签到{2}次,获得{3}{5},
-感谢使用签到服务。
-{4}";
         public string IName
         {
             get { return "签到插件"; }
@@ -191,19 +179,60 @@ namespace MeIn
             if (message == "签到")
             {
                 string uin = p1 + '|' + p2;
+                long leave = 0;
+                DateTime now = DateTime.Now;
                 if (!_meinAll.ContainsKey(uin))
                 {
                     //return string.Format(_unregStr, nick, _personStr);
                     _meinAll.Add(uin, new meinItem() { mein = 0, score = 0, time = DateTime.MinValue.Ticks, nick = nick, mark = mark });
                 }
-                else if (DateTime.Now.Ticks - _meinAll[uin].time < _iniItem.timespan)
+                else
                 {
-                    return string.Format(_timeoutStr, name, new DateTime(_meinAll[uin].time).ToString("yyyy-MM-dd HH:mm:ss"), _meinAll[uin].mein, _meinAll[uin].score, _iniItem.pdata, _iniItem.item);
+
+                    var ntime = _meinAll[uin].time + _iniItem.timespan;
+                    if (ntime > now.Ticks )
+                    {
+                        leave = ntime - now.Ticks;
+                        return string.Format(
+    @"{0}，签到失败：
+上次签到时间为{1:yyyy-MM-dd HH:mm:ss}
+距下次可签到剩余{2}:{3:D2}:{4:D2}
+共成功签到{5}次,获得{6}{7},
+{8}",
+                            name,//0
+                            new DateTime(_meinAll[uin].time),//1
+                            leave / TimeSpan.TicksPerHour,//2
+                            leave % TimeSpan.TicksPerHour / TimeSpan.TicksPerMinute,//3
+                            leave % TimeSpan.TicksPerMinute / TimeSpan.TicksPerSecond,//4
+                            _meinAll[uin].mein,//5
+                            _meinAll[uin].score,//6
+                            _iniItem.item,//7
+                            _iniItem.pdata//8
+                            );
+                    }
                 }
                 Int32 i = r.Next(_iniItem.mintomax) + _iniItem.min;
-                _meinAll[uin] = new meinItem() { mein = _meinAll[uin].mein + 1, score = _meinAll[uin].score + i, time = DateTime.Now.Ticks, nick = nick, mark = mark };
+                _meinAll[uin] = new meinItem() { mein = _meinAll[uin].mein + 1, score = _meinAll[uin].score + i, time = now.Ticks, nick = nick, mark = mark };
                 SaveToFile();
-                return string.Format(_successStr, name, i, _meinAll[uin].mein, _meinAll[uin].score, _iniItem.pdata, _iniItem.item);
+                leave = _iniItem.timespan;
+                return string.Format(
+@"{0}，签到成功：
+{1:yyyy-MM-dd HH:mm:ss}获取{2}{3}，
+距下次可签到剩余{4}:{5:D2}:{6:D2}
+共成功签到{7}次,获得{8}{3},
+感谢使用签到服务。
+{9}",
+                    name,//0
+                    now,//1
+                    i,//2
+                    _iniItem.item,//3
+                    leave / TimeSpan.TicksPerHour,//4
+                    leave % TimeSpan.TicksPerHour / TimeSpan.TicksPerMinute,//5
+                    leave % TimeSpan.TicksPerMinute / TimeSpan.TicksPerSecond,//6
+                    _meinAll[uin].mein,
+                    _meinAll[uin].score,
+                    _iniItem.pdata
+                    );
             }
             return null;
         }
