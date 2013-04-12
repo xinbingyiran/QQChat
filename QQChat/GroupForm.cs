@@ -70,10 +70,7 @@ namespace QQChat
                     if (this.IsHandleCreated)
                     {
 
-                        BeginInvoke(new MethodInvoker(() => { 
-                            imessage.AppendTo(richTextBox1);
-                            SetReceiveBox();
-                        }));
+                        BeginInvoke(new MethodInvoker(() => { imessage.AppendTo(richTextBox1); }));
                     }
                     else
                     {
@@ -116,7 +113,6 @@ namespace QQChat
                             msg.AppendTo(richTextBox1);
                         }
                         richTextBox1.AppendLine("", c);
-                        SetReceiveBox();
                     }));
                 }
                 else
@@ -145,16 +141,6 @@ namespace QQChat
                     msg.AppendTo(richTextBox1);
                 }
                 _oldMessage.Clear();
-                SetReceiveBox();
-            }
-        }
-
-        private void SetReceiveBox()
-        {
-            if (Form.ActiveForm == this && !(richTextBox1.Focused))
-            {
-                richTextBox1.Select(int.MaxValue, 0);
-                richTextBox1.ScrollToCaret();
             }
         }
 
