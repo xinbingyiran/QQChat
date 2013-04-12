@@ -780,6 +780,7 @@ namespace QQChat
             }
             else
             {
+                f.WindowState = FormWindowState.Normal;
                 f.BringToFront();
             }
             if (群组弹窗ToolStripMenuItem.Checked && f.Visible == false)
@@ -829,6 +830,7 @@ namespace QQChat
             }
             else
             {
+                f.WindowState = FormWindowState.Normal;
                 f.BringToFront();
             }
             if (好友弹窗ToolStripMenuItem.Checked && f.Visible == false)
