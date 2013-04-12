@@ -194,10 +194,10 @@ namespace MeIn
                     {
                         leave = ntime - now.Ticks;
                         return string.Format(
-    @"{0}，签到失败：
+    @"{0}，签到失败
 上次签到时间为{1:yyyy-MM-dd HH:mm:ss}
 距下次可签到剩余{2}:{3:D2}:{4:D2}
-共成功签到{5}次,获得{6}{7},
+共成功签到{5}次,获得{6}{7}
 {8}",
                             name,//0
                             new DateTime(_meinAll[uin].time),//1
@@ -216,11 +216,10 @@ namespace MeIn
                 SaveToFile();
                 leave = _iniItem.timespan;
                 return string.Format(
-@"{0}，签到成功：
-{1:yyyy-MM-dd HH:mm:ss}获取{2}{3}，
+@"{0}，签到成功
+{1:yyyy-MM-dd HH:mm:ss}获取{2}{3}
 距下次可签到剩余{4}:{5:D2}:{6:D2}
-共成功签到{7}次,获得{8}{3},
-感谢使用签到服务。
+共成功签到{7}次,获得{8}{3}
 {9}",
                     name,//0
                     now,//1
