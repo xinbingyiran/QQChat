@@ -606,7 +606,8 @@ namespace QQChat
                                 {TranslateMessageUser.UserNick.Key,e.User == null?"":e.User.nick},
                                 {TranslateMessageUser.UserMarkName.Key,e.User == null?"":e.User.markname},
                             };
-                            string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, e.User.status, e.Time);
+                            var state = QQStatus.GetQQStatusByInternal(e.User.status);
+                            string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, state == null?e.User.status:state.Status, e.Time);
                             SetSystemText(messagestate, e.User, e.Time);
                             RefreshUser(e.User);
                             foreach (var p in Plugins)

@@ -11,17 +11,41 @@ namespace MeIn
 {
     internal struct meinItem
     {
+        public Int64 mein;
         public Int64 score;
         public Int64 time;
         public string nick;
         public string mark;
     }
 
+    internal struct iniItem
+    {
+        public Int32 min;
+        public Int32 mintomax;
+        public Int64 timespan;
+        public string item;
+        public string pdata;
+    }
+
     public class MyApi : IMessageDeal
     {
         private Random r = new Random();
-        private string _filePath;
+        private string _meinfilePath;
+        private string _inifilePath;
         private Dictionary<string, meinItem> _meinAll;
+        private iniItem _iniItem;
+        private string _successStr =
+@"{0}，签到成功：
+本次签到获取{1}{5}，
+共成功签到{2}次,获得{3}{5},
+感谢使用签到服务。
+{4}";
+        private string _timeoutStr =
+@"{0}，签到失败：
+上次签到时间为{1}
+共成功签到{2}次,获得{3}{5},
+感谢使用签到服务。
+{4}";
         public string IName
         {
             get { return "签到插件"; }
@@ -35,6 +59,7 @@ namespace MeIn
 
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
+            {"重载","reload"},
             {"设置","setting"},
             {"关于","about"}
         };
@@ -46,7 +71,6 @@ namespace MeIn
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
-            {"注册","注册用户，只有注册用户可以签到。"},
             {"签到","个人签到，我的世界，你曾经来过。"}
         };
 
@@ -60,18 +84,19 @@ namespace MeIn
         {
             _meinAll = new Dictionary<string, meinItem>();
             var assemblay = this.GetType().Assembly;
-            _filePath = assemblay.Location;
-            _filePath = _filePath.Substring(0, _filePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-            _filePath = _filePath + this.GetType().FullName + ".db";
-            LoadFromFile();
+            var filedir = assemblay.Location;
+            filedir = filedir.Substring(0, filedir.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+            _meinfilePath = filedir + this.GetType().FullName + ".db";
+            _inifilePath = filedir + this.GetType().FullName + ".ini";
+            LoadParas();
         }
 
-        public void LoadFromFile()
+        public void LoadParas()
         {
             try
             {
                 _meinAll.Clear();
-                string[] lines = File.ReadAllLines(_filePath);
+                string[] lines = File.ReadAllLines(_meinfilePath);
                 Int64 loadtime = DateTime.Now.Ticks;
                 foreach (string line in lines)
                 {
@@ -104,6 +129,22 @@ namespace MeIn
             catch (Exception)
             {
             }
+            try
+            {
+                string text = File.ReadAllText(_inifilePath);
+                _iniItem = JsonConvert.DeserializeObject<iniItem>(text);
+            }
+            catch (Exception)
+            {
+                _iniItem = new iniItem
+                {
+                    item = "积分",
+                    pdata = "[gmemo]",
+                    min = 1,
+                    mintomax = 14,
+                    timespan = new TimeSpan(4, 0, 0).Ticks
+                };
+            }
         }
 
         public void SaveToFile()
@@ -115,7 +156,12 @@ namespace MeIn
                 lines[index] = JsonConvert.SerializeObject(i);
                 index++;
             }
-            File.WriteAllLines(_filePath, lines);
+            File.WriteAllLines(_meinfilePath, lines);
+        }
+
+        public void SavePara()
+        {
+            File.WriteAllText(_inifilePath, JsonConvert.SerializeObject(_iniItem));
         }
 
         public string DealFriendMessage(Dictionary<string, object> info, string message)
@@ -136,37 +182,6 @@ namespace MeIn
             return DealMessage(message, p1, p2, nick, card, true);
         }
 
-        private string _personStr = "";
-        private string _successStr =
-@"{0}，签到成功：
-本次签到获取{1}积分，
-当前拥有{2}积分
-感谢使用签到服务。
-{3}";
-        private string _timeoutStr =
-@"{0}，签到失败：
-上次签到时间为{1}
-当前拥有{2}积分
-感谢使用签到服务。
-{3}";
-        //        private string _unregStr =
-        //@"{0}，签到失败：
-        //由于当前用户尚未注册，
-        //暂时无法提供此服务
-        //请发送""注册""进行用户注册。
-        //{1}";
-        private string _hasregedStr =
-@"{0}，注册失败：
-当前用户已进行过注册了，
-请不要重复注册。
-{1}";
-        private string _regokStr =
-@"{0}，注册成功：
-注册当前用户成功，
-现在可以使用签到服务了。
-{1}";
-        private Int64 timespan = new TimeSpan(2, 0, 0).Ticks;
-
         private string DealMessage(string message, string p1, string p2, string nick, string mark, bool isGroup)
         {
             if (string.IsNullOrEmpty(message))
@@ -179,46 +194,35 @@ namespace MeIn
                 if (!_meinAll.ContainsKey(uin))
                 {
                     //return string.Format(_unregStr, nick, _personStr);
-                    _meinAll.Add(uin, new meinItem() { score = 0, time = DateTime.MinValue.Ticks, nick = nick, mark = mark });
+                    _meinAll.Add(uin, new meinItem() { mein = 0, score = 0, time = DateTime.MinValue.Ticks, nick = nick, mark = mark });
                 }
-                else if (DateTime.Now.Ticks - _meinAll[uin].time < timespan)
+                else if (DateTime.Now.Ticks - _meinAll[uin].time < _iniItem.timespan)
                 {
-                    return string.Format(_timeoutStr, name, new DateTime(_meinAll[uin].time).ToString("yyyy-MM-dd HH:mm:ss"), _meinAll[uin].score, _personStr);
+                    return string.Format(_timeoutStr, name, new DateTime(_meinAll[uin].time).ToString("yyyy-MM-dd HH:mm:ss"), _meinAll[uin].mein, _meinAll[uin].score, _iniItem.pdata, _iniItem.item);
                 }
-                Int32 i = r.Next(14) + 1;
-                _meinAll[uin] = new meinItem() { score = _meinAll[uin].score + i, time = DateTime.Now.Ticks, nick = nick, mark = mark };
+                Int32 i = r.Next(_iniItem.mintomax) + _iniItem.min;
+                _meinAll[uin] = new meinItem() { mein = _meinAll[uin].mein + 1, score = _meinAll[uin].score + i, time = DateTime.Now.Ticks, nick = nick, mark = mark };
                 SaveToFile();
-                return string.Format(_successStr, name, i, _meinAll[uin].score, _personStr);
-            }
-            else if (message == "注册")
-            {
-                string uin = p1 + '|' + p2;
-                if (_meinAll.ContainsKey(uin))
-                {
-                    return string.Format(_hasregedStr, name, _personStr);
-                }
-                else
-                {
-                    _meinAll.Add(uin, new meinItem() { score = 0, time = DateTime.Now.Ticks - timespan, nick = nick, mark = mark });
-                    SaveToFile();
-                    return string.Format(_regokStr, name, _personStr);
-                }
-            }
-            else
-            {
-
+                return string.Format(_successStr, name, i, _meinAll[uin].mein, _meinAll[uin].score, _iniItem.pdata, _iniItem.item);
             }
             return null;
         }
 
         public void MenuClicked(string menuName)
         {
-            if (menuName == "setting")
+            if (menuName == "reload")
+            {
+                LoadParas();
+            }
+            else if (menuName == "setting")
             {
                 setting s = new setting();
-                s.Message = _personStr;
-                s.ShowDialog();
-                _personStr = s.Message;
+                s.SaveItem = _iniItem;
+                if (s.ShowDialog() == DialogResult.OK)
+                {
+                    _iniItem = s.SaveItem;
+                    SavePara();
+                }
             }
             else if (menuName == "about")
             {

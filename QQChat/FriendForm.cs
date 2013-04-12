@@ -53,12 +53,14 @@ namespace QQChat
             richTextBox3.AppendLine(string.Format("昵称:{0}", Friend.nick));
             richTextBox3.AppendLine(string.Format("备注:{0}", Friend.markname));
             richTextBox3.AppendLine(string.Format("QQ:{0}", Friend.num));
-            richTextBox3.AppendLine(string.Format("status:{0}", Friend.status));
+            var fstatus = QQStatus.GetQQStatusByInternal(Friend.status);
+            richTextBox3.AppendLine(string.Format("status:{0}", fstatus == null ? Friend.status : fstatus.Status));
             richTextBox3.AppendLine(string.Format("is_vip:{0}", Friend.is_vip));
             richTextBox4.Clear();
             richTextBox4.AppendLine(string.Format("昵称:{0}", QQ.User.QQName));
             richTextBox4.AppendLine(string.Format("QQ:{0}", QQ.User.QQNum));
-            richTextBox4.AppendLine(string.Format("状态:{0}", QQ.User.Status));
+            var ustatus = QQStatus.GetQQStatusByInternal(QQ.User.Status);
+            richTextBox4.AppendLine(string.Format("状态:{0}", fstatus == null ? QQ.User.Status : ustatus.Status));
             richTextBox4.AppendLine(string.Format("登录时间:{0}", QQ.User.LoginTime));
         }
 
