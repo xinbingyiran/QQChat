@@ -220,7 +220,7 @@ namespace MessageDeal1
                         {
                             index = 0;
                         }
-                        sb.AppendLine("问题列表：@" + index + Environment.NewLine);
+                        sb.AppendLine("问题列表：@" + index);
                         for (; index < _learning.Count && count > 0; index++, count--)
                         {
                             var filter = _learning[index];
