@@ -167,7 +167,6 @@ namespace MeIn
                     for (int index = 0; index < allArray.Length; index++)
                     {
                         lines[index] = JsonConvert.SerializeObject(allArray[index]);
-                        index++;
                     }
                     File.WriteAllLines(_meinfilePath, lines);
                     _saveFlag = false;
