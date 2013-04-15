@@ -8,6 +8,7 @@ namespace WebQQ2.WebQQ2
     public enum MessageEventType
     {
         MESSAGE_COMMON,
+        MESSAGE_SESS,
         MESSAGE_USER,
         MESSAGE_STATUS,
         MESSAGE_SHAKE,

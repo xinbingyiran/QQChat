@@ -254,5 +254,32 @@ namespace QQChat
         {
             QQ.GetGroupMemberQQNum(Group, member);
         }
+
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 1)
+            {
+                var member = listView1.SelectedItems[0].Tag as QQGroupMember;
+                if (member != null)
+                {
+                    new Task(() =>
+                    {
+                        if (member.num == 0)
+                        {
+                            GetQQMemberNum(member);
+                        }
+                        var friend = QQ.User.GetUserSess(member.uin);
+
+                        friend.uin = member.uin;
+                        friend.num = member.num;
+                        friend.nick = member.nick;
+                        friend.vip_level = member.vip_level;
+                        friend.is_vip = member.is_vip;
+                        friend.id = Group.gid;
+                        MainForm.mainForm.SetSessText(friend, null, DateTime.Now);
+                    }).Start();
+                }
+            }
+        }
     }
 }

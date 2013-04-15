@@ -1,6 +1,6 @@
 ﻿namespace QQChat
 {
-    partial class GroupForm
+    partial class SessForm
     {
         /// <summary>
         /// Required designer variable.
@@ -32,10 +32,7 @@
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.richTextBox3 = new System.Windows.Forms.RichTextBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.listView1 = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.richTextBox4 = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // richTextBox1
@@ -69,64 +66,34 @@
             // 
             this.richTextBox3.Location = new System.Drawing.Point(453, 12);
             this.richTextBox3.Name = "richTextBox3";
-            this.richTextBox3.Size = new System.Drawing.Size(179, 95);
+            this.richTextBox3.Size = new System.Drawing.Size(158, 171);
             this.richTextBox3.TabIndex = 3;
             this.richTextBox3.Text = "";
             // 
-            // button2
+            // richTextBox4
             // 
-            this.button2.Location = new System.Drawing.Point(557, 113);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 5;
-            this.button2.Text = "刷新";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.richTextBox4.Location = new System.Drawing.Point(453, 213);
+            this.richTextBox4.Name = "richTextBox4";
+            this.richTextBox4.Size = new System.Drawing.Size(158, 102);
+            this.richTextBox4.TabIndex = 4;
+            this.richTextBox4.Text = "";
             // 
-            // listView1
-            // 
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2});
-            this.listView1.FullRowSelect = true;
-            this.listView1.Location = new System.Drawing.Point(453, 142);
-            this.listView1.MultiSelect = false;
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(179, 176);
-            this.listView1.TabIndex = 6;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
-            this.listView1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView1_ItemSelectionChanged);
-            this.listView1.DoubleClick += new System.EventHandler(this.listView1_DoubleClick);
-            this.listView1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseClick);
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "用户名";
-            this.columnHeader1.Width = 97;
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "QQ号";
-            this.columnHeader2.Width = 77;
-            // 
-            // GroupForm
+            // FriendForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(644, 327);
-            this.Controls.Add(this.listView1);
-            this.Controls.Add(this.button2);
+            this.ClientSize = new System.Drawing.Size(623, 327);
+            this.Controls.Add(this.richTextBox4);
             this.Controls.Add(this.richTextBox3);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.richTextBox2);
             this.Controls.Add(this.richTextBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.Name = "GroupForm";
-            this.Text = "GroupForm";
-            this.Load += new System.EventHandler(this.GroupForm_Load);
-            this.Shown += new System.EventHandler(this.GroupForm_Shown);
+            this.Name = "FriendForm";
+            this.Text = "SessForm";
+            this.Load += new System.EventHandler(this.FriendForm_Load);
+            this.Shown += new System.EventHandler(this.FriendForm_Shown);
             this.ResumeLayout(false);
 
         }
@@ -137,9 +104,6 @@
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.RichTextBox richTextBox3;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
+        private System.Windows.Forms.RichTextBox richTextBox4;
     }
 }

@@ -45,7 +45,7 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_change_status2 = "http://d.web2.qq.com/channel/change_status2?newstatus={0}&clientid={1}&psessionid={2}&t={3}";
         private static readonly string qq_logout2 = "http://d.web2.qq.com/channel/logout2?ids=&clientid={0}&psessionid={1}&t={2}";
         private static readonly string qq_search_qq_by_uin2 = "http://s.web2.qq.com/api/search_qq_by_uin2?tuin={0}&verifysession={1}&code={2}&vfwebqq={3}&t={4}";
-        private static readonly string qq_get_c2cmsg_sig2 = "http://d.web2.qq.com/channel/get_c2cmsg_sig2?id=3195852032&to_uin={0}&service_type=0&clientid={1}&psessionid={2}&t={3}";
+        private static readonly string qq_get_c2cmsg_sig2 = "http://d.web2.qq.com/channel/get_c2cmsg_sig2?id={0}&to_uin={1}&service_type=0&clientid={2}&psessionid={3}&t={4}";
         private static readonly string qq_get_stranger_info2 = "http://s.web2.qq.com/api/get_stranger_info2?tuin={0}&verifysession=&gid=0&code=&vfwebqq={1}&t={2}";
         private static readonly string qq_send_sess_msg2 = "http://d.web2.qq.com/channel/send_sess_msg2";
 
@@ -103,6 +103,7 @@ namespace WebQQ2.WebQQ2
         private Dictionary<string, object> qq_send_sess_msg2_post = new Dictionary<string, object>()
         {
             {"to",0},
+            {"group_sig",""},
             {"face",0},
             {"content",""},
             {"msg_id",56410001},
@@ -446,8 +447,62 @@ namespace WebQQ2.WebQQ2
             }
             return null;
         }
+        public bool GetFriendStrangeInfo(QQFriend friend)
+        {
+            try
+            {
+                //tuin={0}&verifysession=&gid=0&code=&vfwebqq={1}&t={2}";
+                string url = string.Format(qq_get_stranger_info2, friend.uin, _user.VfWebQQ, QQHelper.GetTime());
+                string retstr = GetUrlText(url);
+                if (retstr != null && retstr.Length > 0)
+                {
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
 
-        public string GetFriendQQNum(QQFriend friend)
+                        friend.face = Convert.ToInt64(result["face"]);
+                        friend.birthday = QQHelper.ToJson(result["birthday"]);
+                        friend.phone = result["phone"] as string;
+                        friend.occupation = result["occupation"] as string;
+                        friend.allow = Convert.ToInt64(result["allow"]);
+                        friend.college = result["college"] as string;
+                        friend.uin = Convert.ToInt64(result["uin"]);
+                        friend.blood = Convert.ToInt64(result["blood"]);
+                        friend.constel = Convert.ToInt64(result["constel"]);
+                        friend.homepage = result["homepage"] as string;
+                        friend.stat = Convert.ToInt64(result["stat"]);
+                        friend.country = result["country"] as string;
+                        friend.city = result["city"] as string;
+                        friend.personal = result["personal"] as string;
+                        friend.nick = result["nick"] as string;
+                        friend.shengxiao = Convert.ToInt64(result["shengxiao"]);
+                        friend.email = result["email"] as string;
+                        friend.token = result["token"] as string;
+                        friend.client_type = Convert.ToInt64(result["client_type"]);
+                        friend.province = result["province"] as string;
+                        friend.gender = result["gender"] as string;
+                        friend.mobile = result["mobile"] as string;
+                        if (MessageFriendReceived != null)
+                        {
+                            MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_USER));
+                        }
+                        return true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
+        public bool GetFriendInfos(QQFriend friend)
+        {
+            return GetFriendQQNum(friend) && GetFriendStrangeInfo(friend);
+        }
+
+        public bool GetFriendQQNum(QQFriend friend)
         {
             try
             {
@@ -459,30 +514,21 @@ namespace WebQQ2.WebQQ2
                     if (root["retcode"] as int? == 0)
                     {
                         Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
-                        try
+
+                        long qqacc = Convert.ToInt64(result["account"]);
+                        friend.num = qqacc;
+                        if (MessageFriendReceived != null)
                         {
-                            long qqacc = Convert.ToInt64(result["account"]);
-                            friend.num = qqacc;
-                            if (MessageFriendReceived != null)
-                            {
-                                MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_USER));
-                            }
-                            return qqacc.ToString();
+                            MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_USER));
                         }
-                        catch (Exception)
-                        {
-                        }
-                    }
-                    else
-                    {
-                        return QQHelper.ToJson(root);
+                        return true;
                     }
                 }
             }
             catch (Exception)
             {
             }
-            return null;
+            return false;
         }
 
         public string GetGroupQQNum(QQGroup group)
@@ -619,7 +665,7 @@ namespace WebQQ2.WebQQ2
                                     //{"retcode":0,"result":[{"poll_type":"buddies_status_change","value":{"uin":15130679,"status":"online","client_type":1}}]}
 
                                     string status = messagevalue["status"].ToString();
-                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]));
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]),true);
                                     if (friend != null)
                                     {
                                         if (friend.status != status)
@@ -641,11 +687,30 @@ namespace WebQQ2.WebQQ2
                                     //{"size":12,"color":"000080","style":[0,0,0],"name":"\u534E\u6587\u5B8B\u4F53"}],"\u6B66\u5A01  "]}}]}
                                     if (MessageFriendReceived != null)
                                     {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]));
+                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
                                         Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
                                         MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
+                                    }
+                                }
+                                break;
+                            case "sess_message":
+                                {
+                                    //{"poll_type":"sess_message",
+                                    //"msg_id":26835,"from_uin":3365751686,"to_uin":2221933016,"msg_id2":367496,"msg_type":140,"reply_ip":178849369,"time":1366004047,
+                                    //"id":1429244372,"ruin":841473232,"service_type":0,"flags":{"text":1,"pic":1,"file":1,"audio":1,"video":1},
+                                    //"content":[["font",{"size":12,"color":"391175","style":[0,0,0],"name":"宋体"}],
+                                    //["face",59]," "]}
+                                    if (MessageFriendReceived != null)
+                                    {
+                                        QQFriend friend = _user.GetUserSess(Convert.ToInt64(messagevalue["from_uin"]));
+                                        friend.num = Convert.ToInt64(messagevalue["ruin"]);
+                                        friend.id = Convert.ToInt64(messagevalue["id"]);
+                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                        System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
+                                        MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_SESS, msgs));
                                     }
                                 }
                                 break;
@@ -657,7 +722,7 @@ namespace WebQQ2.WebQQ2
                                     //"msg_type":9,"reply_ip":178849323}}]}
                                     if (MessageFriendReceived != null)
                                     {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]));
+                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         MessageFriendReceived(this, new FriendEventArgs(friend, msgid, DateTime.Now, MessageEventType.MESSAGE_SHAKE));
                                     }
@@ -724,7 +789,7 @@ namespace WebQQ2.WebQQ2
                                 //"session_id":19823,"cancel_type":1,"time":1364865264}}]}
                                 if (MessageFriendReceived != null)
                                 {
-                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]));
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
                                     Dictionary<string, object> msgs = new Dictionary<string, object>();
                                     msgs.Add("poll_type", poll_type);
                                     foreach (string key in messagevalue.Keys)
@@ -741,7 +806,7 @@ namespace WebQQ2.WebQQ2
                                 //"ip":"101.226.77.168","port":80,"from_uin":2786090795,"size":235,"name":"test2.py","expire_time":1365470120,"time":1364865321}}]}
                                 if (MessageFriendReceived != null)
                                 {
-                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]));
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
                                     Dictionary<string, object> msgs = new Dictionary<string, object>();
                                     msgs.Add("poll_type", poll_type);
                                     foreach (string key in messagevalue.Keys)
@@ -774,7 +839,7 @@ namespace WebQQ2.WebQQ2
 
                                     if (MessageFriendReceived != null)
                                     {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]));
+                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
                                         Dictionary<string, object> msgs = new Dictionary<string, object>();
                                         msgs.Add("poll_type", poll_type);
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
@@ -903,33 +968,88 @@ namespace WebQQ2.WebQQ2
                 return false;
             }
             _event.Reset();
-            string url = qq_send_buddy_msg2;
-            qq_send_buddy_msg2_post["to"] = friend.uin;
-            qq_send_buddy_msg2_post["clientid"] = _user.ClientID;
-            qq_send_buddy_msg2_post["psessionid"] = _user.PsessionID;
-            qq_send_buddy_msg2_post["msg_id"] = _qq_send_buddy_msg2_post_msg_id;
-            _qq_send_buddy_msg2_post_msg_id++;
-            msg.AddRange(qq_send_buddy_msg2_post_content_append);
-            qq_send_buddy_msg2_post["content"] = QQHelper.ToJson(msg);
-            string para = QQHelper.ToPostData(qq_send_buddy_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para),5000);
-            bool ret = false;
-            if (retstr != null && retstr.Length > 0)
+            try
             {
-                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
-                if (root["retcode"] as int? == 0)
+                string url = qq_send_buddy_msg2;
+                qq_send_buddy_msg2_post["to"] = friend.uin;
+                qq_send_buddy_msg2_post["clientid"] = _user.ClientID;
+                qq_send_buddy_msg2_post["psessionid"] = _user.PsessionID;
+                qq_send_buddy_msg2_post["msg_id"] = _qq_send_buddy_msg2_post_msg_id;
+                _qq_send_buddy_msg2_post_msg_id++;
+                msg.AddRange(qq_send_buddy_msg2_post_content_append);
+                qq_send_buddy_msg2_post["content"] = QQHelper.ToJson(msg);
+                string para = QQHelper.ToPostData(qq_send_buddy_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
+                string retstr = PostUrlText(url, Encoding.Default.GetBytes(para), 5000);
+                bool ret = false;
+                if (retstr != null && retstr.Length > 0)
                 {
-                    ret = true;
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        ret = true;
+                    }
                 }
+                return ret;
             }
-            _event.Set();
-            return ret;
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                _event.Set();
+            }
         }
 
+
+        public bool CheckGroupSig(QQFriend friend)
+        {
+            if (friend.group_sig != null)
+                return true;
+            return GetGroupSig(friend, friend.id);
+        }
+
+        public bool GetGroupSig(QQFriend friend, long groupid)
+        {
+            if (groupid == 0)
+                return false;
+            if (_event.WaitOne(5000) == false)
+            {
+                return false;
+            }
+            _event.Reset();
+            try
+            {
+                var ret = false;
+                //"id={0}&to_uin={1}&service_type=0&clientid={2}&psessionid={3}&t={4}";
+                var url = string.Format(qq_get_c2cmsg_sig2, groupid, friend.uin, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
+                string resultStr = GetUrlText(url);
+                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
+                if (root != null && root["retcode"] as int? == 0)
+                {
+                    Dictionary<string, object> paras = root["result"] as Dictionary<string, object>;
+                    friend.group_sig = paras["value"] as string;
+                    ret = true;
+                }
+                return ret;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                _event.Set();
+            }
+        }
 
         public bool SendSessMessage(QQFriend friend, ArrayList msg)
         {
             if (msg == null || msg.Count == 0)
+            {
+                return false;
+            }
+            if (!CheckGroupSig(friend))
             {
                 return false;
             }
@@ -938,27 +1058,38 @@ namespace WebQQ2.WebQQ2
                 return false;
             }
             _event.Reset();
-            string url = qq_send_sess_msg2;
-            qq_send_sess_msg2_post["to"] = friend.uin;
-            qq_send_sess_msg2_post["clientid"] = _user.ClientID;
-            qq_send_sess_msg2_post["psessionid"] = _user.PsessionID;
-            qq_send_sess_msg2_post["msg_id"] = _qq_send_buddy_msg2_post_msg_id;
-            _qq_send_buddy_msg2_post_msg_id++;
-            msg.AddRange(qq_send_buddy_msg2_post_content_append);
-            qq_send_sess_msg2_post["content"] = QQHelper.ToJson(msg);
-            string para = QQHelper.ToPostData(qq_send_sess_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para),5000);
-            bool ret = false;
-            if (retstr != null && retstr.Length > 0)
+            try
             {
-                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
-                if (root["retcode"] as int? == 0)
+                string url = qq_send_sess_msg2;
+                qq_send_sess_msg2_post["to"] = friend.uin;
+                qq_send_sess_msg2_post["group_sig"] = friend.group_sig;
+                qq_send_sess_msg2_post["clientid"] = _user.ClientID;
+                qq_send_sess_msg2_post["psessionid"] = _user.PsessionID;
+                qq_send_sess_msg2_post["msg_id"] = _qq_send_buddy_msg2_post_msg_id;
+                _qq_send_buddy_msg2_post_msg_id++;
+                msg.AddRange(qq_send_buddy_msg2_post_content_append);
+                qq_send_sess_msg2_post["content"] = QQHelper.ToJson(msg);
+                string para = QQHelper.ToPostData(qq_send_sess_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
+                string retstr = PostUrlText(url, Encoding.Default.GetBytes(para), 5000);
+                bool ret = false;
+                if (retstr != null && retstr.Length > 0)
                 {
-                    ret = true;
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        ret = true;
+                    }
                 }
+                return ret;
             }
-            _event.Set();
-            return ret;
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                _event.Set();
+            }
         }
 
         public bool SendGroupMessage(QQGroup group, ArrayList msg)
@@ -972,27 +1103,37 @@ namespace WebQQ2.WebQQ2
                 return false;
             }
             _event.Reset();
-            string url = qq_send_qun_msg2;
-            qq_send_qun_msg2_post["group_uin"] = group.gid;
-            qq_send_qun_msg2_post["clientid"] = _user.ClientID;
-            qq_send_qun_msg2_post["psessionid"] = _user.PsessionID;
-            qq_send_buddy_msg2_post["msg_id"] = _qq_send_buddy_msg2_post_msg_id;
-            _qq_send_buddy_msg2_post_msg_id++;
-            msg.AddRange(qq_send_qun_msg2_post_content_append);
-            qq_send_qun_msg2_post["content"] = QQHelper.ToJson(msg);
-            string para = QQHelper.ToPostData(qq_send_qun_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
-            string retstr = PostUrlText(url, Encoding.Default.GetBytes(para),5000);
-            bool ret = false;
-            if (retstr != null && retstr.Length > 0)
+            try
             {
-                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
-                if (root["retcode"] as int? == 0)
+                string url = qq_send_qun_msg2;
+                qq_send_qun_msg2_post["group_uin"] = group.gid;
+                qq_send_qun_msg2_post["clientid"] = _user.ClientID;
+                qq_send_qun_msg2_post["psessionid"] = _user.PsessionID;
+                qq_send_buddy_msg2_post["msg_id"] = _qq_send_buddy_msg2_post_msg_id;
+                _qq_send_buddy_msg2_post_msg_id++;
+                msg.AddRange(qq_send_qun_msg2_post_content_append);
+                qq_send_qun_msg2_post["content"] = QQHelper.ToJson(msg);
+                string para = QQHelper.ToPostData(qq_send_qun_msg2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
+                string retstr = PostUrlText(url, Encoding.Default.GetBytes(para), 5000);
+                bool ret = false;
+                if (retstr != null && retstr.Length > 0)
                 {
-                    ret = true;
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        ret = true;
+                    }
                 }
+                return ret;
             }
-            _event.Set();
-            return ret;
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                _event.Set();
+            }
         }
 
         public QQFriends RefreshFriendList()
@@ -1036,7 +1177,7 @@ namespace WebQQ2.WebQQ2
                     }
                     foreach (Dictionary<string, object> item in result["info"] as ArrayList)
                     {
-                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["uin"]));
+                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["uin"]), false);
                         if (user != null)
                         {
                             user.face = Convert.ToInt64(item["face"]);
@@ -1046,7 +1187,7 @@ namespace WebQQ2.WebQQ2
                     }
                     foreach (Dictionary<string, object> item in result["vipinfo"] as ArrayList)
                     {
-                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["u"]));
+                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["u"]), false);
                         if (user != null)
                         {
                             user.is_vip = Convert.ToInt64(item["is_vip"]);
@@ -1055,7 +1196,7 @@ namespace WebQQ2.WebQQ2
                     }
                     foreach (Dictionary<string, object> item in result["marknames"] as ArrayList)
                     {
-                        QQFriend user = _user.QQFriends.FriendList.FirstOrDefault(ele=>ele.Value.uin == Convert.ToInt64(item["uin"])).Value;
+                        QQFriend user = _user.QQFriends.FriendList.FirstOrDefault(ele => ele.Value.uin == Convert.ToInt64(item["uin"])).Value;
                         if (user != null)
                         {
                             user.markname = item["markname"].ToString();
@@ -1089,7 +1230,7 @@ namespace WebQQ2.WebQQ2
                 {
                     foreach (Dictionary<string, object> item in root["result"] as ArrayList)
                     {
-                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["uin"]));
+                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["uin"]), false);
                         if (user != null)
                         {
                             user.status = item["status"].ToString();

@@ -20,17 +20,5 @@ namespace WebQQ2.WebQQ2
         public long mflag { get; set; }
         public long is_vip { get; set; }
         public long vip_level { get; set; }
-
-        public QQFriend ToQQFriend()
-        {
-            return new QQFriend()
-            {
-                uin = this.uin,
-                num = this.num,
-                nick = this.nick,
-                vip_level = this.vip_level,
-                is_vip = this.is_vip,
-            };
-        }
     }
 }

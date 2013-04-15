@@ -29,8 +29,12 @@ namespace QQChat
         public static MainForm mainForm;
         private List<GroupForm> _groups;
         private List<FriendForm> _friends;
+        private List<SessForm> _sesss;
         private SystemForm _system;
         private object _createlock;
+
+        private TreeNode _vfzNode = new TreeNode() { Text = "未分组", Tag = -1, Name = "-1" };
+        private TreeNode _msrNode = new TreeNode() { Text = "陌生人", Tag = 999999, Name = "999999" };
 
         private JavaScriptSerializer _jss;
 
@@ -53,6 +57,7 @@ namespace QQChat
             CheckQQStatus();
             _groups = new List<GroupForm>();
             _friends = new List<FriendForm>();
+            _sesss = new List<SessForm>();
             _jss = new JavaScriptSerializer();
         }
 
@@ -60,8 +65,19 @@ namespace QQChat
         {
             if (treeViewF.SelectedNode != null)
             {
-                var uin = Convert.ToInt64(treeViewF.SelectedNode.Tag);
-                new Task(() => GetFriendNum(uin)).Start();
+                var pnode = treeViewF.SelectedNode;
+                if (pnode != _msrNode)
+                {
+                    while (pnode != null && pnode != _msrNode)
+                    {
+                        pnode = pnode.Parent;
+                    }
+                    if (pnode == null)
+                    {
+                        var uin = Convert.ToInt64(treeViewF.SelectedNode.Tag);
+                        new Task(() => GetFriendInfo(uin)).Start();
+                    }
+                }
             }
         }
 
@@ -78,11 +94,30 @@ namespace QQChat
         {
             if (treeViewF.SelectedNode != null)
             {
-                var uin = Convert.ToInt64(treeViewF.SelectedNode.Tag);
-                var f = _qq.User.GetUserFriend(uin);
-                if (f != null)
+                var pnode = treeViewF.SelectedNode;
+                if (pnode != _msrNode)
                 {
-                    SetFriendText(f, null, DateTime.Now);
+                    while (pnode != null && pnode != _msrNode)
+                    {
+                        pnode = pnode.Parent;
+                    }
+                    var uin = Convert.ToInt64(treeViewF.SelectedNode.Tag);
+                    if (pnode == null)
+                    {
+                        var f = _qq.User.GetUserFriend(uin, false);
+                        if (f != null)
+                        {
+                            SetFriendText(f, null, DateTime.Now);
+                        }
+                    }
+                    else
+                    {
+                        var f = _qq.User.GetUserSess(uin);
+                        if (f != null)
+                        {
+                            SetSessText(f, null, DateTime.Now);
+                        }
+                    }
                 }
             }
         }
@@ -261,33 +296,12 @@ namespace QQChat
             }).Start();
         }
 
-        private void GetAllFriendNum()
+        private void GetFriendInfo(long uin)
         {
-            var list = _qq.User.QQFriends.FriendList.Values.ToArray();
-            foreach (QQFriend f in list)
-            {
-                if (_qq.User.QQFriends.FriendList.Values.Contains(f))
-                {
-                    _qq.GetFriendQQNum(f);
-                    RefreshUser(f);
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        private void GetFriendNum(long uin)
-        {
-            var f = _qq.User.GetUserFriend(uin);
+            var f = _qq.User.GetUserFriend(uin, false);
             if (f != null && _qq.User.QQFriends.FriendList.Values.Contains(f))
             {
-                if (f.num == 0)
-                {
-                    _qq.GetFriendQQNum(f);
-                    RefreshUser(f);
-                }
+                CheckFriend(f);
             }
         }
 
@@ -313,42 +327,64 @@ namespace QQChat
                 return;
             }
             TreeNode[] list = treeViewF.Nodes.Find(friend.uin.ToString(), true);
+            TreeNode newSess = null;
             if (list.Length == 1)
             {
-                list[0].Text = friend.LongNameWithStatus;
+                newSess = list[0];
             }
-            if (isMessage.HasValue)
+            else if (list.Length == 0)
             {
-                list[0].ForeColor = isMessage.Value ? Color.Red : treeViewF.ForeColor;
-                var pnode = list[0].Parent;
-                while (pnode != null)
+                newSess = new TreeNode();
+                newSess.Text = friend.LongNameWithStatus;
+                newSess.Tag = friend.uin;
+                newSess.Name = newSess.Tag.ToString();
+                if (friend.categories < 0)
                 {
-                    var find = false;
-                    foreach (TreeNode node in pnode.Nodes)
-                    {
-                        if (node.ForeColor == Color.Red)
-                        {
-                            find = true;
-                            break;
-                        }
-                    }
-                    if (find)
-                    {
-                        pnode.ForeColor = Color.Red;
-                    }
-                    else
-                    {
-                        pnode.ForeColor = treeViewF.ForeColor;
-                    }
-                    pnode = pnode.Parent;
+                    _vfzNode.Nodes.Add(newSess);
                 }
+                else
+                {
+                    _msrNode.Nodes.Add(newSess);
+                }
+            }
+            if (newSess != null)
+            {
+                newSess.Text = friend.LongNameWithStatus;
+                if (isMessage.HasValue)
+                {
+                    newSess.ForeColor = isMessage.Value ? Color.Red : treeViewF.ForeColor;
+                    var pnode = newSess.Parent;
+                    while (pnode != null)
+                    {
+                        var find = false;
+                        foreach (TreeNode node in pnode.Nodes)
+                        {
+                            if (node.ForeColor == Color.Red)
+                            {
+                                find = true;
+                                break;
+                            }
+                        }
+                        if (find)
+                        {
+                            pnode.ForeColor = Color.Red;
+                        }
+                        else
+                        {
+                            pnode.ForeColor = treeViewF.ForeColor;
+                        }
+                        pnode = pnode.Parent;
+                    }
 
+                }
             }
             var f = _friends.Find(ele => ele.ID == "F|" + friend.uin);
             if (f != null)
                 f.UpdateTitle();
+            var f2 = _sesss.Find(ele => ele.ID == "S|" + friend.uin);
+            if (f2 != null)
+                f2.UpdateTitle();
         }
-
 
         private void RefreshGroup(QQGroup group, bool? isMessage = null)
         {
@@ -361,10 +397,10 @@ namespace QQChat
             if (list.Length == 1)
             {
                 list[0].Text = group.LongName;
-            }
-            if (isMessage.HasValue)
-            {
-                list[0].ForeColor = isMessage.Value ? Color.Red : treeViewF.ForeColor;
+                if (isMessage.HasValue)
+                {
+                    list[0].ForeColor = isMessage.Value ? Color.Red : treeViewF.ForeColor;
+                }
             }
             var g = _groups.Find(ele => ele.ID == "G|" + group.gid);
             if (g != null)
@@ -411,8 +447,8 @@ namespace QQChat
                 }
                 treeViewF.Nodes.Add(t);
             }
-            TreeNode vfz = new TreeNode() { Text = "未分组", Tag = -1, Name = "-1" };
-            treeViewF.Nodes.Add(vfz);
+            _vfzNode.Nodes.Clear();
+            treeViewF.Nodes.Add(_vfzNode);
             foreach (var f in result.FriendList)
             {
                 if (f.Value.tag as int? == 0)
@@ -421,9 +457,11 @@ namespace QQChat
                     e.Text = f.Value.LongNameWithStatus;
                     e.Tag = f.Value.uin;
                     e.Name = e.Tag.ToString();
-                    vfz.Nodes.Add(e);
+                    _vfzNode.Nodes.Add(e);
                 }
             }
+            _msrNode.Nodes.Clear();
+            treeViewF.Nodes.Add(_msrNode);
         }
 
         private void ShowGrouplist()
@@ -538,7 +576,7 @@ namespace QQChat
                                 {
                                     if (e.User.num == 0)
                                     {
-                                        _qq.GetFriendQQNum(e.User);
+                                        _qq.GetFriendInfos(e.User);
                                     }
                                     var info = new Dictionary<string, object>
                                     {
@@ -556,6 +594,44 @@ namespace QQChat
                                         if (rmsg != null)
                                         {
                                             SendFriendMessage(e.User, rmsg);
+                                            break;
+                                        }
+                                    }
+                                }).Start();
+                            }
+                        }
+                    }
+                    break;
+                case MessageEventType.MESSAGE_SESS:
+                    {
+                        SetSessText(e.User, e.MsgContent, e.Time);
+                        if (e.Time > _qq.User.LoginTime)
+                        {
+                            string rmsg = InternalPickMessage(e.MsgContent);
+                            if (rmsg != null)
+                            {
+                                SendSessMessage(e.User, rmsg);
+                            }
+                            else
+                            {
+                                new Task(() =>
+                                {
+                                    var info = new Dictionary<string, object>
+                                    {
+                                        {TranslateMessageUser.UserNum.Key,e.User == null?0:e.User.num},
+                                        {TranslateMessageUser.UserNick.Key,e.User == null?"":e.User.nick},
+                                        {TranslateMessageUser.UserMarkName.Key,e.User == null?"":e.User.markname},
+                                    };
+                                    foreach (var p in Plugins)
+                                    {
+                                        if (!p.Value.Enabled)
+                                        {
+                                            continue;
+                                        }
+                                        rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
+                                        if (rmsg != null)
+                                        {
+                                            SendSessMessage(e.User, rmsg);
                                             break;
                                         }
                                     }
@@ -598,7 +674,7 @@ namespace QQChat
                         {
                             if (e.User.num == 0)
                             {
-                                _qq.GetFriendQQNum(e.User);
+                                _qq.GetFriendInfos(e.User);
                             }
                             var info = new Dictionary<string, object>
                             {
@@ -607,7 +683,7 @@ namespace QQChat
                                 {TranslateMessageUser.UserMarkName.Key,e.User == null?"":e.User.markname},
                             };
                             var state = QQStatus.GetQQStatusByInternal(e.User.status);
-                            string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, state == null?e.User.status:state.Status, e.Time);
+                            string messagestate = string.Format("状态更改：{0} => {1} @ {2}", e.User.LongName, state == null ? e.User.status : state.Status, e.Time);
                             SetSystemText(messagestate, e.User, e.Time);
                             RefreshUser(e.User);
                             foreach (var p in Plugins)
@@ -643,7 +719,7 @@ namespace QQChat
                         {
                             if (e.User.num == 0)
                             {
-                                _qq.GetFriendQQNum(e.User);
+                                _qq.GetFriendInfos(e.User);
                             }
                             var info = new Dictionary<string, object>
                             {
@@ -792,6 +868,20 @@ namespace QQChat
             }
         }
 
+        public void CheckFriend(QQFriend friend)
+        {
+            if (friend == null)
+                return;
+            if (friend.num == 0)
+            {
+                _qq.GetFriendInfos(friend);
+            }
+            if (friend.birthday == null)
+            {
+                _qq.GetFriendStrangeInfo(friend);
+            }
+        }
+
         public void SetFriendText(QQFriend friend, string msg, DateTime time)
         {
             if (InvokeRequired)
@@ -804,6 +894,7 @@ namespace QQChat
             {
                 if (f == null)
                 {
+                    CheckFriend(friend);
                     f = new FriendForm()
                     {
                         Friend = friend,
@@ -811,6 +902,57 @@ namespace QQChat
                     };
                     f.FormClosed += FriendForm_FormClosed;
                     _friends.Add(f);
+                    f.UpdateTitle();
+                }
+            }
+
+            if (msg != null)
+            {
+                if (!f.HasMessage && f.Visible == false)
+                {
+                    RefreshUser(friend, true);
+                }
+                f.AppendMessage(msg, friend, time);
+            }
+            else if (f.Visible == false)
+            {
+                f.Show();
+                RefreshUser(friend, false);
+                f.BringToFront();
+            }
+            else
+            {
+                f.WindowState = FormWindowState.Normal;
+                f.BringToFront();
+            }
+            if (好友弹窗ToolStripMenuItem.Checked && f.Visible == false)
+            {
+                f.Show();
+                RefreshUser(friend, false);
+                f.BringToFront();
+            }
+        }
+
+        public void SetSessText(QQFriend friend, string msg, DateTime time)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(() => { SetSessText(friend, msg, time); }));
+                return;
+            }
+            var f = _sesss.Find(g => g.ID == "S|" + friend.uin);
+            lock (_createlock)
+            {
+                if (f == null)
+                {
+                    CheckFriend(friend);
+                    f = new SessForm()
+                    {
+                        Friend = friend,
+                        QQ = _qq,
+                    };
+                    f.FormClosed += SessForm_FormClosed;
+                    _sesss.Add(f);
                     f.UpdateTitle();
                 }
             }
@@ -861,6 +1003,13 @@ namespace QQChat
                 _friends.Remove(f);
         }
 
+        private void SessForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            var f = sender as SessForm;
+            if (f != null)
+                _sesss.Remove(f);
+        }
+
         public bool SendGroupMessage(QQGroup group, QQGroupMember member, string msg)
         {
             if (msg == null) return false;
@@ -872,11 +1021,15 @@ namespace QQChat
         public bool SendFriendMessage(QQFriend friend, string msg)
         {
             if (msg == null) return false;
-            if (friend.num == 0)
-            {
-                _qq.GetFriendQQNum(friend);
-            }
             var f = _friends.Find(g => g.ID == "F|" + friend.uin);
+            f.SendMessage(GetUserMsg(friend, msg));
+            return true;
+        }
+
+        public bool SendSessMessage(QQFriend friend, string msg)
+        {
+            if (msg == null) return false;
+            var f = _sesss.Find(g => g.ID == "S|" + friend.uin);
             f.SendMessage(GetUserMsg(friend, msg));
             return true;
         }
@@ -1258,6 +1411,10 @@ namespace QQChat
 
             if (_system != null)
                 _system.Close();
+            foreach (var s in _sesss.ToArray())
+            {
+                s.Close();
+            }
             foreach (var f in _friends.ToArray())
             {
                 f.Close();
