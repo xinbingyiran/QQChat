@@ -28,6 +28,9 @@ namespace MessageDeal1
         private Dictionary<string, FindIndex> _currentIndex;
 
         private string _filePath;
+        private bool _saveFlag;
+        private object _saveLock;
+        private System.Timers.Timer _timer;
 
         public string IName
         {
@@ -75,6 +78,8 @@ namespace MessageDeal1
 
         public MyDeal()
         {
+            _saveLock = new object();
+            _saveFlag = false;
             _learning = new List<KeyValuePair<string, string>>();
             _currentIndex = new Dictionary<string, FindIndex>();
             _autoreplay = true;
@@ -83,6 +88,16 @@ namespace MessageDeal1
             _filePath = _filePath.Substring(0, _filePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             _filePath = _filePath + this.GetType().FullName + ".db";
             LoadFromFile();
+            _timer = new System.Timers.Timer();
+            _timer.AutoReset = true;
+            _timer.Interval = 5000;
+            _timer.Elapsed += _timer_Elapsed;
+            _timer.Start();
+        }
+
+        private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            SaveToFile();
         }
 
         public void LoadFromFile()
@@ -110,7 +125,7 @@ namespace MessageDeal1
                 _learning = dir.ToList();
                 if (_learning.Count != lines.Length)
                 {
-                    SaveToFile();
+                    SetSaveFlag();
                 }
             }
             catch (Exception)
@@ -118,10 +133,22 @@ namespace MessageDeal1
             }
         }
 
+        public void SetSaveFlag()
+        {
+            _saveFlag = true;
+        }
+
         public void SaveToFile()
         {
-            var lines = _learning.Select(ele => ele.Key + ' ' + ele.Value);
-            File.WriteAllLines(_filePath, lines);
+            lock (_saveLock)
+            {
+                if (_saveFlag)
+                {
+                    var lines = _learning.Select(ele => ele.Key + ' ' + ele.Value);
+                    File.WriteAllLines(_filePath, lines);
+                    _saveFlag = false;
+                }
+            }
         }
 
         public string DealFriendMessage(Dictionary<string, object> info, string message)
@@ -163,7 +190,7 @@ namespace MessageDeal1
                             return null;
                         }
                         _learning.ReplacePair(wd[0], wd[1]);
-                        SaveToFile();
+                        SetSaveFlag();
                         return "已经学会此问题：" + wd[0];
                     }
                 case '忘':
@@ -173,7 +200,7 @@ namespace MessageDeal1
                             return "呵呵，问题请至少输入两个字哦。";
                         }
                         _learning.RemovePair(submessage);
-                        SaveToFile();
+                        SetSaveFlag();
                         return "已经忘记此问题：" + submessage;
                     }
                 case '列':

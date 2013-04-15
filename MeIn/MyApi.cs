@@ -34,6 +34,10 @@ namespace MeIn
         private string _inifilePath;
         private Dictionary<string, meinItem> _meinAll;
         private iniItem _iniItem;
+        private bool _saveFlag;
+        private object _saveLock;
+        private System.Timers.Timer _timer;
+
         public string IName
         {
             get { return "签到插件"; }
@@ -70,6 +74,8 @@ namespace MeIn
 
         public MyApi()
         {
+            _saveLock = new object();
+            _saveFlag = false;
             _meinAll = new Dictionary<string, meinItem>();
             var assemblay = this.GetType().Assembly;
             var filedir = assemblay.Location;
@@ -77,6 +83,16 @@ namespace MeIn
             _meinfilePath = filedir + this.GetType().FullName + ".db";
             _inifilePath = filedir + this.GetType().FullName + ".ini";
             LoadParas();
+            _timer = new System.Timers.Timer();
+            _timer.AutoReset = true;
+            _timer.Interval = 5000;
+            _timer.Elapsed += _timer_Elapsed;
+            _timer.Start();
+        }
+
+        private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            SaveToFile();
         }
 
         public void LoadParas()
@@ -111,7 +127,7 @@ namespace MeIn
                 }
                 if (_meinAll.Count != lines.Length)
                 {
-                    SaveToFile();
+                    SetSaveFlag();
                 }
             }
             catch (Exception)
@@ -135,16 +151,28 @@ namespace MeIn
             }
         }
 
+        public void SetSaveFlag()
+        {
+            _saveFlag = true;
+        }
+
         public void SaveToFile()
         {
-            var lines = new string[_meinAll.Count];
-            int index = 0;
-            foreach (KeyValuePair<string, meinItem> i in _meinAll)
+            lock (_saveLock)
             {
-                lines[index] = JsonConvert.SerializeObject(i);
-                index++;
+                if (_saveFlag)
+                {
+                    var allArray = _meinAll.ToArray();
+                    var lines = new string[allArray.Length];
+                    for (int index = 0; index < allArray.Length; index++)
+                    {
+                        lines[index] = JsonConvert.SerializeObject(allArray[index]);
+                        index++;
+                    }
+                    File.WriteAllLines(_meinfilePath, lines);
+                    _saveFlag = false;
+                }
             }
-            File.WriteAllLines(_meinfilePath, lines);
         }
 
         public void SavePara()
@@ -213,7 +241,7 @@ namespace MeIn
                 }
                 Int32 i = r.Next(_iniItem.mintomax) + _iniItem.min;
                 _meinAll[uin] = new meinItem() { mein = _meinAll[uin].mein + 1, score = _meinAll[uin].score + i, time = now.Ticks, nick = nick, mark = mark };
-                SaveToFile();
+                SetSaveFlag();
                 leave = _iniItem.timespan;
                 return string.Format(
 @"{0}，签到成功
