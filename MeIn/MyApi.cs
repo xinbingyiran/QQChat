@@ -273,7 +273,7 @@ namespace MeIn
 {8}",
                             name,//0
                             item.time,//1
-                            leave.TotalHours,//2
+                            leave.Ticks / TimeSpan.TicksPerHour,//2
                             leave.Minutes,//3
                             leave.Seconds,//4
                             item.mein,//5
@@ -308,7 +308,7 @@ namespace MeIn
                     now,//1
                     i,//2
                     _iniItem.item,//3
-                    leave.TotalHours,//4
+                    leave.Ticks / TimeSpan.TicksPerHour,//4
                     leave.Minutes,//5
                     leave.Seconds,//6
                     item.mein,
