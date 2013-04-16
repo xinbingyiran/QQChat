@@ -92,10 +92,13 @@ namespace HaveAJoke
 
         private string DealMessage(string message)
         {
-            if (_count > 0)
+            if (message.Trim() == "笑话")
             {
-                var items = jokes[r.Next(_count)];
-                return string.IsNullOrEmpty(items[0]) ? items[1] : items[0] + "\r\n" + items[1];//0 title,1 content
+                if (_count > 0)
+                {
+                    var items = jokes[r.Next(_count)];
+                    return string.IsNullOrEmpty(items[0]) ? items[1] : items[0] + "\r\n" + items[1];//0 title,1 content
+                }
             }
             return null;
         }
