@@ -6,23 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MeIn
 {
     internal struct meinItem
     {
+        public string uin;
+        public DateTime time;
         public Int64 mein;
         public Int64 score;
-        public Int64 time;
         public string nick;
         public string mark;
+        public DateTime lasttime;
+        public string lastsay;
     }
 
     internal struct iniItem
     {
         public Int32 min;
         public Int32 mintomax;
-        public Int64 timespan;
+        public TimeSpan timespan;
         public string item;
         public string pdata;
     }
@@ -37,6 +41,7 @@ namespace MeIn
         private bool _saveFlag;
         private object _saveLock;
         private System.Timers.Timer _timer;
+        private bool _autoMein;
 
         public string IName
         {
@@ -51,6 +56,9 @@ namespace MeIn
 
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
+            {"记录启","start"},
+            {"记录停","stop"},
+            {"状态","status"},
             {"重载","reload"},
             {"设置","setting"},
             {"关于","about"}
@@ -76,6 +84,7 @@ namespace MeIn
         {
             _saveLock = new object();
             _saveFlag = false;
+            _autoMein = false;
             _meinAll = new Dictionary<string, meinItem>();
             var assemblay = this.GetType().Assembly;
             var filedir = assemblay.Location;
@@ -104,25 +113,48 @@ namespace MeIn
                 Int64 loadtime = DateTime.Now.Ticks;
                 foreach (string line in lines)
                 {
-                    KeyValuePair<string, meinItem> item;
+                    meinItem item;
                     try
                     {
-                        item = JsonConvert.DeserializeObject<KeyValuePair<string, meinItem>>(line);
+                        item = JsonConvert.DeserializeObject<meinItem>(line);
+                        if (item.uin == null || item.nick == null)
+                        {
+                            throw new Exception();
+                        }
                     }
                     catch (Exception)
                     {
-                        continue;
+                        try
+                        {
+                            var olditem = JsonConvert.DeserializeObject<KeyValuePair<string, Dictionary<string, object>>>(line);
+                            item = new meinItem()
+                            {
+                                uin = olditem.Key,
+                                mein = Convert.ToInt64(olditem.Value["mein"]),
+                                score = Convert.ToInt64(olditem.Value["score"]),
+                                time = new DateTime(Convert.ToInt64(olditem.Value["time"])),
+                                nick = olditem.Value["nick"] as string,
+                                mark = olditem.Value["mark"] as string,
+                                lasttime = new DateTime(Convert.ToInt64(olditem.Value["time"])),
+                                lastsay = "签到",
+                            };
+                            SetSaveFlag();
+                        }
+                        catch (Exception)
+                        {
+                            continue;
+                        }
                     }
 
-                    if (_meinAll.ContainsKey(item.Key))
+                    if (_meinAll.ContainsKey(item.uin))
                     {
-                        var newitem = item.Value;
-                        newitem.score += _meinAll[item.Key].score;
-                        _meinAll[item.Key] = newitem;
+                        var newitem = item;
+                        newitem.score += _meinAll[item.uin].score;
+                        _meinAll[item.uin] = newitem;
                     }
                     else
                     {
-                        _meinAll.Add(item.Key, item.Value);
+                        _meinAll.Add(item.uin, item);
                     }
                 }
                 if (_meinAll.Count != lines.Length)
@@ -146,7 +178,7 @@ namespace MeIn
                     pdata = "[gmemo]",
                     min = 1,
                     mintomax = 14,
-                    timespan = new TimeSpan(4, 0, 0).Ticks
+                    timespan = new TimeSpan(4, 0, 0)
                 };
             }
         }
@@ -164,9 +196,11 @@ namespace MeIn
                 {
                     var allArray = _meinAll.ToArray();
                     var lines = new string[allArray.Length];
+                    IsoDateTimeConverter timeConverter = new IsoDateTimeConverter();
+                    timeConverter.DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
                     for (int index = 0; index < allArray.Length; index++)
                     {
-                        lines[index] = JsonConvert.SerializeObject(allArray[index]);
+                        lines[index] = JsonConvert.SerializeObject(allArray[index].Value,timeConverter);
                     }
                     File.WriteAllLines(_meinfilePath, lines);
                     _saveFlag = false;
@@ -203,23 +237,34 @@ namespace MeIn
                 return null;
             message = message.Trim();
             string name = string.Format("{0}[{1}]", isGroup ? (string.IsNullOrEmpty(mark) ? nick : mark) : nick, p2);
+            string uin = p1 + '|' + p2;
+            TimeSpan leave;
+            DateTime now = DateTime.Now;
+            #region 签到
             if (message == "签到")
             {
-                string uin = p1 + '|' + p2;
-                long leave = 0;
-                DateTime now = DateTime.Now;
+                meinItem item;
                 if (!_meinAll.ContainsKey(uin))
                 {
                     //return string.Format(_unregStr, nick, _personStr);
-                    _meinAll.Add(uin, new meinItem() { mein = 0, score = 0, time = DateTime.MinValue.Ticks, nick = nick, mark = mark });
+                    item = new meinItem()
+                    {
+                        uin = uin,
+                        mein = 0,
+                        score = 0,
+                        time = DateTime.MinValue,
+                        nick = nick,
+                        mark = mark,
+                    };
+                    _meinAll.Add(uin, item);
                 }
                 else
                 {
-
-                    var ntime = _meinAll[uin].time + _iniItem.timespan;
-                    if (ntime > now.Ticks )
+                    item = _meinAll[uin];
+                    var ntime = item.time + _iniItem.timespan;
+                    if (ntime > now)
                     {
-                        leave = ntime - now.Ticks;
+                        leave = ntime - now;
                         return string.Format(
     @"{0}，签到失败
 上次签到时间为{1:yyyy-MM-dd HH:mm:ss}
@@ -227,19 +272,30 @@ namespace MeIn
 共成功签到{5}次,获得{6}{7}
 {8}",
                             name,//0
-                            new DateTime(_meinAll[uin].time),//1
-                            leave / TimeSpan.TicksPerHour,//2
-                            leave % TimeSpan.TicksPerHour / TimeSpan.TicksPerMinute,//3
-                            leave % TimeSpan.TicksPerMinute / TimeSpan.TicksPerSecond,//4
-                            _meinAll[uin].mein,//5
-                            _meinAll[uin].score,//6
+                            item.time,//1
+                            leave.TotalHours,//2
+                            leave.Minutes,//3
+                            leave.Seconds,//4
+                            item.mein,//5
+                            item.score,//6
                             _iniItem.item,//7
                             _iniItem.pdata//8
                             );
                     }
                 }
                 Int32 i = r.Next(_iniItem.mintomax) + _iniItem.min;
-                _meinAll[uin] = new meinItem() { mein = _meinAll[uin].mein + 1, score = _meinAll[uin].score + i, time = now.Ticks, nick = nick, mark = mark };
+                item = new meinItem()
+                {
+                    uin = uin,
+                    mein = item.mein + 1,
+                    score = item.score + i,
+                    time = now,
+                    nick = nick,
+                    mark = mark,
+                    lasttime = now,
+                    lastsay = message,
+                };
+                _meinAll[uin] = item;
                 SetSaveFlag();
                 leave = _iniItem.timespan;
                 return string.Format(
@@ -252,13 +308,40 @@ namespace MeIn
                     now,//1
                     i,//2
                     _iniItem.item,//3
-                    leave / TimeSpan.TicksPerHour,//4
-                    leave % TimeSpan.TicksPerHour / TimeSpan.TicksPerMinute,//5
-                    leave % TimeSpan.TicksPerMinute / TimeSpan.TicksPerSecond,//6
-                    _meinAll[uin].mein,
-                    _meinAll[uin].score,
+                    leave.TotalHours,//4
+                    leave.Minutes,//5
+                    leave.Seconds,//6
+                    item.mein,
+                    item.score,
                     _iniItem.pdata
                     );
+            }
+            #endregion
+            else if (_autoMein)
+            {
+                meinItem theitem;
+                if (!_meinAll.ContainsKey(uin))
+                {
+                    //return string.Format(_unregStr, nick, _personStr);
+                    theitem = new meinItem()
+                    {
+                        uin = uin,
+                        mein = 0,
+                        score = 0,
+                        time = DateTime.MinValue,
+                        nick = nick,
+                        mark = mark,
+                    };
+                    _meinAll.Add(uin, theitem);
+                }
+                else
+                {
+                    theitem = _meinAll[uin];
+                }
+                theitem.lasttime = now;
+                theitem.lastsay = message;
+                _meinAll[uin] = theitem;
+                SetSaveFlag();
             }
             return null;
         }
@@ -278,6 +361,20 @@ namespace MeIn
                     _iniItem = s.SaveItem;
                     SavePara();
                 }
+            }
+            else if (menuName == "start")
+            {
+                _autoMein = true;
+                MessageBox.Show("启用成功。", "自动状态");
+            }
+            else if (menuName == "stop")
+            {
+                _autoMein = false;
+                MessageBox.Show("停用成功。", "自动状态");
+            }
+            else if (menuName == "status")
+            {
+                MessageBox.Show(string.Format("当前状态为{0}。", _autoMein ? "启用" : "停用"), "自动状态");
             }
             else if (menuName == "about")
             {

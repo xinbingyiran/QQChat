@@ -53,7 +53,7 @@ namespace MeIn
             }
             SaveItem.min = min;
             SaveItem.mintomax = max - min;
-            SaveItem.timespan = TimeSpan.TicksPerMinute * span;
+            SaveItem.timespan = new TimeSpan(TimeSpan.TicksPerMinute * span);
             SaveItem.item = textBoxName.Text;
             SaveItem.pdata = richTextBox1.Text;
             this.DialogResult = DialogResult.OK;
@@ -64,7 +64,7 @@ namespace MeIn
         {
             textBoxMin.Text = SaveItem.min.ToString();
             textBoxMax.Text = (SaveItem.min + SaveItem.mintomax).ToString();
-            textBoxSpan.Text = ((Int32)new TimeSpan(SaveItem.timespan).TotalMinutes).ToString();
+            textBoxSpan.Text = ((Int32)SaveItem.timespan.TotalMinutes).ToString();
             textBoxName.Text = SaveItem.item;
             richTextBox1.Text = SaveItem.pdata;
             this.DialogResult = DialogResult.None;
