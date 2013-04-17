@@ -191,6 +191,7 @@ namespace WebQQ2.WebQQ2
 
         public event EventHandler<FriendEventArgs> MessageFriendReceived;
         public event EventHandler<GroupEventArgs> MessageGroupReceived;
+        public event EventHandler<ErrorEventArgs> GetMessageError;
 
         #endregion
 
@@ -631,9 +632,18 @@ namespace WebQQ2.WebQQ2
 
         public void GetMessage()
         {
-            while (_user.Status != "offline")
+            while (_user.Status != QQStatus.StatusOffline.StatusInternal)
             {
                 GetMessageSub();
+            }
+        }
+
+        public void ThrowError(string error)
+        {
+            User.Status = QQStatus.StatusOffline.StatusInternal;
+            if (GetMessageError != null)
+            {
+                GetMessageError(this,new ErrorEventArgs(new Exception(error)));
             }
         }
 
@@ -644,10 +654,25 @@ namespace WebQQ2.WebQQ2
             qq_poll2_post["psessionid"] = _user.PsessionID;
             string para = QQHelper.ToPostData(qq_poll2_post) + string.Format("&clientid={0}&psessionid={1}", _user.ClientID, _user.PsessionID);
             string str = PostUrlText(url, Encoding.Default.GetBytes(para), int.MaxValue);
+            //str = null;未获取信息
+            if (str == null)
+            {
+                ThrowError("网络中断");
+                return;
+            }
             try
             {
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(str);
-                if (root["retcode"] as int? == 0)
+                var retcode = (root["retcode"] as int?).GetValueOrDefault(-1);
+                if (retcode == 102)
+                {
+                    //没信息
+                }
+                else if (retcode == 103 || retcode == 121)
+                {
+                    ThrowError("掉线");
+                }
+                else if (retcode == 0)
                 {
                     System.Collections.ArrayList list = root["result"] as System.Collections.ArrayList;
                     for (int i = list.Count - 1; i >= 0; i--)//倒序

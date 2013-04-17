@@ -151,11 +151,7 @@ namespace QQChat
             ToolStripMenuItem loginitem = new ToolStripMenuItem("重新登录");
             loginitem.Click += (sender, e) =>
             {
-                _qq.MessageFriendReceived -= QQMessageFriendReceived;
-                _qq.MessageGroupReceived -= QQMessageGroupReceived;
-                _qq.LogOutQQ2();
-                this.DialogResult = System.Windows.Forms.DialogResult.Retry;
-                this.Close();
+                ReturnToLogIn();
             };
             状态ToolStripMenuItem.DropDownItems.Add(loginitem);
             foreach (QQStatus status in QQStatus.AllStatus)
@@ -166,7 +162,6 @@ namespace QQChat
                 };
                 newitem.Click += (sender, e) =>
                 {
-                    CheckQQStatus();
                     new Task(() =>
                         {
                             string result = _qq.ChangeStatus(status.StatusInternal);
@@ -182,10 +177,22 @@ namespace QQChat
                                 if (status.StatusInternal != QQStatus.StatusOffline.StatusInternal)
                                     _qq.StartGetMessage();
                             }
+
+                            CheckQQStatus();
                         }).Start();
                 };
                 状态ToolStripMenuItem.DropDownItems.Add(newitem);
             }
+        }
+
+        private void ReturnToLogIn()
+        {
+            _qq.MessageFriendReceived -= QQMessageFriendReceived;
+            _qq.MessageGroupReceived -= QQMessageGroupReceived;
+            _qq.GetMessageError -= QQ_GetMessageError;
+            _qq.LogOutQQ2();
+            this.DialogResult = System.Windows.Forms.DialogResult.Retry;
+            this.Close();
         }
 
         private void CheckQQStatus()
@@ -293,6 +300,7 @@ namespace QQChat
             _qq = qq;
             _qq.MessageFriendReceived += QQMessageFriendReceived;
             _qq.MessageGroupReceived += QQMessageGroupReceived;
+            _qq.GetMessageError += QQ_GetMessageError;
             new Task(() =>
             {
                 GetAllFriends();
@@ -301,6 +309,44 @@ namespace QQChat
                 Thread.Sleep(500);
                 _qq.StartGetMessage();
             }).Start();
+        }
+
+        private void QQ_GetMessageError(object sender, ErrorEventArgs e)
+        {
+            if (e.GetException().Message == "网络中断")
+            {
+                ReturnToLogIn();
+            }
+            else
+            {
+                new Task(() =>
+                    {
+                        try
+                        {
+                            foreach (ToolStripItem item in 状态ToolStripMenuItem.DropDownItems)
+                            {
+                                if (item.Tag is QQStatus && (item as ToolStripMenuItem) != null)
+                                {
+                                    if ((item as ToolStripMenuItem).Checked)
+                                    {
+                                        _qq.LoginQQ2((item.Tag as QQStatus).StatusInternal);
+                                        GetAllFriends();
+                                        Thread.Sleep(500);
+                                        GetAllGroups();
+                                        Thread.Sleep(500);
+                                        _qq.StartGetMessage();
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        BeginInvoke(new MethodInvoker(() =>ReturnToLogIn()));
+                    }).Start();
+            }
         }
 
         private void GetAllFriends()
@@ -1466,8 +1512,8 @@ namespace QQChat
 
         internal Dictionary<string, string> GetSettings()
         {
-            if(_settings == null)
-                _settings = new Dictionary<string,string>();
+            if (_settings == null)
+                _settings = new Dictionary<string, string>();
             foreach (var p in Plugins)
             {
                 if (_settings.ContainsKey(p.Key))
@@ -1476,7 +1522,7 @@ namespace QQChat
                 }
                 else
                 {
-                    _settings.Add(p.Key,p.Value.Setting);
+                    _settings.Add(p.Key, p.Value.Setting);
                 }
             }
             return _settings;
