@@ -15,6 +15,7 @@ using QQChat.Classes;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using System.Collections;
+using Newtonsoft.Json;
 
 namespace QQChat
 {
@@ -36,7 +37,7 @@ namespace QQChat
         private TreeNode _vfzNode = new TreeNode() { Text = "未分组", Tag = -1, Name = "-1" };
         private TreeNode _msrNode = new TreeNode() { Text = "陌生人", Tag = 999999, Name = "999999" };
 
-        private JavaScriptSerializer _jss;
+        private Dictionary<string, string> _settings;
 
         public MainForm()
         {
@@ -52,13 +53,23 @@ namespace QQChat
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            LoadParas();
             LoadStatus();
             LoadPlugins();
             CheckQQStatus();
             _groups = new List<GroupForm>();
             _friends = new List<FriendForm>();
             _sesss = new List<SessForm>();
-            _jss = new JavaScriptSerializer();
+        }
+
+        private void LoadParas()
+        {
+
+        }
+
+        private void SaveParas()
+        {
+
         }
 
         private void treeViewF_AfterSelect(object sender, TreeViewEventArgs e)
@@ -243,8 +254,14 @@ namespace QQChat
                 subitems[i] = item;
                 i++;
             }
-            o.Enabled = false;
+            ///////
+            var key = o.GetType().FullName;
+            if (_settings != null && _settings.ContainsKey(key))
+            {
+                o.Setting = _settings[key];
+            }
             ToolStripMenuItem statusitem = new ToolStripMenuItem("激活状态");
+            statusitem.Checked = o.Enabled;
             statusitem.Click += (sender, e) =>
             {
                 o.Enabled = !o.Enabled;
@@ -784,12 +801,12 @@ namespace QQChat
                                 break;
                             }
                         }
-                        SetSystemText(_jss.Serialize(e.Msgs), null, e.Time);
+                        SetSystemText(JsonConvert.SerializeObject(e.Msgs), null, e.Time);
                     }
                     break;
                 default:
                     {
-                        SetSystemText(_jss.Serialize(e.Msgs), null, e.Time);
+                        SetSystemText(JsonConvert.SerializeObject(e.Msgs), null, e.Time);
                     }
                     break;
             }
@@ -1441,5 +1458,28 @@ namespace QQChat
             群组弹窗ToolStripMenuItem.Checked = !群组弹窗ToolStripMenuItem.Checked;
         }
 
+
+        internal void SetSettings(Dictionary<string, string> settings)
+        {
+            _settings = settings;
+        }
+
+        internal Dictionary<string, string> GetSettings()
+        {
+            if(_settings == null)
+                _settings = new Dictionary<string,string>();
+            foreach (var p in Plugins)
+            {
+                if (_settings.ContainsKey(p.Key))
+                {
+                    _settings[p.Key] = p.Value.Setting;
+                }
+                else
+                {
+                    _settings.Add(p.Key,p.Value.Setting);
+                }
+            }
+            return _settings;
+        }
     }
 }

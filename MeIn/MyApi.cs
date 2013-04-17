@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Threading.Tasks;
 
 namespace MeIn
 {
@@ -24,6 +25,8 @@ namespace MeIn
 
     internal struct iniItem
     {
+        public bool isEnable;
+        public bool autoIn;
         public Int32 min;
         public Int32 mintomax;
         public TimeSpan timespan;
@@ -35,13 +38,29 @@ namespace MeIn
     {
         private Random r = new Random();
         private string _meinfilePath;
-        private string _inifilePath;
         private Dictionary<string, meinItem> _meinAll;
         private iniItem _iniItem;
         private bool _saveFlag;
         private object _saveLock;
         private System.Timers.Timer _timer;
-        private bool _autoMein;
+
+        public string Setting
+        {
+            get
+            {
+                return JsonConvert.SerializeObject(_iniItem);
+            }
+            set
+            {
+                try
+                {
+                    _iniItem = JsonConvert.DeserializeObject<iniItem>(value);
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
 
         public string IName
         {
@@ -50,8 +69,8 @@ namespace MeIn
 
         public bool Enabled
         {
-            get;
-            set;
+            get { return _iniItem.isEnable; }
+            set { _iniItem.isEnable = value; }
         }
 
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
@@ -84,19 +103,30 @@ namespace MeIn
         {
             _saveLock = new object();
             _saveFlag = false;
-            _autoMein = false;
             _meinAll = new Dictionary<string, meinItem>();
             var assemblay = this.GetType().Assembly;
             var filedir = assemblay.Location;
             filedir = filedir.Substring(0, filedir.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             _meinfilePath = filedir + this.GetType().FullName + ".db";
-            _inifilePath = filedir + this.GetType().FullName + ".ini";
-            LoadParas();
-            _timer = new System.Timers.Timer();
-            _timer.AutoReset = true;
-            _timer.Interval = 5000;
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.Start();
+            _iniItem = new iniItem
+            {
+                isEnable = false,
+                autoIn = false,
+                item = "积分",
+                pdata = "",
+                min = 1,
+                mintomax = 14,
+                timespan = new TimeSpan(4, 0, 0)
+            };
+            new Task(() =>
+                {
+                    LoadParas();
+                    _timer = new System.Timers.Timer();
+                    _timer.AutoReset = true;
+                    _timer.Interval = 5000;
+                    _timer.Elapsed += _timer_Elapsed;
+                    _timer.Start();
+                }).Start();
         }
 
         private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -165,22 +195,6 @@ namespace MeIn
             catch (Exception)
             {
             }
-            try
-            {
-                string text = File.ReadAllText(_inifilePath);
-                _iniItem = JsonConvert.DeserializeObject<iniItem>(text);
-            }
-            catch (Exception)
-            {
-                _iniItem = new iniItem
-                {
-                    item = "积分",
-                    pdata = "[gmemo]",
-                    min = 1,
-                    mintomax = 14,
-                    timespan = new TimeSpan(4, 0, 0)
-                };
-            }
         }
 
         public void SetSaveFlag()
@@ -200,17 +214,12 @@ namespace MeIn
                     timeConverter.DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
                     for (int index = 0; index < allArray.Length; index++)
                     {
-                        lines[index] = JsonConvert.SerializeObject(allArray[index].Value,timeConverter);
+                        lines[index] = JsonConvert.SerializeObject(allArray[index].Value, timeConverter);
                     }
                     File.WriteAllLines(_meinfilePath, lines);
                     _saveFlag = false;
                 }
             }
-        }
-
-        public void SavePara()
-        {
-            File.WriteAllText(_inifilePath, JsonConvert.SerializeObject(_iniItem));
         }
 
         public string DealFriendMessage(Dictionary<string, object> info, string message)
@@ -317,7 +326,7 @@ namespace MeIn
                     );
             }
             #endregion
-            else if (_autoMein)
+            else if (_iniItem.autoIn)
             {
                 meinItem theitem;
                 if (!_meinAll.ContainsKey(uin))
@@ -359,22 +368,21 @@ namespace MeIn
                 if (s.ShowDialog() == DialogResult.OK)
                 {
                     _iniItem = s.SaveItem;
-                    SavePara();
                 }
             }
             else if (menuName == "start")
             {
-                _autoMein = true;
+                _iniItem.autoIn = true;
                 MessageBox.Show("启用成功。", "自动状态");
             }
             else if (menuName == "stop")
             {
-                _autoMein = false;
+                _iniItem.autoIn = false;
                 MessageBox.Show("停用成功。", "自动状态");
             }
             else if (menuName == "status")
             {
-                MessageBox.Show(string.Format("当前状态为{0}。", _autoMein ? "启用" : "停用"), "自动状态");
+                MessageBox.Show(string.Format("当前状态为{0}。", _iniItem.autoIn ? "启用" : "停用"), "自动状态");
             }
             else if (menuName == "about")
             {

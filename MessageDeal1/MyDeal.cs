@@ -6,6 +6,7 @@ using MessageDeal;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MessageDeal1
 {
@@ -32,6 +33,21 @@ namespace MessageDeal1
         private object _saveLock;
         private System.Timers.Timer _timer;
 
+        public string Setting
+        {
+            get
+            {
+                return (Enabled ? "1" : "0") + (_autoreplay ? "1" : "0");
+            }
+            set
+            {
+                if (!string.IsNullOrEmpty(value) && value.Length == 2)
+                {
+                    Enabled = value[0] == '1';
+                    _autoreplay = value[1] == '1';
+                }
+            }
+        }
         public string IName
         {
             get { return "学话鹦鹉"; }
@@ -87,12 +103,15 @@ namespace MessageDeal1
             _filePath = assemblay.Location;
             _filePath = _filePath.Substring(0, _filePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             _filePath = _filePath + this.GetType().FullName + ".db";
-            LoadFromFile();
-            _timer = new System.Timers.Timer();
-            _timer.AutoReset = true;
-            _timer.Interval = 5000;
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.Start();
+            new Task(() =>
+                {
+                    LoadFromFile();
+                    _timer = new System.Timers.Timer();
+                    _timer.AutoReset = true;
+                    _timer.Interval = 5000;
+                    _timer.Elapsed += _timer_Elapsed;
+                    _timer.Start();
+                }).Start();
         }
 
         private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)

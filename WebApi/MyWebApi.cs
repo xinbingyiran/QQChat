@@ -11,10 +11,26 @@ using System.IO;
 
 namespace WebApi
 {
-    public class MyWebApi:IMessageDeal
+    public class MyWebApi : IMessageDeal
     {
 
         private bool _autoreplay = false;
+
+        public string Setting
+        {
+            get
+            {
+                return (Enabled ? "1" : "0") + (_autoreplay ? "1" : "0");
+            }
+            set
+            {
+                if (!string.IsNullOrEmpty(value) && value.Length == 2)
+                {
+                    Enabled = value[0] == '1';
+                    _autoreplay = value[1] == '1';
+                }
+            }
+        }
 
         public string IName
         {
@@ -25,7 +41,7 @@ namespace WebApi
             get;
             set;
         }
-        
+
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
             {"启用","start"},
@@ -186,7 +202,7 @@ namespace WebApi
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
-            string[] substring = message.Split(new char[]{' '},2,StringSplitOptions.None);
+            string[] substring = message.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
             string rstr = null;
             try
             {
@@ -264,7 +280,7 @@ namespace WebApi
             }
             if (rstr != null)
             {
-                return rstr.Replace(@"<br/>",Environment.NewLine);
+                return rstr.Replace(@"<br/>", Environment.NewLine);
             }
             return null;
         }

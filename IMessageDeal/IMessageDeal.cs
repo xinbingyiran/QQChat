@@ -101,6 +101,7 @@ namespace MessageDeal
 
     public interface IMessageDeal
     {
+        string Setting { get; set; }
         /// <summary>
         /// 插件名称
         /// </summary>
@@ -123,7 +124,7 @@ namespace MessageDeal
         /// <param name="info">用户信息UserName,UserNick,UserMarkName</param>
         /// <param name="message">要处理的消息</param>
         /// <returns>如果不需要回应，只需设置为null即</returns>
-        string DealFriendMessage(Dictionary<string,object> info,string message);
+        string DealFriendMessage(Dictionary<string, object> info, string message);
         /// <summary>
         /// 处理群消息，并返回处理结果
         /// </summary>

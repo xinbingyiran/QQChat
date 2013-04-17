@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Security.Cryptography;
 using QQChat.Classes;
+using Newtonsoft.Json;
 
 namespace QQChat
 {
@@ -20,6 +21,8 @@ namespace QQChat
         private QQ _qq;
 
         private string _fileName;
+
+        private Dictionary<string, string> _settings;
 
         public LoginForm()
         {
@@ -42,20 +45,14 @@ namespace QQChat
                 comboBox1.SelectedIndex = 0;
             }
             panel1.Visible = false;
-#if(DEBUG)
-            textBoxUser.Text = "2221933016";
-            textBoxPass.Text = "ypbxyy";
-            CreateUser(textBoxUser.Text);
-            new Task(GetVerifyCode).Start();
-#else
             try
             {
                 var lines = File.ReadAllLines(_fileName);
                 textBoxUser.Text = PassHelper.AESDecrypt(lines[0]);
                 textBoxPass.Text = PassHelper.AESDecrypt(lines[1]);
+                _settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(lines[2]);
             }
             catch (Exception) { }
-#endif
         }
 
         private void SetImageCode(Image image)
@@ -188,8 +185,11 @@ namespace QQChat
             this.Hide();
             MainForm m = new MainForm();
             m.InitUser(_qq);
+            m.SetSettings(_settings);
             if (m.ShowDialog() != System.Windows.Forms.DialogResult.Retry)
             {
+                _settings = m.GetSettings(); ;
+                SaveToFile();
                 Environment.Exit(Environment.ExitCode);
             }
             new Task(GetVerifyCode).Start();
@@ -210,17 +210,21 @@ namespace QQChat
 
         private void textBoxPass_Leave(object sender, EventArgs e)
         {
-#if!(DEBUG)
+            SaveToFile();
+        }
+
+        private void SaveToFile()
+        {
             try
             {
-                string[] lines = new[] { PassHelper.AESEncrypt(textBoxUser.Text), PassHelper.AESEncrypt(textBoxPass.Text) };
-                new Task(() =>
-                    {
-                        File.WriteAllLines(_fileName,lines);
-                    }).Start();
+                string[] lines = new[] { 
+                    PassHelper.AESEncrypt(textBoxUser.Text),
+                    PassHelper.AESEncrypt(textBoxPass.Text),
+                    JsonConvert.SerializeObject(_settings)
+                };
+                File.WriteAllLines(_fileName, lines);
             }
             catch (Exception) { }
-#endif
         }
     }
 }

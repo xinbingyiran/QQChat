@@ -5,12 +5,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace HaveAJoke
 {
     public class MyAPI : IMessageDeal
     {
+
+        public string Setting
+        {
+            get
+            {
+                return (Enabled ? "1" : "0");
+            }
+            set
+            {
+                Enabled = value == "1";
+            }
+        }
+
         public string IName
         {
             get { return "随机回复笑话插件"; }
@@ -55,7 +69,10 @@ namespace HaveAJoke
             var filedir = assemblay.Location;
             filedir = filedir.Substring(0, filedir.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             _filepath = filedir + this.GetType().FullName + ".db";
-            LoadPara();
+            new Task(() =>
+                {
+                    LoadPara();
+                }).Start();
         }
 
         private void LoadPara()
