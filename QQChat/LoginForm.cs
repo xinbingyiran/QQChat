@@ -137,17 +137,30 @@ namespace QQChat
 
         private void button1_Click(object sender, EventArgs e)
         {
+            EnableLog(false);
             if (_qq == null)
             {
                 SetInfo("用户名不能空...");
+                EnableLog(true);
                 return;
             }
             if (textBoxPass.Text.Length < 6)
             {
                 SetInfo("密码长度错误...");
+                EnableLog(true);
                 return;
             }
             LogQQ(textBoxPass.Text, textBoxCode.Text, (string)comboBox1.SelectedValue);
+        }
+
+        private void EnableLog(bool Enable)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(() => { EnableLog(Enable); }));
+                return;
+            }
+            button1.Enabled = Enable;
         }
 
         private void LogQQ(string pass, string code, string status)
@@ -159,7 +172,7 @@ namespace QQChat
                 {
                     SetInfo(result);
                     GetVerifyImage();
-                    return;
+                    EnableLog(true);
                 }
                 else
                 {
@@ -168,6 +181,7 @@ namespace QQChat
                     if (result != null)
                     {
                         SetInfo(result);
+                        EnableLog(true);
                         return;
                     }
                     InitMainForm();
@@ -194,6 +208,7 @@ namespace QQChat
             }
             new Task(GetVerifyCode).Start();
             this.Show();
+            EnableLog(true);
         }
 
         private void LoginForm_Activated(object sender, EventArgs e)
