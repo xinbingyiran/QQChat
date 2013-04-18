@@ -55,6 +55,8 @@ namespace WebQQ2.WebQQ2
                 if (_msgs.Count == 1 && _msgs.Keys.Contains("content"))
                 {
                     ArrayList content = _msgs["content"] as ArrayList;
+                    if (content == null)
+                        return null;
                     if (content.Count == 2)
                     {
                         return GetSimpleMsg(content[1]);

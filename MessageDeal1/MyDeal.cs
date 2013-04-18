@@ -26,11 +26,11 @@ namespace MessageDeal1
 
         public static readonly string lineSep = @"<br/>";
 
-        private Dictionary<string, FindIndex> _currentIndex;
+        private readonly Dictionary<string, FindIndex> _currentIndex;
 
-        private string _filePath;
+        private readonly string _filePath;
         private bool _saveFlag;
-        private object _saveLock;
+        private readonly object _saveLock;
         private System.Timers.Timer _timer;
 
         public string Setting
@@ -335,7 +335,7 @@ namespace MessageDeal1
             int sub = int.MaxValue;
             for (int i = 0; i < _learning.Count; i++)
             {
-                var itemindex = message.IndexOf(_learning[i].Key);
+                var itemindex = message.IndexOf(_learning[i].Key, System.StringComparison.Ordinal);
                 if (itemindex >= 0 && itemindex <= 5)
                 {
                     int si = message.Length - _learning[i].Key.Length;

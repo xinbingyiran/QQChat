@@ -1,7 +1,6 @@
 ﻿namespace QQChat.Classes
 {
     using System;
-    using System.Collections.Generic;
     using System.Text;
     using System.Runtime.InteropServices;
     using System.Drawing;
@@ -65,10 +64,9 @@
             StringBuilder _fontTable = new StringBuilder();
             _fontTable.Append(@"{\fonttbl{\f0");
             _fontTable.Append(@"\");
-            if (rtfFontFamily.Contains(_font.FontFamily.Name))
-                _fontTable.Append(rtfFontFamily[_font.FontFamily.Name]);
-            else
-                _fontTable.Append(rtfFontFamily[FF_UNKNOWN]);
+            _fontTable.Append(rtfFontFamily.Contains(_font.FontFamily.Name)
+                                  ? rtfFontFamily[_font.FontFamily.Name]
+                                  : rtfFontFamily[FF_UNKNOWN]);
             _fontTable.Append(@"\fcharset0 ");
             _fontTable.Append(_font.Name);
             _fontTable.Append(@";}}");
@@ -132,18 +130,16 @@
 
         private static string GetRtfImage(RichTextBox rtb, Image _image)
         {
-            StringBuilder _rtf = null;
             MemoryStream _stream = null;
             Graphics _graphics = null;
             Metafile _metaFile = null;
-            IntPtr _hdc;
             try
             {
-                _rtf = new StringBuilder();
+                StringBuilder _rtf = new StringBuilder();
                 _stream = new MemoryStream();
                 using (_graphics = rtb.CreateGraphics())
                 {
-                    _hdc = _graphics.GetHdc();
+                    IntPtr _hdc = _graphics.GetHdc();
                     _metaFile = new Metafile(_stream, _hdc);
                     _graphics.ReleaseHdc(_hdc);
                 }

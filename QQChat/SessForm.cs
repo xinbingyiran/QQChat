@@ -1,15 +1,7 @@
 ﻿using QQChat.Classes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WebQQ2.WebQQ2;
@@ -88,7 +80,7 @@ namespace QQChat
                     if (this.IsHandleCreated)
                     {
 
-                        BeginInvoke(new MethodInvoker(() => { imessage.AppendTo(richTextBox1); }));
+                        BeginInvoke(new MethodInvoker(() => imessage.AppendTo(richTextBox1)));
                     }
                     else
                     {
@@ -118,29 +110,32 @@ namespace QQChat
             //richTextBox1.AppendLine(rmessage, c);
             new Task(() =>
             {
-                List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, qfriend.uin.ToString());
-                foreach (IRichMessage msg in messages)
+                if (qfriend != null)
                 {
-                    msg.MessageColor = c;
-                }
-                if (this.IsHandleCreated)
-                {
-                    BeginInvoke(new MethodInvoker(() =>
-                     {
-                         foreach (IRichMessage msg in messages)
-                         {
-                             msg.AppendTo(richTextBox1);
-                         }
-                         richTextBox1.AppendLine("", c);
-                     }));
-                }
-                else
-                {
-                    _oldMessage.AddRange(messages);
-                    _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = c });
-                    if (_oldMessage.Count > 50)
+                    List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, qfriend.uin.ToString());
+                    foreach (IRichMessage msg in messages)
                     {
-                        _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
+                        msg.MessageColor = c;
+                    }
+                    if (this.IsHandleCreated)
+                    {
+                        BeginInvoke(new MethodInvoker(() =>
+                            {
+                                foreach (IRichMessage msg in messages)
+                                {
+                                    msg.AppendTo(richTextBox1);
+                                }
+                                richTextBox1.AppendLine("", c);
+                            }));
+                    }
+                    else
+                    {
+                        _oldMessage.AddRange(messages);
+                        _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = c });
+                        if (_oldMessage.Count > 50)
+                        {
+                            _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
+                        }
                     }
                 }
             }).Start();

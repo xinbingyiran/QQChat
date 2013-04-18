@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -66,30 +65,30 @@ namespace QQChat
             pictureBoxCode.Image = image;
         }
 
-        private void SetTextCode(string Text)
+        private void SetTextCode(string text)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => SetTextCode(Text)));
+                BeginInvoke(new MethodInvoker(() => SetTextCode(text)));
                 return;
             }
             panel1.Visible = false;
-            textBoxCode.Text = Text;
+            textBoxCode.Text = text;
         }
 
-        private void SetInfo(string Text)
+        private void SetInfo(string text)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => SetInfo(Text)));
+                BeginInvoke(new MethodInvoker(() => SetInfo(text)));
                 return;
             }
-            label4.Text = Text;
+            label4.Text = text;
         }
 
         private void textBoxUser_Leave(object sender, EventArgs e)
         {
-            string mstr = @"\d{5,12}";
+            const string mstr = @"\d{5,12}";
             if (Regex.IsMatch(textBoxUser.Text, mstr))
             {
                 if (_qq == null || textBoxUser.Text != _qq.User.QQNum)
@@ -157,7 +156,7 @@ namespace QQChat
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => { EnableLog(Enable); }));
+                BeginInvoke(new MethodInvoker(() => EnableLog(Enable)));
                 return;
             }
             button1.Enabled = Enable;
@@ -202,7 +201,7 @@ namespace QQChat
             m.SetSettings(_settings);
             if (m.ShowDialog() != System.Windows.Forms.DialogResult.Retry)
             {
-                _settings = m.GetSettings(); ;
+                _settings = m.GetSettings();
                 SaveToFile();
                 Environment.Exit(Environment.ExitCode);
             }

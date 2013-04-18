@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -70,7 +69,7 @@ namespace QQChat
                     if (this.IsHandleCreated)
                     {
 
-                        BeginInvoke(new MethodInvoker(() => { imessage.AppendTo(richTextBox1); }));
+                        BeginInvoke(new MethodInvoker(() => imessage.AppendTo(richTextBox1)));
                     }
                     else
                     {
@@ -93,12 +92,12 @@ namespace QQChat
             QQGroupMember gmember = member as QQGroupMember;
             if (string.IsNullOrEmpty(message))
                 return;
-            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card == null ? gmember.nick : gmember.card, gmember.num));
+            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card ?? gmember.nick, gmember.num));
             Color c = FormHelper.PickColor();
             //richTextBox1.AppendLine(rmessage, c);
             new Task(() =>
             {
-                List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, gmember.uin.ToString());
+                List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, gmember == null ? "" : gmember.uin.ToString());
 
                 foreach (IRichMessage msg in messages)
                 {
@@ -159,7 +158,8 @@ namespace QQChat
                     {
                         QQ.RefreshGroupInfo(Group);
                     }
-                    catch (Exception) { }
+                    catch (Exception)
+                    { }
                     BeginInvoke(new MethodInvoker(() =>
                     {
                         LoadMembers();
@@ -189,7 +189,7 @@ namespace QQChat
         private void InsertQQGroupMember(QQGroupMember member, int type)
         {
             if (member == null) return;
-            var item = new ListViewItem(new string[] { member.card == null ? member.nick : member.card, member.num.ToString() })
+            var item = new ListViewItem(new string[] { member.card ?? member.nick, member.num.ToString() })
             {
                 ForeColor = colors[type],
                 Tag = member

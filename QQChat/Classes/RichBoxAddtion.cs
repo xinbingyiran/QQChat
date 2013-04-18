@@ -53,7 +53,7 @@ namespace QQChat.Classes
                 throw new ArgumentNullException();
             rtb.Select(int.MaxValue, 0);
             rtb.SelectionColor = (MessageColor == null) ? rtb.SelectionColor : MessageColor.Value;
-            rtb.SelectedText = this.Message as string;
+            rtb.SelectedText = Message as string;
             return true;
         }
     }
@@ -164,7 +164,7 @@ namespace QQChat.Classes
 
         public static void AppendLine(this RichTextBox textbox, string lineStr)
         {
-            int lineCount = 1000;
+            const int lineCount = 1000;
             string[] lines = textbox.Lines;
             int selectStart = textbox.SelectionStart;
             int selectLength = textbox.SelectionLength;
@@ -201,7 +201,7 @@ namespace QQChat.Classes
 
         public static void AppendLine(this RichTextBox textbox, string lineStr, Color lineColor)
         {
-            int lineCount = 1000;
+            const int lineCount = 1000;
             string[] lines = textbox.Lines;
             int selectStart = textbox.SelectionStart;
             int selectLength = textbox.SelectionLength;

@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -88,7 +87,7 @@ namespace QQChat
                     if (this.IsHandleCreated)
                     {
 
-                        BeginInvoke(new MethodInvoker(() => { imessage.AppendTo(richTextBox1); }));
+                        BeginInvoke(new MethodInvoker(() => imessage.AppendTo(richTextBox1)));
                     }
                     else
                     {
@@ -110,8 +109,10 @@ namespace QQChat
             }
             if (string.IsNullOrEmpty(message))
                 return;
-            QQFriend qfriend = friend as QQFriend;
-            if (qfriend != this.Friend)
+            var qfriend = friend as QQFriend;
+            if (qfriend == null)
+                return;
+            if (qfriend != Friend)
                 return;
             string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message);
             Color c = FormHelper.PickColor();

@@ -261,7 +261,7 @@ namespace WebQQ2.WebQQ2
 
         public string GetCFaceUrl(string pic, string gid)
         {
-            string url = string.Format(qq_cface, pic, gid, QQHelper.GetTime()); ;
+            string url = string.Format(qq_cface, pic, gid, QQHelper.GetTime());
             return GetFileTrueUrl(url);
         }
 
@@ -390,7 +390,7 @@ namespace WebQQ2.WebQQ2
             {
                 return "尚未全局登录成功";
             }
-            string url = string.Format(qq_logout2, _user.ClientID, _user.PsessionID, QQHelper.GetTime()); ;
+            string url = string.Format(qq_logout2, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
             string retstr = GetUrlText(url);
             if (retstr != null && retstr.Length > 0)
             {
@@ -417,7 +417,7 @@ namespace WebQQ2.WebQQ2
             {
                 return "尚未全局登录成功";
             }
-            string url = string.Format(qq_change_status2, newStatus, _user.ClientID, _user.PsessionID, QQHelper.GetTime()); ;
+            string url = string.Format(qq_change_status2, newStatus, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
             string retstr = GetUrlText(url);
             if (retstr != null && retstr.Length > 0)
             {
@@ -643,7 +643,7 @@ namespace WebQQ2.WebQQ2
             User.Status = QQStatus.StatusOffline.StatusInternal;
             if (GetMessageError != null)
             {
-                GetMessageError(this,new ErrorEventArgs(new Exception(error)));
+                GetMessageError(this, new ErrorEventArgs(new Exception(error)));
             }
         }
 
@@ -690,7 +690,7 @@ namespace WebQQ2.WebQQ2
                                     //{"retcode":0,"result":[{"poll_type":"buddies_status_change","value":{"uin":15130679,"status":"online","client_type":1}}]}
 
                                     string status = messagevalue["status"].ToString();
-                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]),true);
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]), true);
                                     if (friend != null)
                                     {
                                         if (friend.status != status)
@@ -712,7 +712,7 @@ namespace WebQQ2.WebQQ2
                                     //{"size":12,"color":"000080","style":[0,0,0],"name":"\u534E\u6587\u5B8B\u4F53"}],"\u6B66\u5A01  "]}}]}
                                     if (MessageFriendReceived != null)
                                     {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
+                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
                                         Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
@@ -747,7 +747,7 @@ namespace WebQQ2.WebQQ2
                                     //"msg_type":9,"reply_ip":178849323}}]}
                                     if (MessageFriendReceived != null)
                                     {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
+                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         MessageFriendReceived(this, new FriendEventArgs(friend, msgid, DateTime.Now, MessageEventType.MESSAGE_SHAKE));
                                     }
@@ -792,10 +792,7 @@ namespace WebQQ2.WebQQ2
                                         QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
                                         if (member == null)
                                         {
-                                            new Task(() =>
-                                            {
-                                                RefreshGroupInfo(group);
-                                            }).Start();
+                                            new Task(() => RefreshGroupInfo(group)).Start();
                                         }
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
@@ -814,9 +811,11 @@ namespace WebQQ2.WebQQ2
                                 //"session_id":19823,"cancel_type":1,"time":1364865264}}]}
                                 if (MessageFriendReceived != null)
                                 {
-                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
-                                    Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                    msgs.Add("poll_type", poll_type);
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                        {
+                                            {"poll_type", poll_type}
+                                        };
                                     foreach (string key in messagevalue.Keys)
                                     {
                                         msgs.Add(key, messagevalue[key]);
@@ -831,9 +830,11 @@ namespace WebQQ2.WebQQ2
                                 //"ip":"101.226.77.168","port":80,"from_uin":2786090795,"size":235,"name":"test2.py","expire_time":1365470120,"time":1364865321}}]}
                                 if (MessageFriendReceived != null)
                                 {
-                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
-                                    Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                    msgs.Add("poll_type", poll_type);
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                        {
+                                            {"poll_type", poll_type}
+                                        };
                                     foreach (string key in messagevalue.Keys)
                                     {
                                         msgs.Add(key, messagevalue[key]);
@@ -847,8 +848,10 @@ namespace WebQQ2.WebQQ2
                                     _user.Status = "offline";
                                     if (MessageFriendReceived != null)
                                     {
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                        msgs.Add("poll_type", poll_type);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
                                         foreach (string key in messagevalue.Keys)
                                         {
                                             msgs.Add(key, messagevalue[key]);
@@ -864,9 +867,11 @@ namespace WebQQ2.WebQQ2
 
                                     if (MessageFriendReceived != null)
                                     {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]),true);
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                        msgs.Add("poll_type", poll_type);
+                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
                                         long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         foreach (string key in messagevalue.Keys)
                                         {
@@ -880,8 +885,10 @@ namespace WebQQ2.WebQQ2
                                 {
                                     if (MessageFriendReceived != null)
                                     {
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                        msgs.Add("poll_type", poll_type);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
                                         foreach (string key in messagevalue.Keys)
                                         {
                                             msgs.Add(key, messagevalue[key]);
@@ -906,8 +913,10 @@ namespace WebQQ2.WebQQ2
                                     //"admin_uin":1793858042,"t_admin_uin":"","admin_nick":"\u521B\u5EFA\u8005"}}]}
                                     if (MessageFriendReceived != null)
                                     {
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                        msgs.Add("poll_type", poll_type);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
                                         foreach (string key in messagevalue.Keys)
                                         {
                                             msgs.Add(key, messagevalue[key]);
@@ -924,8 +933,10 @@ namespace WebQQ2.WebQQ2
                                     //"msg":"aaa","allow":1,"stat":10,"client_type":1}}]}
                                     if (MessageFriendReceived != null)
                                     {
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                        msgs.Add("poll_type", poll_type);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
                                         foreach (string key in messagevalue.Keys)
                                         {
                                             msgs.Add(key, messagevalue[key]);
@@ -938,8 +949,10 @@ namespace WebQQ2.WebQQ2
                                 {
                                     if (MessageFriendReceived != null)
                                     {
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>();
-                                        msgs.Add("poll_type", poll_type);
+                                        Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
                                         foreach (string key in messagevalue.Keys)
                                         {
                                             msgs.Add(key, messagevalue[key]);

@@ -58,7 +58,6 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.Linq" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -80,14 +79,6 @@
     <ProjectReference Include="..\ExcelOp\ExcelOp.csproj">
       <Project>{66112f55-cdb3-4883-b273-36f1f3055c1d}</Project>
       <Name>ExcelOp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\IMessageDeal\MessageDeal.csproj">
-      <Project>{5d7192b6-a4bc-4f48-9cf2-9513527f254e}</Project>
-      <Name>MessageDeal</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MessageDeal1\MessageDeal1.csproj">
-      <Project>{d519f8cb-ba1a-49bb-890b-76f2df39b824}</Project>
-      <Name>MessageDeal1</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

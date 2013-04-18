@@ -25,10 +25,13 @@ namespace QQChat.Classes
         /// </summary>
         /// <param name="message">要发送的消息内容</param>
         void SendMessage(string message);
+
         /// <summary>
         /// 收到消息并添加到窗口
         /// </summary>
         /// <param name="message">收到的消息内容</param>
+        /// <param name="extend">附加信息</param>
+        /// <param name="time">发送时间</param>
         void AppendMessage(string message,object extend,DateTime time);
     }
 }

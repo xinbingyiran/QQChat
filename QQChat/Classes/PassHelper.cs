@@ -17,7 +17,6 @@ namespace QQChat.Classes
         /// AES加密算法
         /// </summary>
         /// <param name="plainText">明文字符串</param>
-        /// <param name="strKey">密钥</param>
         /// <returns>返回加密后的密文</returns>
         public static string AESEncrypt(string plainText)
         {
@@ -41,7 +40,6 @@ namespace QQChat.Classes
         /// AES解密
         /// </summary>
         /// <param name="message">密文</param>
-        /// <param name="strKey">密钥</param>
         /// <returns>返回解密后的字符串</returns>
         public static string AESDecrypt(string message)
         {

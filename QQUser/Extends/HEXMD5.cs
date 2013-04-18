@@ -7,12 +7,10 @@ namespace WebQQ2.Extends
 {
     public class HEXMD5
     {
+        private const int chrsz = 8;
+        private const int mode = 32;
 
-        private static readonly bool hexcase = true;
-        private static readonly string b64pad = "";
-        private static readonly int chrsz = 8;
-        private static readonly int mode = 32;
-        public static string md5(string A)
+        public static string Md5(string A)
         {
             return hex_md5(A);
         }
@@ -180,7 +178,7 @@ namespace WebQQ2.Extends
 
         public static string hexchar2bin(string str)
         {
-            List<byte> arr = new List<byte>();
+            var arr = new List<byte>();
             for (var i = 0; i < str.Length; i = i + 2)
             {
                 arr.Add(Convert.ToByte(str.Substring(i, 2),16));
@@ -188,31 +186,31 @@ namespace WebQQ2.Extends
             return new String(Bytes2Chars(arr.ToArray()));
         }
 
-        public static char[] Bytes2Chars(IEnumerable<byte> bytes)
+        public static char[] Bytes2Chars(byte[] bytes)
         {
-            char[] chars = new char[bytes.Count()];
-            for (int i = 0; i < bytes.Count(); i++)
+            char[] chars = new char[bytes.Length];
+            for (int i = 0; i < bytes.Length; i++)
             {
-                chars[i] = (char)bytes.ElementAt(i);
+                chars[i] = (char)bytes[i];
             }
             return chars;
         }
 
-        public static byte[] Chars2Bytes(IEnumerable<char> chars)
+        public static byte[] Chars2Bytes(char[] chars)
         {
-            byte[] bytes = new byte[chars.Count()];
-            for (int i = 0; i < chars.Count(); i++)
+            byte[] bytes = new byte[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
             {
-                bytes[i] = (byte)chars.ElementAt(i);
+                bytes[i] = (byte)chars[i];
             }
             return bytes;
         }
-        public static int[] Bytes2Ints(IEnumerable<byte> bytes)
+        public static int[] Bytes2Ints(byte[] bytes)
         {
-            int[] ints = new int[bytes.Count()];
-            for (int i = 0; i < bytes.Count(); i++)
+            int[] ints = new int[bytes.Length];
+            for (int i = 0; i < bytes.Length; i++)
             {
-                ints[i] = bytes.ElementAt(i);
+                ints[i] = bytes[i];
             }
             return ints;
         }

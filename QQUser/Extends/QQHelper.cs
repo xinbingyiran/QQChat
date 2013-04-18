@@ -27,9 +27,9 @@ namespace WebQQ2.Extends
 
         public static string GetPassword(string uin, string password, string verficode)
         {
-            string rpass = HEXMD5.hexchar2bin(HEXMD5.md5(password));
-            rpass = HEXMD5.md5(rpass + uin);
-            rpass = HEXMD5.md5(rpass + verficode.ToUpper());
+            string rpass = HEXMD5.hexchar2bin(HEXMD5.Md5(password));
+            rpass = HEXMD5.Md5(rpass + uin);
+            rpass = HEXMD5.Md5(rpass + verficode.ToUpper());
             return rpass;
         }
 
