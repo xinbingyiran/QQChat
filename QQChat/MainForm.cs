@@ -167,10 +167,7 @@ Designed by XBYR", @"QQ聊天程序");
 
         private void ReturnToLogIn()
         {
-            _qq.MessageFriendReceived -= QQMessageFriendReceived;
-            _qq.MessageGroupReceived -= QQMessageGroupReceived;
-            _qq.GetMessageError -= QQ_GetMessageError;
-            _qq.LogOutQQ2();
+            this.Clear();
             this.DialogResult = System.Windows.Forms.DialogResult.Retry;
             this.Close();
         }
@@ -209,7 +206,7 @@ Designed by XBYR", @"QQ聊天程序");
                     Type[] types = ab.GetTypes();
                     foreach (Type t in types)
                     {
-                        if (!t.IsClass || t.GetInterface("MessageDeal.IMessageDeal") == null)
+                        if (!t.IsClass || t.IsAbstract || t.GetInterface("MessageDeal.IMessageDeal") == null)
                         {
                             continue;
                         }
@@ -235,46 +232,51 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 return;
             }
-            Dictionary<string, string> menus = o.Menus;
-            ToolStripItem[] subitems = new ToolStripItem[menus.Count + 2];
-            int i = 0;
-            foreach (KeyValuePair<string, string> menu in menus)
-            {
-                ToolStripItem item = new ToolStripMenuItem(menu.Key);
-                KeyValuePair<string, string> menu1 = menu;
-                item.Click += (sender, e) => o.MenuClicked(menu1.Value);
-                subitems[i] = item;
-                i++;
-            }
-            ///////
+            ToolStripMenuItem newitem = new ToolStripMenuItem(o.PluginName);
             var key = t.FullName;
             if (_settings != null && _settings.ContainsKey(key))
             {
                 o.Setting = _settings[key];
             }
-            ToolStripMenuItem statusitem = new ToolStripMenuItem("激活状态");
+            ToolStripMenuItem statusitem = new ToolStripMenuItem("激活");
             statusitem.Checked = o.Enabled;
             statusitem.Click += (sender, e) =>
             {
                 o.Enabled = !o.Enabled;
                 statusitem.Checked = o.Enabled;
             };
-            subitems[i] = statusitem;
-            i++;
-
-            ToolStripMenuItem helpitem = new ToolStripMenuItem("命令列表");
-            helpitem.Click += (sender, args) =>
+            newitem.DropDownItems.Add(statusitem);
+            Dictionary<string, string> filters = o.Filters;
+            if (filters != null && filters.Count > 0)
+            {
+                ToolStripMenuItem helpitem = new ToolStripMenuItem("命令");
+                StringBuilder sb = new StringBuilder();
+                foreach (KeyValuePair<string, string> filter in filters)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (KeyValuePair<string, string> filter in o.Filters)
+                    sb.AppendFormat("{0} {1}{2}", filter.Key, filter.Value, Environment.NewLine);
+                }
+                var str = sb.ToString();
+                helpitem.Click += (sender, args) =>
                     {
-                        sb.AppendFormat("{0} {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                    }
-                    MessageBox.Show(sb.ToString());
-                };
-            subitems[i] = helpitem;
-            ToolStripMenuItem newitem = new ToolStripMenuItem(o.IName);
-            newitem.DropDownItems.AddRange(subitems);
+                        MessageBox.Show(str);
+                    };
+                newitem.DropDownItems.Add(helpitem);
+            }
+            Dictionary<string, string> menus = o.Menus;
+            if (menus != null && menus.Count > 0)
+            {
+                ToolStripItem[] subitems = new ToolStripItem[menus.Count];
+                int i = 0;
+                foreach (KeyValuePair<string, string> menu in menus)
+                {
+                    ToolStripItem item = new ToolStripMenuItem(menu.Key);
+                    KeyValuePair<string, string> menu1 = menu;
+                    item.Click += (sender, e) => o.MenuClicked(menu1.Value);
+                    subitems[i] = item;
+                    i++;
+                }
+                newitem.DropDownItems.AddRange(subitems);
+            }
             菜单ToolStripMenuItem.DropDownItems.Add(newitem);
         }
 
@@ -1421,8 +1423,8 @@ Designed by XBYR", @"QQ聊天程序");
                 if (MessageBox.Show(@"你确定要退出吗？", @"退出确认", MessageBoxButtons.YesNoCancel) == System.Windows.Forms.DialogResult.Yes)
                 {
                     this.Hide();
-                    this.DialogResult = DialogResult.Abort;
-                    _qq.LogOutQQ2();
+                    this.Clear();
+                    this.DialogResult = System.Windows.Forms.DialogResult.None;
                 }
                 else
                 {
@@ -1444,6 +1446,18 @@ Designed by XBYR", @"QQ聊天程序");
             foreach (var g in _groups.ToArray())
             {
                 g.Close();
+            }
+        }
+
+        private void Clear()
+        {
+            _qq.MessageFriendReceived -= QQMessageFriendReceived;
+            _qq.MessageGroupReceived -= QQMessageGroupReceived;
+            _qq.GetMessageError -= QQ_GetMessageError;
+            _qq.LogOutQQ2();
+            foreach (var p in Plugins)
+            {
+                p.Value.OnExited();
             }
         }
 

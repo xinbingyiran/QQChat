@@ -205,6 +205,7 @@ namespace QQChat
                 SaveToFile();
                 Environment.Exit(Environment.ExitCode);
             }
+            _settings = m.GetSettings();
             new Task(GetVerifyCode).Start();
             this.Show();
             EnableLog(true);

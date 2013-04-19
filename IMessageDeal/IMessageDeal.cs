@@ -102,7 +102,7 @@ namespace MessageDeal
         /// <summary>
         /// 插件名称
         /// </summary>
-        string IName { get; }
+        string PluginName { get; }
         /// <summary>
         /// 插件状态
         /// </summary>
@@ -149,5 +149,63 @@ namespace MessageDeal
         /// <param name="info">用户信息UserName,UserNick,UserMarkName</param>
         /// <returns>如果不需要回应，只需设置为null即可</returns>
         string Input(Dictionary<string, object> info);
+
+        /// <summary>
+        /// 退出时发送此消息，进行最后保存，时间不要太长，否则可能引起反感
+        /// </summary>
+        void OnExited();
+    }
+
+    public abstract class TMessage : IMessageDeal
+    {
+
+        public virtual string Setting { get; set; }
+
+        public virtual string PluginName
+        {
+            get { return null; }
+        }
+
+        public virtual bool Enabled { get; set; }
+
+        public virtual Dictionary<string, string> Menus
+        {
+            get { return null; }
+        }
+
+        public virtual Dictionary<string, string> Filters
+        {
+            get { return null; }
+        }
+
+        public virtual string DealFriendMessage(Dictionary<string, object> info, string message)
+        {
+            return null;
+        }
+
+        public virtual string DealGroupMessage(Dictionary<string, object> info, string message)
+        {
+            return null;
+        }
+
+        public virtual void MenuClicked(string menuName)
+        {
+            return;
+        }
+
+        public virtual string StatusChanged(Dictionary<string, object> info, string newStatus)
+        {
+            return null;
+        }
+
+        public virtual string Input(Dictionary<string, object> info)
+        {
+            return null;
+        }
+
+        public virtual void OnExited()
+        {
+            return;
+        }
     }
 }

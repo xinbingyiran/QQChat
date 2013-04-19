@@ -24,27 +24,27 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_login = "http://ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=1&aid=1003903&u1=http%3A%2F%2Fw.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-6-9305&mibao_css=m_webqq&t=1&g=1";
         private static readonly string qq_login2 = "http://d.web2.qq.com/channel/login2";
         private static readonly string qq_get_user_friends2 = "http://s.web2.qq.com/api/get_user_friends2";
-        private static readonly string qq_get_friend_info2 = "http://s.web2.qq.com/api/get_friend_info2?tuin={0}&verifysession=&code=&vfwebqq={1}&t={2}";
+        //private static readonly string qq_get_friend_info2 = "http://s.web2.qq.com/api/get_friend_info2?tuin={0}&verifysession=&code=&vfwebqq={1}&t={2}";
         private static readonly string qq_getface_user = "http://face3.qun.qq.com/cgi/svr/face/getface?cache=1&type=1&fid=0&uin={0}&vfwebqq={1}&t={2}";
-        private static readonly string qq_getface_qun = "http://face1.qun.qq.com/cgi/svr/face/getface?cache=0&type=4&fid=0&uin={0}&vfwebqq={1}";//uin = code
+        //private static readonly string qq_getface_qun = "http://face1.qun.qq.com/cgi/svr/face/getface?cache=0&type=4&fid=0&uin={0}&vfwebqq={1}";//uin = code
         private static readonly string qq_get_group_name_list_mask2 = "http://s.web2.qq.com/api/get_group_name_list_mask2";
         private static readonly string qq_get_group_info = "http://s.web2.qq.com/api/get_group_info?gcode=%5B{0}%5D&retainKey=memo&vfwebqq={1}&t={2}";
         private static readonly string qq_get_group_info_ext2 = "http://s.web2.qq.com/api/get_group_info_ext2?gcode={0}&vfwebqq={1}&t={2}";
         private static readonly string qq_send_qun_msg2 = "http://d.web2.qq.com/channel/send_qun_msg2";
         private static readonly string qq_get_online_buddies2 = "http://d.web2.qq.com/channel/get_online_buddies2?clientid={0}&psessionid={1}&t={2}";
-        private static readonly string qq_get_single_long_nick2 = "http://s.web2.qq.com/api/get_single_long_nick2?tuin={0}&vfwebqq={1}&t={2}";
-        private static readonly string qq_set_long_nick2 = "http://s.web2.qq.com/api/set_long_nick2";
-        private static readonly string qq_get_msg_tip = "http://web.qq.com/web2/get_msg_tip?uin=&tp=1&id=0&retype=1&rc=18&lv=3&t={0}";
-        private static readonly string qq_get_discu_list_new2 = "http://d.web2.qq.com/channel/get_discu_list_new2?clientid={0}&psessionid={1}&vfwebqq={2}&t={3}";
-        private static readonly string qq_get_recent_list2 = "http://d.web2.qq.com/channel/get_recent_list2";
+        //private static readonly string qq_get_single_long_nick2 = "http://s.web2.qq.com/api/get_single_long_nick2?tuin={0}&vfwebqq={1}&t={2}";
+        //private static readonly string qq_set_long_nick2 = "http://s.web2.qq.com/api/set_long_nick2";
+        //private static readonly string qq_get_msg_tip = "http://web.qq.com/web2/get_msg_tip?uin=&tp=1&id=0&retype=1&rc=18&lv=3&t={0}";
+        //private static readonly string qq_get_discu_list_new2 = "http://d.web2.qq.com/channel/get_discu_list_new2?clientid={0}&psessionid={1}&vfwebqq={2}&t={3}";
+        //private static readonly string qq_get_recent_list2 = "http://d.web2.qq.com/channel/get_recent_list2";
         private static readonly string qq_poll2 = "http://d.web2.qq.com/channel/poll2";
         private static readonly string qq_send_buddy_msg2 = "http://d.web2.qq.com/channel/send_buddy_msg2";
-        private static readonly string qq_get_qq_level2 = "http://s.web2.qq.com/api/get_qq_level2?tuin={0}&vfwebqq={1}&t={2}";
+        //private static readonly string qq_get_qq_level2 = "http://s.web2.qq.com/api/get_qq_level2?tuin={0}&vfwebqq={1}&t={2}";
         private static readonly string qq_get_friend_uin2_user = "http://s.web2.qq.com/api/get_friend_uin2?tuin={0}&verifysession=&type=1&code=&vfwebqq={1}&t={2}";
-        private static readonly string qq_get_friend_uin2_group = "http://s.web2.qq.com/api/get_friend_uin2?tuin={0}&verifysession=&type=4&code=&vfwebqq={1}&t={2}";
+        //private static readonly string qq_get_friend_uin2_group = "http://s.web2.qq.com/api/get_friend_uin2?tuin={0}&verifysession=&type=4&code=&vfwebqq={1}&t={2}";
         private static readonly string qq_change_status2 = "http://d.web2.qq.com/channel/change_status2?newstatus={0}&clientid={1}&psessionid={2}&t={3}";
         private static readonly string qq_logout2 = "http://d.web2.qq.com/channel/logout2?ids=&clientid={0}&psessionid={1}&t={2}";
-        private static readonly string qq_search_qq_by_uin2 = "http://s.web2.qq.com/api/search_qq_by_uin2?tuin={0}&verifysession={1}&code={2}&vfwebqq={3}&t={4}";
+        //private static readonly string qq_search_qq_by_uin2 = "http://s.web2.qq.com/api/search_qq_by_uin2?tuin={0}&verifysession={1}&code={2}&vfwebqq={3}&t={4}";
         private static readonly string qq_get_c2cmsg_sig2 = "http://d.web2.qq.com/channel/get_c2cmsg_sig2?id={0}&to_uin={1}&service_type=0&clientid={2}&psessionid={3}&t={4}";
         private static readonly string qq_get_stranger_info2 = "http://s.web2.qq.com/api/get_stranger_info2?tuin={0}&verifysession=&gid=0&code=&vfwebqq={1}&t={2}";
         private static readonly string qq_send_sess_msg2 = "http://d.web2.qq.com/channel/send_sess_msg2";
@@ -59,7 +59,7 @@ namespace WebQQ2.WebQQ2
 
         private static readonly string qq_cface = "http://qun.qq.com/cgi/svr/chatimg/get?af=1&pic={0}&gid={1}&time={2}";
 
-        private static readonly string qq_cface2 = "http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
+        //private static readonly string qq_cface2 = "http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
 
         private static readonly string qq_deny_added_request2 = "http://s.web2.qq.com/api/deny_added_request2";
         private static readonly string qq_allow_added_request2 = "http://s.web2.qq.com/api/allow_added_request2";

@@ -9,10 +9,10 @@ using System.Windows.Forms;
 
 namespace HaveAJoke
 {
-    public class MyAPI : IMessageDeal
+    public class MyAPI : TMessage
     {
 
-        public string Setting
+        public override string Setting
         {
             get
             {
@@ -24,15 +24,9 @@ namespace HaveAJoke
             }
         }
 
-        public string IName
+        public override string PluginName
         {
-            get { return "随机回复笑话插件"; }
-        }
-
-        public bool Enabled
-        {
-            get;
-            set;
+            get { return "随机笑话"; }
         }
 
         private Dictionary<string, string> _menus = new Dictionary<string, string>
@@ -41,7 +35,7 @@ namespace HaveAJoke
             {"关于","about"}
         };
 
-        public Dictionary<string, string> Menus
+        public override Dictionary<string, string> Menus
         {
             get { return _menus; }
         }
@@ -51,7 +45,7 @@ namespace HaveAJoke
             {"笑话","随机获取一则笑话"}
         };
 
-        public Dictionary<string, string> Filters
+        public override Dictionary<string, string> Filters
         {
             get { return _filters; }
         }
@@ -96,12 +90,12 @@ namespace HaveAJoke
             _count = jokes.Count;
         }
 
-        public string DealFriendMessage(Dictionary<string, object> info, string message)
+        public override string DealFriendMessage(Dictionary<string, object> info, string message)
         {
             return DealMessage(message);
         }
 
-        public string DealGroupMessage(Dictionary<string, object> info, string message)
+        public override string DealGroupMessage(Dictionary<string, object> info, string message)
         {
             return DealMessage(message);
         }
@@ -119,7 +113,7 @@ namespace HaveAJoke
             return null;
         }
 
-        public void MenuClicked(string menuName)
+        public override void MenuClicked(string menuName)
         {
             if (menuName == "reload")
             {
@@ -131,14 +125,5 @@ namespace HaveAJoke
             }
         }
 
-        public string StatusChanged(Dictionary<string, object> info, string newStatus)
-        {
-            return null;
-        }
-
-        public string Input(Dictionary<string, object> info)
-        {
-            return null;
-        }
     }
 }

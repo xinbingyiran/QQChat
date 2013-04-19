@@ -8,7 +8,7 @@ namespace WebQQ2.Extends
     public class HEXMD5
     {
         private const int chrsz = 8;
-        private const int mode = 32;
+        //private const int mode = 32;
 
         public static string Md5(string A)
         {
@@ -105,14 +105,14 @@ namespace WebQQ2.Extends
                 H = safe_add(H, B);
                 G = safe_add(G, A);
             }
-            if (mode == 16)
-            {
-                return new Int32[]{ I, H};
-            }
-            else
-            {
+            //if (mode == 16)
+            //{
+            //    return new Int32[]{ I, H};
+            //}
+            //else
+            //{
                 return new Int32[] { J, I, H, G };
-            }
+            //}
         }
         public static int md5_cmn(int F, int C, int B, int A, int E, int D)
         {

@@ -11,12 +11,12 @@ using System.IO;
 
 namespace WebApi
 {
-    public class MyWebApi : IMessageDeal
+    public class MyWebApi : TMessage
     {
 
         private bool _autoreplay = false;
 
-        public string Setting
+        public override string Setting
         {
             get
             {
@@ -32,14 +32,9 @@ namespace WebApi
             }
         }
 
-        public string IName
+        public override string PluginName
         {
             get { return "Web信息处理"; }
-        }
-        public bool Enabled
-        {
-            get;
-            set;
         }
 
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
@@ -50,7 +45,7 @@ namespace WebApi
             {"关于","about"}
         };
 
-        public Dictionary<string, string> Menus
+        public override Dictionary<string, string> Menus
         {
             get { return _menus; }
         }
@@ -69,7 +64,7 @@ namespace WebApi
             {"-s 查/启/停","状态切换与查询[查询/自动对话/-i对话]"},
         };
 
-        public Dictionary<string, string> Filters
+        public override Dictionary<string, string> Filters
         {
             get
             {
@@ -285,17 +280,17 @@ namespace WebApi
             return null;
         }
 
-        public string DealFriendMessage(Dictionary<string, object> info, string message)
+        public override string DealFriendMessage(Dictionary<string, object> info, string message)
         {
             return DealAllMessage(message);
         }
 
-        public string DealGroupMessage(Dictionary<string, object> info, string message)
+        public override string DealGroupMessage(Dictionary<string, object> info, string message)
         {
             return DealAllMessage(message);
         }
 
-        public void MenuClicked(string menuName)
+        public override void MenuClicked(string menuName)
         {
             if (menuName == "about")
             {
@@ -315,16 +310,6 @@ namespace WebApi
             {
                 MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
             }
-        }
-
-        public string StatusChanged(Dictionary<string, object> info, string newStatus)
-        {
-            return null;
-        }
-
-        public string Input(Dictionary<string, object> info)
-        {
-            return null;
         }
     }
 }

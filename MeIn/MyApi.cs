@@ -15,14 +15,14 @@ namespace MeIn
 {
     internal struct meinItem
     {
-        public string lastsay;
-        public DateTime lasttime;
+        public string uin;
+        public string nick;
         public string mark;
         public Int64 mein;
-        public string nick;
         public Int64 score;
         public DateTime time;
-        public string uin;
+        public DateTime lasttime;
+        public string lastsay;
     }
 
     internal struct iniItem
@@ -36,14 +36,10 @@ namespace MeIn
         public TimeSpan timespan;
     }
 
-    public class MyApi : IMessageDeal
+    public class MyApi : TMessage
     {
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
             {
-                {"记录启", "start"},
-                {"记录停", "stop"},
-                {"状态", "status"},
-                {"重载", "reload"},
                 {"设置", "setting"},
                 {"关于", "about"}
             };
@@ -85,13 +81,14 @@ namespace MeIn
                     LoadParas();
                     _timer = new Timer();
                     _timer.AutoReset = true;
-                    _timer.Interval = 5000;
+                    _timer.Interval = 300000;
                     _timer.Elapsed += _timer_Elapsed;
+                    System.Threading.Thread.Sleep(new Random().Next(300000));
                     _timer.Start();
                 }).Start();
         }
 
-        public string Setting
+        public override string Setting
         {
             get { return JsonConvert.SerializeObject(_iniItem); }
             set
@@ -106,29 +103,29 @@ namespace MeIn
             }
         }
 
-        public string IName
+        public override string PluginName
         {
             get { return "签到插件"; }
         }
 
-        public bool Enabled
+        public override bool Enabled
         {
             get { return _iniItem.isEnable; }
             set { _iniItem.isEnable = value; }
         }
 
-        public Dictionary<string, string> Menus
+        public override Dictionary<string, string> Menus
         {
             get { return _menus; }
         }
 
 
-        public Dictionary<string, string> Filters
+        public override Dictionary<string, string> Filters
         {
             get { return _filters; }
         }
 
-        public string DealFriendMessage(Dictionary<string, object> info, string message)
+        public override string DealFriendMessage(Dictionary<string, object> info, string message)
         {
             string p1 = "000000";
             string p2 = info[TranslateMessageUser.UserNum.Key].ToString();
@@ -137,7 +134,7 @@ namespace MeIn
             return DealMessage(message, p1, p2, nick, mark, false);
         }
 
-        public string DealGroupMessage(Dictionary<string, object> info, string message)
+        public override string DealGroupMessage(Dictionary<string, object> info, string message)
         {
             string p1 = info[TranslateMessageGroup.GroupNum.Key].ToString();
             string p2 = info[TranslateMessageGroup.MemberNum.Key].ToString();
@@ -146,13 +143,9 @@ namespace MeIn
             return DealMessage(message, p1, p2, nick, card, true);
         }
 
-        public void MenuClicked(string menuName)
+        public override void MenuClicked(string menuName)
         {
-            if (menuName == "reload")
-            {
-                LoadParas();
-            }
-            else if (menuName == "setting")
+            if (menuName == "setting")
             {
                 var s = new setting();
                 s.SaveItem = _iniItem;
@@ -161,37 +154,18 @@ namespace MeIn
                     _iniItem = s.SaveItem;
                 }
             }
-            else if (menuName == "start")
-            {
-                _iniItem.autoIn = true;
-                MessageBox.Show("启用成功。", "自动状态");
-            }
-            else if (menuName == "stop")
-            {
-                _iniItem.autoIn = false;
-                MessageBox.Show("停用成功。", "自动状态");
-            }
-            else if (menuName == "status")
-            {
-                MessageBox.Show(string.Format("当前状态为{0}。", _iniItem.autoIn ? "启用" : "停用"), "自动状态");
-            }
             else if (menuName == "about")
             {
                 MessageBox.Show("这是一个签到插件\r\n当你输入签到，代表你曾经到过。", "软件说明");
             }
         }
 
-        public string StatusChanged(Dictionary<string, object> info, string newStatus)
-        {
-            return null;
-        }
-
-        public string Input(Dictionary<string, object> info)
-        {
-            return null;
-        }
-
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            SaveToFile();
+        }
+
+        public override void OnExited()
         {
             SaveToFile();
         }
@@ -348,8 +322,8 @@ namespace MeIn
                         time = now,
                         nick = nick,
                         mark = mark,
-                        lasttime = now,
-                        lastsay = message,
+                        lasttime = item.lasttime,
+                        lastsay = item.lastsay,
                     };
                 _meinAll[uin] = item;
                 SetSaveFlag();

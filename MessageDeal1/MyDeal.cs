@@ -16,7 +16,7 @@ namespace MessageDeal1
         public string find;
         public int index;
     };
-    public class MyDeal : IMessageDeal
+    public class MyDeal : TMessage
     {
 
         private List<KeyValuePair<string, string>> _learning;
@@ -33,7 +33,7 @@ namespace MessageDeal1
         private readonly object _saveLock;
         private System.Timers.Timer _timer;
 
-        public string Setting
+        public override string Setting
         {
             get
             {
@@ -48,20 +48,13 @@ namespace MessageDeal1
                 }
             }
         }
-        public string IName
+        public override string PluginName
         {
             get { return "学话鹦鹉"; }
         }
 
-        public bool Enabled
-        {
-            get;
-            set;
-        }
-
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
-            {"重载","reload"},
             {"启用","start"},
             {"停用","stop"},
             {"状态","status"},
@@ -79,12 +72,12 @@ namespace MessageDeal1
             {"-状[ 查/启/停]","自动回答问题状态查询/启用/停用"},
         };
 
-        public Dictionary<string, string> Menus
+        public override Dictionary<string, string> Menus
         {
             get { return _menus; }
         }
 
-        public Dictionary<string, string> Filters
+        public override Dictionary<string, string> Filters
         {
             get
             {
@@ -108,8 +101,9 @@ namespace MessageDeal1
                     LoadFromFile();
                     _timer = new System.Timers.Timer();
                     _timer.AutoReset = true;
-                    _timer.Interval = 5000;
+                    _timer.Interval = 300000;
                     _timer.Elapsed += _timer_Elapsed;
+                    System.Threading.Thread.Sleep(new Random().Next(300000));
                     _timer.Start();
                 }).Start();
         }
@@ -170,7 +164,7 @@ namespace MessageDeal1
             }
         }
 
-        public string DealFriendMessage(Dictionary<string, object> info, string message)
+        public override string DealFriendMessage(Dictionary<string, object> info, string message)
         {
             return DealWDString(message);
         }
@@ -349,19 +343,14 @@ namespace MessageDeal1
             return retstr;
         }
 
-        public string DealGroupMessage(Dictionary<string, object> info, string message)
+        public override string DealGroupMessage(Dictionary<string, object> info, string message)
         {
             return DealWDString(message);
         }
 
-        public void MenuClicked(string menuName)
+        public override void MenuClicked(string menuName)
         {
-            if (menuName == "reload")
-            {
-                LoadFromFile();
-                MessageBox.Show("已完成重载，共" + _learning.Count + "条数据", "操作提示");
-            }
-            else if (menuName == "start")
+            if (menuName == "start")
             {
                 _autoreplay = true;
                 MessageBox.Show("当前自动回答问题状态为启用", "状态指示");
@@ -381,27 +370,11 @@ namespace MessageDeal1
             }
         }
 
-        public string StatusChanged(Dictionary<string, object> info, string newStatus)
+        public override void OnExited()
         {
-            //if (Enabled)
-            //{
-            //    QQStatus status = QQStatus.GetQQStatusByInternal(newStatus);
-            //    if (status != null && status != QQStatus.StatusOffline)
-            //    {
-            //        return string.Format("{0} 你好，你现在的状态是:{1}", TranslateMessageUser.UserNick, status.Status);
-            //    }
-            //}
-            return null;
+            SaveToFile();
         }
 
-        public string Input(Dictionary<string, object> info)
-        {
-            //if (Enabled)
-            //{
-            //    return string.Format("{0} 你好，我正在等待你的输入。", TranslateMessageUser.UserNick);
-            //}
-            return null;
-        }
     }
 
     internal static class Extends

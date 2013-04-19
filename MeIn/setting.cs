@@ -55,6 +55,7 @@ namespace MeIn
             SaveItem.timespan = new TimeSpan(TimeSpan.TicksPerMinute * span);
             SaveItem.item = textBoxName.Text;
             SaveItem.pdata = richTextBox1.Text;
+            SaveItem.autoIn = checkBox1.Checked;
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -66,6 +67,7 @@ namespace MeIn
             textBoxSpan.Text = ((Int32)SaveItem.timespan.TotalMinutes).ToString();
             textBoxName.Text = SaveItem.item;
             richTextBox1.Text = SaveItem.pdata;
+            checkBox1.Checked = SaveItem.autoIn;
             this.DialogResult = DialogResult.None;
 
         }
