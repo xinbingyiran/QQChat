@@ -31,6 +31,18 @@ namespace QQChat
         private List<SessForm> _sesss;
         private SystemForm _system;
         private object _createlock;
+        private string _fileName;
+        public string[] Paras
+        {
+            get;
+            private set;
+        }
+
+        public LoginForm LoginForm
+        {
+            get;
+            private set;
+        }
 
         private TreeNode _vfzNode = new TreeNode() { Text = @"未分组", Tag = -1, Name = "-1" };
         private TreeNode _msrNode = new TreeNode() { Text = @"陌生人", Tag = 999999, Name = "999999" };
@@ -40,8 +52,33 @@ namespace QQChat
         public MainForm()
         {
             InitializeComponent();
+            LoginForm = new LoginForm();
             mainForm = this;
             _createlock = new object();
+            _fileName = Application.StartupPath + "\\QQUser.dat";
+            try
+            {
+                Paras = File.ReadAllLines(_fileName);
+                _settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(Paras[2]);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+
+        public void SaveToFile()
+        {
+            try
+            {
+                string[] lines = new[] { 
+                    LoginForm.UserString,
+                    LoginForm.PassString,
+                    JsonConvert.SerializeObject(_settings)
+                };
+                File.WriteAllLines(_fileName, lines);
+            }
+            catch (Exception) { }
         }
 
         private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -53,12 +90,19 @@ Designed by XBYR", @"QQ聊天程序");
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            LoadStatus();
-            LoadPlugins();
-            CheckQQStatus();
             _groups = new List<GroupForm>();
             _friends = new List<FriendForm>();
             _sesss = new List<SessForm>();
+            if (LoginForm.QQ == null)
+            {
+                if (LoginForm.ShowDialog() != DialogResult.OK)
+                {
+                    Application.Exit();
+                }
+            }
+            LoadStatusMenu();
+            LoadPlugins();
+            InitUser(LoginForm.QQ);
         }
 
         private void treeViewF_AfterSelect(object sender, TreeViewEventArgs e)
@@ -135,7 +179,7 @@ Designed by XBYR", @"QQ聊天程序");
             }
         }
 
-        private void LoadStatus()
+        private void LoadStatusMenu()
         {
             ToolStripMenuItem loginitem = new ToolStripMenuItem("重新登录");
             loginitem.Click += (sender, args) => ReturnToLogIn();
@@ -168,8 +212,13 @@ Designed by XBYR", @"QQ聊天程序");
         private void ReturnToLogIn()
         {
             this.Clear();
-            this.DialogResult = System.Windows.Forms.DialogResult.Retry;
-            this.Close();
+            this.Hide();
+            if (LoginForm.ShowDialog() != DialogResult.OK)
+            {
+                this.Close();
+            }
+            this.Show();
+            this.InitUser(LoginForm.QQ);
         }
 
         private void CheckQQStatus()
@@ -288,6 +337,7 @@ Designed by XBYR", @"QQ聊天程序");
             _qq.MessageFriendReceived += QQMessageFriendReceived;
             _qq.MessageGroupReceived += QQMessageGroupReceived;
             _qq.GetMessageError += QQ_GetMessageError;
+            CheckQQStatus();
             new Task(() =>
             {
                 GetAllFriends();
@@ -1424,7 +1474,6 @@ Designed by XBYR", @"QQ聊天程序");
                 {
                     this.Hide();
                     this.Clear();
-                    this.DialogResult = System.Windows.Forms.DialogResult.None;
                 }
                 else
                 {
@@ -1432,7 +1481,14 @@ Designed by XBYR", @"QQ聊天程序");
                     return;
                 }
             }
+        }
 
+        private void Clear()
+        {
+            _qq.MessageFriendReceived -= QQMessageFriendReceived;
+            _qq.MessageGroupReceived -= QQMessageGroupReceived;
+            _qq.GetMessageError -= QQ_GetMessageError;
+            _qq.LogOutQQ2();
             if (_system != null)
                 _system.Close();
             foreach (var s in _sesss.ToArray())
@@ -1447,18 +1503,12 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 g.Close();
             }
-        }
-
-        private void Clear()
-        {
-            _qq.MessageFriendReceived -= QQMessageFriendReceived;
-            _qq.MessageGroupReceived -= QQMessageGroupReceived;
-            _qq.GetMessageError -= QQ_GetMessageError;
-            _qq.LogOutQQ2();
             foreach (var p in Plugins)
             {
                 p.Value.OnExited();
             }
+            treeViewF.Nodes.Clear();
+            treeViewG.Nodes.Clear();
         }
 
         private void MainForm_Activated(object sender, EventArgs e)

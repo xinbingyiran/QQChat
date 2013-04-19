@@ -15,7 +15,11 @@ namespace QQChat
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LoginForm());
+            var mainForm = new MainForm();
+            if (mainForm.LoginForm.ShowDialog() == DialogResult.OK)
+            {
+                Application.Run(mainForm);
+            }
         }
     }
 }

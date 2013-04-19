@@ -17,16 +17,30 @@ namespace QQChat
 {
     public partial class LoginForm : Form
     {
-        private QQ _qq;
+        public QQ QQ
+        {
+            get;
+            private set;
+        }
 
-        private string _fileName;
-
-        private Dictionary<string, string> _settings;
+        public string UserString
+        {
+            get
+            {
+                return PassHelper.AESEncrypt(textBoxUser.Text);
+            }
+        }
+        public string PassString
+        {
+            get
+            {
+                return PassHelper.AESEncrypt(textBoxPass.Text);
+            }
+        }
 
         public LoginForm()
         {
             InitializeComponent();
-            _fileName = Application.StartupPath + "\\QQUser.dat";
         }
 
         private void LoginForm_Load(object sender, EventArgs e)
@@ -46,10 +60,8 @@ namespace QQChat
             panel1.Visible = false;
             try
             {
-                var lines = File.ReadAllLines(_fileName);
-                textBoxUser.Text = PassHelper.AESDecrypt(lines[0]);
-                textBoxPass.Text = PassHelper.AESDecrypt(lines[1]);
-                _settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(lines[2]);
+                textBoxUser.Text = PassHelper.AESDecrypt(MainForm.mainForm.Paras[0]);
+                textBoxPass.Text = PassHelper.AESDecrypt(MainForm.mainForm.Paras[1]);
             }
             catch (Exception) { }
         }
@@ -63,6 +75,7 @@ namespace QQChat
             }
             panel1.Visible = true;
             pictureBoxCode.Image = image;
+            SetInfo("需要输入验证码");
         }
 
         private void SetTextCode(string text)
@@ -91,10 +104,7 @@ namespace QQChat
             const string mstr = @"\d{5,12}";
             if (Regex.IsMatch(textBoxUser.Text, mstr))
             {
-                if (_qq == null || textBoxUser.Text != _qq.User.QQNum)
-                {
-                    CreateUser(textBoxUser.Text);
-                }
+                CreateUser(textBoxUser.Text);
                 new Task(GetVerifyCode).Start();
             }
             else
@@ -106,7 +116,7 @@ namespace QQChat
         private void GetVerifyCode()
         {
             SetInfo("验证是否需要验证码");
-            string vcode = _qq.GetVerifyCode();
+            string vcode = QQ.GetVerifyCode();
             if (vcode.StartsWith("!") && vcode.Length == 4)
             {
                 SetTextCode(vcode);
@@ -120,7 +130,7 @@ namespace QQChat
 
         private void CreateUser(string qqnum)
         {
-            _qq = new QQ(qqnum);
+            QQ = new QQ(qqnum);
         }
 
         private void pictureBoxCode_Click(object sender, EventArgs e)
@@ -130,14 +140,14 @@ namespace QQChat
 
         private void GetVerifyImage()
         {
-            Image result = _qq.GetVerifyImage();
+            Image result = QQ.GetVerifyImage();
             SetImageCode(result);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             EnableLog(false);
-            if (_qq == null)
+            if (QQ == null)
             {
                 SetInfo("用户名不能空...");
                 EnableLog(true);
@@ -166,8 +176,8 @@ namespace QQChat
         {
             new Task(() =>
             {
-                string result = _qq.LoginQQ(pass, code);
-                if (!_qq.User.IsPreLoged)
+                string result = QQ.LoginQQ(pass, code);
+                if (!QQ.User.IsPreLoged)
                 {
                     SetInfo(result);
                     GetVerifyImage();
@@ -176,7 +186,7 @@ namespace QQChat
                 else
                 {
                     SetInfo(result);
-                    result = _qq.LoginQQ2(status);
+                    result = QQ.LoginQQ2(status);
                     if (result != null)
                     {
                         SetInfo(result);
@@ -195,24 +205,13 @@ namespace QQChat
                 BeginInvoke(new MethodInvoker(InitMainForm));
                 return;
             }
-            this.Hide();
-            MainForm m = new MainForm();
-            m.InitUser(_qq);
-            m.SetSettings(_settings);
-            if (m.ShowDialog() != System.Windows.Forms.DialogResult.Retry)
-            {
-                _settings = m.GetSettings();
-                SaveToFile();
-                Environment.Exit(Environment.ExitCode);
-            }
-            _settings = m.GetSettings();
-            new Task(GetVerifyCode).Start();
-            this.Show();
-            EnableLog(true);
+            DialogResult = DialogResult.OK;
+            this.Close();
         }
 
         private void LoginForm_Activated(object sender, EventArgs e)
         {
+            EnableLog(true);
             if (textBoxUser.Text.Length == 0)
             {
                 textBoxUser.Focus();
@@ -223,23 +222,5 @@ namespace QQChat
             }
         }
 
-        private void textBoxPass_Leave(object sender, EventArgs e)
-        {
-            SaveToFile();
-        }
-
-        private void SaveToFile()
-        {
-            try
-            {
-                string[] lines = new[] { 
-                    PassHelper.AESEncrypt(textBoxUser.Text),
-                    PassHelper.AESEncrypt(textBoxPass.Text),
-                    JsonConvert.SerializeObject(_settings)
-                };
-                File.WriteAllLines(_fileName, lines);
-            }
-            catch (Exception) { }
-        }
     }
 }
