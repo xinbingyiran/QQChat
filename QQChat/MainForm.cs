@@ -211,6 +211,11 @@ Designed by XBYR", @"QQ聊天程序");
 
         private void ReturnToLogIn()
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(ReturnToLogIn));
+                return;
+            }
             this.Clear();
             this.Hide();
             if (LoginForm.ShowDialog() != DialogResult.OK)
