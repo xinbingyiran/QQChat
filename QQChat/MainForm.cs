@@ -1508,6 +1508,8 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 g.Close();
             }
+            this.GetSettings();
+            this.SaveToFile();
             foreach (var p in Plugins)
             {
                 p.Value.OnExited();
@@ -1530,12 +1532,6 @@ Designed by XBYR", @"QQ聊天程序");
         private void 群组弹窗ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             群组弹窗ToolStripMenuItem.Checked = !群组弹窗ToolStripMenuItem.Checked;
-        }
-
-
-        internal void SetSettings(Dictionary<string, string> settings)
-        {
-            _settings = settings;
         }
 
         internal Dictionary<string, string> GetSettings()
