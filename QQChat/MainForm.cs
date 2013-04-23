@@ -595,7 +595,7 @@ Designed by XBYR", @"QQ聊天程序");
                             }
                             if (e.Member.num == 0)
                             {
-                                _qq.GetGroupMemberQQNum(e.Group, e.Member);
+                                _qq.GetGroupMemberInfos(e.Group, e.Member);
                             }
                             SetGroupText(e.Group, e.Member, e.MsgContent, e.Time);
                             if (e.Time > _qq.User.LoginTime)

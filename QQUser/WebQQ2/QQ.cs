@@ -498,9 +498,60 @@ namespace WebQQ2.WebQQ2
             return false;
         }
 
+        public bool GetGroupMemberStrangeInfo(QQGroupMember member)
+        {
+            try
+            {
+                //tuin={0}&verifysession=&gid=0&code=&vfwebqq={1}&t={2}";
+                string url = string.Format(qq_get_stranger_info2, member.uin, _user.VfWebQQ, QQHelper.GetTime());
+                string retstr = GetUrlText(url);
+                if (retstr != null && retstr.Length > 0)
+                {
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+
+                        member.face = Convert.ToInt64(result["face"]);
+                        member.birthday = QQHelper.ToJson(result["birthday"]);
+                        member.phone = result["phone"] as string;
+                        member.occupation = result["occupation"] as string;
+                        member.allow = Convert.ToInt64(result["allow"]);
+                        member.college = result["college"] as string;
+                        member.uin = Convert.ToInt64(result["uin"]);
+                        member.blood = Convert.ToInt64(result["blood"]);
+                        member.constel = Convert.ToInt64(result["constel"]);
+                        member.homepage = result["homepage"] as string;
+                        member.stat = Convert.ToInt64(result["stat"]);
+                        member.country = result["country"] as string;
+                        member.city = result["city"] as string;
+                        member.personal = result["personal"] as string;
+                        member.nick = result["nick"] as string;
+                        member.shengxiao = Convert.ToInt64(result["shengxiao"]);
+                        member.email = result["email"] as string;
+                        member.token = result["token"] as string;
+                        member.client_type = Convert.ToInt64(result["client_type"]);
+                        member.province = result["province"] as string;
+                        member.gender = result["gender"] as string;
+                        member.mobile = result["mobile"] as string;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
         public bool GetFriendInfos(QQFriend friend)
         {
             return GetFriendQQNum(friend) && GetFriendStrangeInfo(friend);
+        }
+
+        public bool GetGroupMemberInfos(QQGroup group,QQGroupMember member)
+        {
+            return GetGroupMemberQQNum(group, member) && GetGroupMemberStrangeInfo(member);
         }
 
         public bool GetFriendQQNum(QQFriend friend)
@@ -570,7 +621,7 @@ namespace WebQQ2.WebQQ2
             return null;
         }
 
-        public string GetGroupMemberQQNum(QQGroup group, QQGroupMember member)
+        public bool GetGroupMemberQQNum(QQGroup group, QQGroupMember member)
         {
             try
             {
@@ -590,7 +641,7 @@ namespace WebQQ2.WebQQ2
                             {
                                 MessageGroupReceived(this, new GroupEventArgs(group, member, 0, DateTime.Now, MessageEventType.MESSAGE_USER, string.Empty));
                             }
-                            return qqacc.ToString();
+                            return true;
                         }
                         catch (Exception)
                         {
@@ -598,14 +649,14 @@ namespace WebQQ2.WebQQ2
                     }
                     else
                     {
-                        return QQHelper.ToJson(root);
+                        return false;
                     }
                 }
             }
             catch (Exception)
             {
             }
-            return null;
+            return false;
         }
 
         public void StartGetMessage()
