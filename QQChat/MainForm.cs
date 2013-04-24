@@ -1234,7 +1234,7 @@ Designed by XBYR", @"QQ聊天程序");
                             {
                                 try
                                 {
-                                    string url = _qq.GetFaceUrl(m.Groups["faceid"]);
+                                    string url = QQ.GetFaceUrl(m.Groups["faceid"]);
                                     Stream s = _qq.GetUrlStream(url);
                                     Bitmap nbm = Image.FromStream(s) as Bitmap;
                                     bm = nbm;
@@ -1401,7 +1401,7 @@ Designed by XBYR", @"QQ聊天程序");
         }
 
 
-        public ArrayList TransSendFaceMessage(ArrayList oldmessages)
+        public static ArrayList TransSendFaceMessage(ArrayList oldmessages)
         {
             if (oldmessages == null || oldmessages.Count == 0)
                 return oldmessages;
@@ -1443,7 +1443,7 @@ Designed by XBYR", @"QQ聊天程序");
             return newmessages;
         }
 
-        public ArrayList TransSendMessage(string msg)
+        public static ArrayList TransSendMessage(string msg)
         {
             if (msg == null)
                 return null;

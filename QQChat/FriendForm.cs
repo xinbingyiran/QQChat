@@ -20,6 +20,7 @@ namespace QQChat
         public QQ QQ { get; set; }
         public QQFriend Friend { get; set; }
         private List<IRichMessage> _oldMessage;
+        private FaceForm _faceForm;
 
         public string ID
         {
@@ -39,6 +40,23 @@ namespace QQChat
         {
             InitializeComponent();
             _oldMessage = new List<IRichMessage>();
+            _faceForm = new FaceForm();
+            _faceForm.OnFaceSelected += FaceForm_OnFaceSelected;
+        }
+
+        private void FaceForm_OnFaceSelected(object sender, FaceEventArgs e)
+        {
+            AppendToSend(e.FaceString);
+        }
+
+        private void AppendToSend(string text)
+        {
+            if (InvokeRequired)
+            {
+                this.BeginInvoke(new MethodInvoker(() => AppendToSend(text)));
+                return;
+            }
+            this.richTextBox2.SelectedText = text;
         }
 
         private void FriendForm_Load(object sender, EventArgs e)
@@ -74,24 +92,32 @@ namespace QQChat
                 return;
             new Task(() =>
                 {
-                    var result = QQ.SendFriendMessage(Friend, MainForm.mainForm.TransSendMessage(message));
+                    var result = QQ.SendFriendMessage(Friend, MainForm.TransSendMessage(message));
                     var msg = string.Format("发送：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", DateTime.Now, Environment.NewLine, message);
                     if (result == false)
                     {
                         msg += "[发送失败]";
                     }
-                    IRichMessage imessage = new RichMessageText(msg + Environment.NewLine)
+                    var imessage = MainForm.mainForm.TransMessage(msg + Environment.NewLine, Friend.uin.ToString());
+                    var c = FormHelper.PickColor();
+                    foreach (var emessage in imessage)
                     {
-                        MessageColor = FormHelper.PickColor()
-                    };
+                        emessage.MessageColor = c;
+                    }
                     if (this.IsHandleCreated)
                     {
 
-                        BeginInvoke(new MethodInvoker(() => imessage.AppendTo(richTextBox1)));
+                        BeginInvoke(new MethodInvoker(() =>
+                            {
+                                foreach (var emessage in imessage)
+                                {
+                                    emessage.AppendTo(richTextBox1);
+                                }
+                            }));
                     }
                     else
                     {
-                        _oldMessage.Add(imessage);
+                        _oldMessage.AddRange(imessage);
                         if (_oldMessage.Count > 50)
                         {
                             _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
@@ -173,6 +199,11 @@ namespace QQChat
         private void FriendForm_Shown(object sender, EventArgs e)
         {
             DealOldMessage();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            _faceForm.Show(this);
         }
     }
 }

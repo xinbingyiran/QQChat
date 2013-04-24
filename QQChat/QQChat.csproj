@@ -56,8 +56,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\ChatFormMethod.cs" />
@@ -66,6 +68,12 @@
     <Compile Include="Classes\RichBoxAddtion.cs" />
     <Compile Include="Classes\RTFIMAGE.cs" />
     <Compile Include="Classes\TranslateMessage.cs" />
+    <Compile Include="FaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FaceForm.Designer.cs">
+      <DependentUpon>FaceForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="FriendForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -104,6 +112,9 @@
     <Compile Include="SessForm.Designer.cs">
       <DependentUpon>SessForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="FaceForm.resx">
+      <DependentUpon>FaceForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FriendForm.resx">
       <DependentUpon>FriendForm.cs</DependentUpon>
       <SubType>Designer</SubType>

@@ -56,7 +56,7 @@ namespace WebQQ2.Extends
         public static TEntry FromJson<TEntry>(string input)
         {
             JavaScriptSerializer jss = new JavaScriptSerializer();
-            return (TEntry)jss.Deserialize(input, typeof(TEntry));
+            return jss.Deserialize<TEntry>(input);
         }
 
         public static object FromJson(string input)
