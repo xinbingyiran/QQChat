@@ -1495,19 +1495,25 @@ Designed by XBYR", @"QQ聊天程序");
             _qq.GetMessageError -= QQ_GetMessageError;
             _qq.LogOutQQ2();
             if (_system != null)
+            {
                 _system.Close();
+                _system = null;
+            }
             foreach (var s in _sesss.ToArray())
             {
                 s.Close();
             }
+            _sesss.Clear();
             foreach (var f in _friends.ToArray())
             {
                 f.Close();
             }
+            _friends.Clear();
             foreach (var g in _groups.ToArray())
             {
                 g.Close();
             }
+            _groups.Clear();
             this.GetSettings();
             this.SaveToFile();
             foreach (var p in Plugins)
