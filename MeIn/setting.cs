@@ -19,7 +19,7 @@ namespace MeIn
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Int32 min, max, span;
+            Int32 min, max, span,top;
             if (!Int32.TryParse(textBoxMin.Text, out min))
             {
                 MessageBox.Show("请输入有效最小值");
@@ -50,8 +50,21 @@ namespace MeIn
                 textBoxSpan.Focus();
                 return;
             }
+            if (!Int32.TryParse(textBoxTop.Text, out top))
+            {
+                MessageBox.Show("请输入有效排名个数");
+                textBoxTop.Focus();
+                return;
+            }
+            if (top < 1)
+            {
+                MessageBox.Show("请输入正整数");
+                textBoxTop.Focus();
+                return;
+            }
             SaveItem.min = min;
             SaveItem.mintomax = max - min;
+            SaveItem.top = top;
             SaveItem.timespan = new TimeSpan(TimeSpan.TicksPerMinute * span);
             SaveItem.item = textBoxName.Text;
             SaveItem.pdata = richTextBox1.Text;
@@ -65,6 +78,7 @@ namespace MeIn
             textBoxMin.Text = SaveItem.min.ToString();
             textBoxMax.Text = (SaveItem.min + SaveItem.mintomax).ToString();
             textBoxSpan.Text = ((Int32)SaveItem.timespan.TotalMinutes).ToString();
+            textBoxTop.Text = SaveItem.top.ToString();
             textBoxName.Text = SaveItem.item;
             richTextBox1.Text = SaveItem.pdata;
             checkBox1.Checked = SaveItem.autoIn;

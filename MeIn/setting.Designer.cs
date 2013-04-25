@@ -41,6 +41,8 @@
             this.textBoxMax = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBoxTop = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // richTextBox1
@@ -116,7 +118,7 @@
             // 
             this.textBoxSpan.Location = new System.Drawing.Point(95, 66);
             this.textBoxSpan.Name = "textBoxSpan";
-            this.textBoxSpan.Size = new System.Drawing.Size(228, 21);
+            this.textBoxSpan.Size = new System.Drawing.Size(70, 21);
             this.textBoxSpan.TabIndex = 9;
             // 
             // label4
@@ -154,11 +156,29 @@
             this.checkBox1.Text = "记录通话";
             this.checkBox1.UseVisualStyleBackColor = true;
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(177, 69);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(65, 12);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "排名个数：";
+            // 
+            // textBoxTop
+            // 
+            this.textBoxTop.Location = new System.Drawing.Point(252, 66);
+            this.textBoxTop.Name = "textBoxTop";
+            this.textBoxTop.Size = new System.Drawing.Size(70, 21);
+            this.textBoxTop.TabIndex = 15;
+            // 
             // setting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(334, 263);
+            this.Controls.Add(this.textBoxTop);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBoxMax);
@@ -197,5 +217,7 @@
         private System.Windows.Forms.TextBox textBoxMax;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBoxTop;
     }
 }

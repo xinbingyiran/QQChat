@@ -10,6 +10,7 @@ using MessageDeal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Timer = System.Timers.Timer;
+using System.Text;
 
 namespace MeIn
 {
@@ -25,6 +26,39 @@ namespace MeIn
         public string lastsay;
     }
 
+    internal class MeinTimesComparer : IComparer<meinItem>
+    {
+        private MeinTimesComparer() { }
+
+        private static readonly MeinTimesComparer _default = new MeinTimesComparer();
+
+        public static MeinTimesComparer Default
+        {
+            get { return _default; }
+        }
+
+        public int Compare(meinItem x, meinItem y)
+        {
+            return y.mein.CompareTo(x.mein);
+        }
+    }
+
+    internal class MeinScoreComparer : IComparer<meinItem>
+    {
+        private MeinScoreComparer() { }
+
+        private static readonly MeinScoreComparer _default = new MeinScoreComparer();
+
+        public static MeinScoreComparer Default
+        {
+            get { return _default; }
+        }
+        public int Compare(meinItem x, meinItem y)
+        {
+            return y.score.CompareTo(x.score);
+        }
+    }
+
     internal struct iniItem
     {
         public bool autoIn;
@@ -32,6 +66,7 @@ namespace MeIn
         public string item;
         public Int32 min;
         public Int32 mintomax;
+        public Int32 top;
         public string pdata;
         public TimeSpan timespan;
     }
@@ -46,7 +81,9 @@ namespace MeIn
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
             {
-                {"签到", "个人签到，我的世界，你曾经来过。"}
+                {"签到", "个人签到，我的世界，你曾经来过。"},
+                {"签到排名", "个人签到，我的世界，你曾经来过。"},
+                {"成绩排名", "个人签到，我的世界，你曾经来过。"}
             };
 
         private readonly Dictionary<string, meinItem> _meinAll;
@@ -74,6 +111,7 @@ namespace MeIn
                     pdata = "",
                     min = 1,
                     mintomax = 14,
+                    top = 5,
                     timespan = new TimeSpan(4, 0, 0)
                 };
             new Task(() =>
@@ -303,7 +341,7 @@ namespace MeIn
 {8}",
                             name, //0
                             item.time, //1
-                            leave.Ticks/TimeSpan.TicksPerHour, //2
+                            leave.Ticks / TimeSpan.TicksPerHour, //2
                             leave.Minutes, //3
                             leave.Seconds, //4
                             item.mein, //5
@@ -338,7 +376,7 @@ namespace MeIn
                     now, //1
                     i, //2
                     _iniItem.item, //3
-                    leave.Ticks/TimeSpan.TicksPerHour, //4
+                    leave.Ticks / TimeSpan.TicksPerHour, //4
                     leave.Minutes, //5
                     leave.Seconds, //6
                     item.mein,
@@ -346,8 +384,48 @@ namespace MeIn
                     _iniItem.pdata
                     );
             }
-                #endregion
+            #endregion
 
+            else if (message == "签到排名")
+            {
+                var gstr = p1 + "|";
+                var gstrlen = gstr.Length;
+                var items = _meinAll.Values.Where(ele => ele.uin.StartsWith(gstr)).ToArray();
+                if (items.Length == 0)
+                {
+                    return "无排名";
+                }
+                Array.Sort(items, MeinTimesComparer.Default);
+                int length = items.Length > _iniItem.top ? _iniItem.top : items.Length;
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("排名结果：");
+                for (int i = 0; i < length; i++)
+                {
+                    sb.AppendFormat("第{0}名：{1} 次 {2}[{3}]", i + 1, items[i].mein, items[i].mark == null ? items[i].nick : items[i].mark, items[i].uin.Substring(gstrlen));
+                    sb.AppendLine();
+                }
+                return sb.ToString();
+            }
+            else if (message == "成绩排名")
+            {
+                var gstr = p1 + "|";
+                var gstrlen = gstr.Length;
+                var items = _meinAll.Values.Where(ele => ele.uin.StartsWith(p1 + "|")).ToArray();
+                if (items.Length == 0)
+                {
+                    return "无排名";
+                }
+                Array.Sort(items, MeinScoreComparer.Default);
+                int length = items.Length > _iniItem.top ? _iniItem.top : items.Length;
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("排名结果：");
+                for (int i = 0; i < length; i++)
+                {
+                    sb.AppendFormat("第{0}名：{1} {2} {3}[{4}]", i + 1, items[i].score, _iniItem.item, items[i].mark == null ? items[i].nick : items[i].mark, items[i].uin.Substring(gstrlen));
+                    sb.AppendLine();
+                }
+                return sb.ToString();
+            }
             else if (_iniItem.autoIn)
             {
                 meinItem theitem;
