@@ -30,6 +30,7 @@ namespace QQChat
         private List<FriendForm> _friends;
         private List<SessForm> _sesss;
         private SystemForm _system;
+        private PluginForm _plugin;
         private object _createlock;
         private string _fileName;
         public string[] Paras
@@ -53,6 +54,7 @@ namespace QQChat
         {
             InitializeComponent();
             LoginForm = new LoginForm();
+            _plugin = new PluginForm();
             mainForm = this;
             _createlock = new object();
             _fileName = Application.StartupPath + "\\QQUser.dat";
@@ -292,12 +294,6 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 o.Setting = _settings[key];
             }
-            ToolStripMenuItem aboutItem = new ToolStripMenuItem("关于");
-            aboutItem.Click += (sender, e) =>
-            {
-                MessageBox.Show(o.AboutMessage, o.PluginName);
-            };
-            newitem.DropDownItems.Add(aboutItem);
             ToolStripMenuItem statusitem = new ToolStripMenuItem("激活");
             statusitem.Checked = o.Enabled;
             statusitem.Click += (sender, e) =>
@@ -306,37 +302,14 @@ Designed by XBYR", @"QQ聊天程序");
                 statusitem.Checked = o.Enabled;
             };
             newitem.DropDownItems.Add(statusitem);
-            Dictionary<string, string> filters = o.Filters;
-            if (filters != null && filters.Count > 0)
+            ToolStripMenuItem pluginItem = new ToolStripMenuItem("设置");
+            pluginItem.Click += (sender, e) =>
             {
-                ToolStripMenuItem helpitem = new ToolStripMenuItem("命令");
-                StringBuilder sb = new StringBuilder();
-                foreach (KeyValuePair<string, string> filter in filters)
-                {
-                    sb.AppendFormat("{0} {1}{2}", filter.Key, filter.Value, Environment.NewLine);
-                }
-                var str = sb.ToString();
-                helpitem.Click += (sender, args) =>
-                    {
-                        MessageBox.Show(str);
-                    };
-                newitem.DropDownItems.Add(helpitem);
-            }
-            Dictionary<string, string> menus = o.Menus;
-            if (menus != null && menus.Count > 0)
-            {
-                ToolStripItem[] subitems = new ToolStripItem[menus.Count];
-                int i = 0;
-                foreach (KeyValuePair<string, string> menu in menus)
-                {
-                    ToolStripItem item = new ToolStripMenuItem(menu.Key);
-                    KeyValuePair<string, string> menu1 = menu;
-                    item.Click += (sender, e) => o.MenuClicked(menu1.Value);
-                    subitems[i] = item;
-                    i++;
-                }
-                newitem.DropDownItems.AddRange(subitems);
-            }
+                _plugin.InitPlugin(o);
+                _plugin.Show();
+                _plugin.BringToFront();
+            };
+            newitem.DropDownItems.Add(pluginItem);
             菜单ToolStripMenuItem.DropDownItems.Add(newitem);
             o.OnMessage += new EventHandler<EventArgs>(Plugin_OnMessage);
         }
