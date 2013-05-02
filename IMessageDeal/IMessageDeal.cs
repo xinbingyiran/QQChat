@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Runtime;
+using System.Collections.Generic;
 
 namespace MessageDeal
 {
@@ -45,60 +47,28 @@ namespace MessageDeal
         };
     }
 
-    public class QQStatus
+    public class MessageType
     {
-        public string Status { get; private set; }
-        public string StatusInternal { get; private set; }
-        private QQStatus(string status, string statusInternal)
+        private MessageType() { }
+        public static string MessageFriend = "friend";
+        public static string MessageGroup = "group";
+        public static string MessageStatus = "status";
+        public static string MessageInput = "input";
+        public static string MessageMember = "member";
+        public static string MessageAdmin = "admin";
+        public static string[] AllMessage = new string[]
         {
-            Status = status;
-            StatusInternal = statusInternal;
-        }
-        public static QQStatus StatusOnline = new QQStatus("我在线上", "online");
-        public static QQStatus StatusCallme = new QQStatus("Q我吧", "callme");
-        public static QQStatus StatusAway = new QQStatus("离开", "away");
-        public static QQStatus StatusBusy = new QQStatus("忙碌", "busy");
-        public static QQStatus StatusSilent = new QQStatus("请勿打扰", "silent");
-        public static QQStatus StatusHidden = new QQStatus("隐身", "hidden");
-        public static QQStatus StatusOffline = new QQStatus("离线", "offline");
-        public static QQStatus[] AllStatus = new QQStatus[]
-        {
-            StatusOnline,
-            StatusCallme,
-            StatusAway,
-            StatusBusy,
-            StatusSilent,
-            StatusHidden,
-            StatusOffline
+            MessageFriend,
+            MessageGroup,
+            MessageStatus,
+            MessageInput,
+            MessageMember,
+            MessageAdmin,
         };
-        public static QQStatus GetQQStatusByInternal(string statusInternal)
-        {
-            foreach (var st in AllStatus)
-            {
-                if (st.StatusInternal == statusInternal)
-                    return st;
-            }
-            return null;
-        }
-        public static QQStatus GetQQStatusByStatus(string status)
-        {
-            foreach (var st in AllStatus)
-            {
-                if (st.Status == status)
-                    return st;
-            }
-            return null;
-        }
-
-        public override string ToString()
-        {
-            return Status;
-        }
     }
 
     public interface IMessageDeal
     {
-        string Setting { get; set; }
         /// <summary>
         /// 插件名称
         /// </summary>
@@ -106,7 +76,15 @@ namespace MessageDeal
         /// <summary>
         /// 插件状态
         /// </summary>
+        string AboutMessage { get; }
+        /// <summary>
+        /// 插件状态
+        /// </summary>
         bool Enabled { get; set; }
+        /// <summary>
+        /// 插件设置
+        /// </summary>
+        string Setting { get; set; }
         /// <summary>
         /// 获取相应的菜单项，格式为[显示内容-传递内容]
         /// </summary>
@@ -116,50 +94,32 @@ namespace MessageDeal
         /// </summary>
         Dictionary<string, string> Filters { get; }
         /// <summary>
-        /// 处理用户消息，并返回处理结果
-        /// </summary>
-        /// <param name="info">用户信息UserName,UserNick,UserMarkName</param>
-        /// <param name="message">要处理的消息</param>
-        /// <returns>如果不需要回应，只需设置为null即</returns>
-        string DealFriendMessage(Dictionary<string, object> info, string message);
-        /// <summary>
-        /// 处理群消息，并返回处理结果
-        /// </summary>
-        /// 
-        /// <param name="info">用户信息GroupName,GroupNum,MemberNum,MemberNick,MemberCard</param>
-        /// <param name="message">要处理的消息</param>
-        /// <returns>如果不需要回应，只需设置为null即可</returns>
-        string DealGroupMessage(Dictionary<string, object> info, string message);
-        /// <summary>
         /// 菜单处理程序
         /// </summary>
         /// <param name="menuName">菜单名称[传递内容]</param>
         /// <returns></returns>
         void MenuClicked(string menuName);
         /// <summary>
-        /// 用户状态改变
+        /// 处理用户消息，并返回处理结果
         /// </summary>
-        /// <param name="info">用户信息UserName,UserNick,UserMarkName</param>
-        /// <param name="newStatus">新状态[传递内容]</param>
-        /// <returns>如果不需要回应，只需设置为null即可</returns>
-        string StatusChanged(Dictionary<string, object> info, string newStatus);
-        /// <summary>
-        /// 用户正在输入
-        /// </summary>
-        /// <param name="info">用户信息UserName,UserNick,UserMarkName</param>
-        /// <returns>如果不需要回应，只需设置为null即可</returns>
-        string Input(Dictionary<string, object> info);
+        /// <param name="messageType">消息类型</param>
+        /// <param name="info">消息内容</param>
+        /// <param name="message">要处理的消息</param>
+        /// <returns>如果不需要回应，只需设置为null即</returns>
+        string DealMessage(string messageType,Dictionary<string, object> info, string message);
 
         /// <summary>
         /// 退出时发送此消息，进行最后保存，时间不要太长，否则可能引起反感
         /// </summary>
         void OnExited();
+
+        string LastMessage { get; }
+
+        event EventHandler<EventArgs> OnMessage;
     }
 
     public abstract class TMessage : IMessageDeal
     {
-
-        public virtual string Setting { get; set; }
 
         public virtual string PluginName
         {
@@ -167,6 +127,8 @@ namespace MessageDeal
         }
 
         public virtual bool Enabled { get; set; }
+
+        public virtual string Setting { get; set; }
 
         public virtual Dictionary<string, string> Menus
         {
@@ -178,34 +140,35 @@ namespace MessageDeal
             get { return null; }
         }
 
-        public virtual string DealFriendMessage(Dictionary<string, object> info, string message)
-        {
-            return null;
-        }
-
-        public virtual string DealGroupMessage(Dictionary<string, object> info, string message)
-        {
-            return null;
-        }
-
         public virtual void MenuClicked(string menuName)
         {
             return;
         }
 
-        public virtual string StatusChanged(Dictionary<string, object> info, string newStatus)
-        {
-            return null;
-        }
-
-        public virtual string Input(Dictionary<string, object> info)
-        {
-            return null;
-        }
-
         public virtual void OnExited()
         {
             return;
+        }
+
+
+        public virtual string DealMessage(string messageType, Dictionary<string, object> info, string message)
+        {
+            return null;
+        }
+
+        public virtual string LastMessage
+        {
+            get;
+            protected set;
+        }
+
+        public virtual event EventHandler<EventArgs> OnMessage;
+
+
+        public virtual string AboutMessage
+        {
+            get;
+            protected set;
         }
     }
 }

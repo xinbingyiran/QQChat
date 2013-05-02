@@ -45,4 +45,24 @@ namespace QQChat.Classes
             MemberCard
         };
     }
+
+    public class MessageType
+    {
+        private MessageType() { }
+        public static string MessageFriend = "friend";
+        public static string MessageGroup = "group";
+        public static string MessageStatus = "status";
+        public static string MessageInput = "input";
+        public static string MessageMember = "member";
+        public static string MessageAdmin = "admin";
+        public static string[] AllMessage = new string[]
+        {
+            MessageFriend,
+            MessageGroup,
+            MessageStatus,
+            MessageInput,
+            MessageMember,
+            MessageAdmin,
+        };
+    }
 }

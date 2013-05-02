@@ -42,7 +42,6 @@ namespace WebApi
             {"启用","start"},
             {"停用","stop"},
             {"状态","status"},
-            {"关于","about"}
         };
 
         public override Dictionary<string, string> Menus
@@ -190,8 +189,12 @@ namespace WebApi
             return null;
         }
 
-        private string DealAllMessage(string message)
+        public override string DealMessage(string messageType, Dictionary<string, object> info, string message)
         {
+            if (messageType != MessageType.MessageFriend && messageType != MessageType.MessageGroup)
+            {
+                return null;
+            }
             if (!Enabled)
                 return null;
             if (string.IsNullOrEmpty(message))
@@ -280,35 +283,36 @@ namespace WebApi
             return null;
         }
 
-        public override string DealFriendMessage(Dictionary<string, object> info, string message)
-        {
-            return DealAllMessage(message);
-        }
+        public override event EventHandler<EventArgs> OnMessage;
 
-        public override string DealGroupMessage(Dictionary<string, object> info, string message)
+        public override string AboutMessage
         {
-            return DealAllMessage(message);
+            get
+            {
+                return "Web信息处理。\r\n信息来自网上，谨慎使用。";
+            }
         }
 
         public override void MenuClicked(string menuName)
         {
-            if (menuName == "about")
-            {
-                MessageBox.Show("Web信息处理。\r\n信息来自网上，谨慎使用。", "关于插件");
-            }
-            else if (menuName == "start")
+            LastMessage = null;
+            if (menuName == "start")
             {
                 _autoreplay = true;
-                MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
+                LastMessage = "当前回复状态为启用";
             }
             else if (menuName == "stop")
             {
                 _autoreplay = false;
-                MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
+                LastMessage = "当前回复状态为停用";
             }
             else if (menuName == "status")
             {
-                MessageBox.Show("当前回复状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
+                LastMessage = "当前回复状态为" + (_autoreplay ? "启用" : "停用");
+            }
+            if (LastMessage != null && OnMessage != null)
+            {
+                OnMessage(this, EventArgs.Empty);
             }
         }
     }

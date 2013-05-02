@@ -55,10 +55,9 @@ namespace MessageDeal1
 
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
-            {"启用","start"},
-            {"停用","stop"},
-            {"状态","status"},
-            {"关于","about"},
+            {"自动自动启","start"},
+            {"自动回复停","stop"},
+            {"自动回复状态","status"},
         };
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
@@ -164,14 +163,13 @@ namespace MessageDeal1
             }
         }
 
-        public override string DealFriendMessage(Dictionary<string, object> info, string message)
-        {
-            return DealWDString(message);
-        }
-
-        private string DealWDString(string message)
+        public override string DealMessage(string messageType, Dictionary<string, object> info, string message)
         {
             if (!Enabled)
+            {
+                return null;
+            }
+            if (messageType != MessageType.MessageFriend && messageType != MessageType.MessageGroup)
             {
                 return null;
             }
@@ -343,36 +341,42 @@ namespace MessageDeal1
             return retstr;
         }
 
-        public override string DealGroupMessage(Dictionary<string, object> info, string message)
-        {
-            return DealWDString(message);
-        }
+        public override event EventHandler<EventArgs> OnMessage;
 
         public override void MenuClicked(string menuName)
         {
+            LastMessage = null;
             if (menuName == "start")
             {
                 _autoreplay = true;
-                MessageBox.Show("当前自动回答问题状态为启用", "状态指示");
+                LastMessage = "当前自动回答问题状态为启用";
             }
             else if (menuName == "stop")
             {
                 _autoreplay = false;
-                MessageBox.Show("当前自动回答问题状态为停用", "状态指示");
+               LastMessage = "当前自动回答问题状态为停用";
             }
             else if (menuName == "status")
             {
-                MessageBox.Show("当前自动回答问题状态为" + (_autoreplay ? "启用" : "停用"), "状态指示");
+                LastMessage = "当前自动回答问题状态为" + (_autoreplay ? "启用" : "停用");
             }
-            else if (menuName == "about")
+            if(LastMessage != null && OnMessage != null)
             {
-                MessageBox.Show("学话鹦鹉。\r\n能学会一些对话信息。\r\n当前信息条数：" + _learning.Count, "关于插件");
+                OnMessage(this, EventArgs.Empty);
             }
         }
 
         public override void OnExited()
         {
             SaveToFile();
+        }
+
+        public override string AboutMessage
+        {
+            get
+            {
+                return "学话鹦鹉。\r\n能学会一些对话信息。\r\n当前信息条数：" + _learning.Count;
+            }
         }
 
     }

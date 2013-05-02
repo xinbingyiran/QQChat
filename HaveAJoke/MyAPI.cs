@@ -32,7 +32,6 @@ namespace HaveAJoke
         private Dictionary<string, string> _menus = new Dictionary<string, string>
         {
             {"重载","reload"},
-            {"关于","about"}
         };
 
         public override Dictionary<string, string> Menus
@@ -79,9 +78,21 @@ namespace HaveAJoke
             try
             {
                 var lines = File.ReadAllLines(_filepath);
-                foreach (var line in lines)
+                var len = lines.Length;
+                for (int i = 0; i < len; i++)
                 {
-                    jokes.Add(JsonConvert.DeserializeObject<string[]>(line));
+                    try
+                    {
+                        jokes.Add(JsonConvert.DeserializeObject<string[]>(lines[i]));
+                    }
+                    catch (Exception ex)
+                    {
+                        if (OnMessage != null)
+                        {
+                            LastMessage = ex.Message + "@" + (i + 1);
+                            OnMessage(this, EventArgs.Empty);
+                        }
+                    }
                 }
             }
             catch (Exception)
@@ -90,18 +101,12 @@ namespace HaveAJoke
             _count = jokes.Count;
         }
 
-        public override string DealFriendMessage(Dictionary<string, object> info, string message)
+        public override string DealMessage(string messageType, Dictionary<string, object> info, string message)
         {
-            return DealMessage(message);
-        }
-
-        public override string DealGroupMessage(Dictionary<string, object> info, string message)
-        {
-            return DealMessage(message);
-        }
-
-        private string DealMessage(string message)
-        {
+            if (messageType != MessageType.MessageFriend && messageType != MessageType.MessageGroup)
+            {
+                return null;
+            }
             if (message.Trim() == "笑话")
             {
                 if (_count > 0)
@@ -109,19 +114,31 @@ namespace HaveAJoke
                     var items = jokes[r.Next(_count)];
                     return string.IsNullOrEmpty(items[0]) ? items[1] : items[0] + "\r\n" + items[1];//0 title,1 content
                 }
+                return null;
             }
             return null;
         }
+
+        public override event EventHandler<EventArgs> OnMessage;
 
         public override void MenuClicked(string menuName)
         {
             if (menuName == "reload")
             {
                 LoadPara();
+                LastMessage = AboutMessage;
+                if (OnMessage != null)
+                {
+                    OnMessage(this, EventArgs.Empty);
+                }
             }
-            else if (menuName == "about")
+        }
+
+        public override string AboutMessage
+        {
+            get
             {
-                MessageBox.Show("这是一个笑话插件\r\n当你输入签到，会随机回复一条笑话。\r\n当前笑话数量为：" + _count, "软件说明");
+                return "这是一个笑话插件\r\n当你输入签到，会随机回复一条笑话。\r\n当前笑话数量为：" + _count;
             }
         }
 

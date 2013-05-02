@@ -75,8 +75,9 @@ namespace MeIn
     {
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
             {
-                {"设置", "setting"},
-                {"关于", "about"}
+                {"自动记录启","start"},
+                {"自动记录停","stop"},
+                {"自动记录状态","status"},
             };
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
@@ -163,38 +164,34 @@ namespace MeIn
             get { return _filters; }
         }
 
-        public override string DealFriendMessage(Dictionary<string, object> info, string message)
+        public override string DealMessage(string messageType, Dictionary<string, object> info, string message)
         {
-            string p1 = "000000";
-            string p2 = info[TranslateMessageUser.UserNum.Key].ToString();
-            string nick = info[TranslateMessageUser.UserNick.Key] as string ?? "";
-            string mark = info[TranslateMessageUser.UserMarkName.Key] as string ?? "";
-            return DealMessage(message, p1, p2, nick, mark, false);
-        }
-
-        public override string DealGroupMessage(Dictionary<string, object> info, string message)
-        {
-            string p1 = info[TranslateMessageGroup.GroupNum.Key].ToString();
-            string p2 = info[TranslateMessageGroup.MemberNum.Key].ToString();
-            var nick = info[TranslateMessageGroup.MemberNick.Key] as string;
-            var card = info[TranslateMessageGroup.MemberCard.Key] as string;
-            return DealMessage(message, p1, p2, nick, card, true);
-        }
-
-        public override void MenuClicked(string menuName)
-        {
-            if (menuName == "setting")
+            if (messageType == MessageType.MessageFriend)
             {
-                var s = new setting();
-                s.SaveItem = _iniItem;
-                if (s.ShowDialog() == DialogResult.OK)
-                {
-                    _iniItem = s.SaveItem;
-                }
+                string p1 = "000000";
+                string p2 = info[TranslateMessageUser.UserNum.Key].ToString();
+                string nick = info[TranslateMessageUser.UserNick.Key] as string ?? "";
+                string mark = info[TranslateMessageUser.UserMarkName.Key] as string ?? "";
+                return DealMessage(message, p1, p2, nick, mark, false);
             }
-            else if (menuName == "about")
+            else if (messageType == MessageType.MessageGroup)
             {
-                MessageBox.Show("这是一个签到插件\r\n当你输入签到，代表你曾经到过。", "软件说明");
+                string p1 = info[TranslateMessageGroup.GroupNum.Key].ToString();
+                string p2 = info[TranslateMessageGroup.MemberNum.Key].ToString();
+                var nick = info[TranslateMessageGroup.MemberNick.Key] as string;
+                var card = info[TranslateMessageGroup.MemberCard.Key] as string;
+                return DealMessage(message, p1, p2, nick, card, true);
+            }
+            return null;
+        }
+
+        public override event EventHandler<EventArgs> OnMessage;
+
+        public override string AboutMessage
+        {
+            get
+            {
+                return "这是一个签到插件\r\n当你输入签到，代表你曾经到过。";
             }
         }
 
@@ -451,8 +448,32 @@ namespace MeIn
                 theitem.lastsay = message;
                 _meinAll[uin] = theitem;
                 SetSaveFlag();
+                return null;
             }
             return null;
+        }
+
+        public override void MenuClicked(string menuName)
+        {
+            LastMessage = null;
+            if (menuName == "start")
+            {
+                _iniItem.autoIn = true;
+                LastMessage = "当前自动记录状态为启用";
+            }
+            else if (menuName == "stop")
+            {
+                _iniItem.autoIn = false;
+                LastMessage = "当前自动记录状态为停用";
+            }
+            else if (menuName == "status")
+            {
+                LastMessage = "当前自动记录状态为" + (_iniItem.autoIn ? "启用" : "停用");
+            }
+            if (LastMessage != null && OnMessage != null)
+            {
+                OnMessage(this, EventArgs.Empty);
+            }
         }
     }
 }

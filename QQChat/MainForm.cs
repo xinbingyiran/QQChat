@@ -292,6 +292,12 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 o.Setting = _settings[key];
             }
+            ToolStripMenuItem aboutItem = new ToolStripMenuItem("关于");
+            aboutItem.Click += (sender, e) =>
+            {
+                MessageBox.Show(o.AboutMessage, o.PluginName);
+            };
+            newitem.DropDownItems.Add(aboutItem);
             ToolStripMenuItem statusitem = new ToolStripMenuItem("激活");
             statusitem.Checked = o.Enabled;
             statusitem.Click += (sender, e) =>
@@ -332,6 +338,14 @@ Designed by XBYR", @"QQ聊天程序");
                 newitem.DropDownItems.AddRange(subitems);
             }
             菜单ToolStripMenuItem.DropDownItems.Add(newitem);
+            o.OnMessage += new EventHandler<EventArgs>(Plugin_OnMessage);
+        }
+
+
+
+        private void Plugin_OnMessage(object sender, EventArgs e)
+        {
+            MessageBox.Show((sender as dynamic).LastMessage);
         }
 
         public void InitUser(QQ qq)
@@ -621,7 +635,7 @@ Designed by XBYR", @"QQ聊天程序");
                                         {
                                             continue;
                                         }
-                                        rmsg = p.Value.DealGroupMessage(info, e.MsgContent);
+                                        rmsg = p.Value.DealMessage(MessageType.MessageGroup, info, e.MsgContent);
                                         if (rmsg != null)
                                         {
                                             SendGroupMessage(e.Group, e.Member, rmsg);
@@ -685,7 +699,7 @@ Designed by XBYR", @"QQ聊天程序");
                                         {
                                             continue;
                                         }
-                                        rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
+                                        rmsg = p.Value.DealMessage(MessageType.MessageFriend, info, e.MsgContent);
                                         if (rmsg != null)
                                         {
                                             SendFriendMessage(e.User, rmsg);
@@ -723,7 +737,7 @@ Designed by XBYR", @"QQ聊天程序");
                                         {
                                             continue;
                                         }
-                                        rmsg = p.Value.DealFriendMessage(info, e.MsgContent);
+                                        rmsg = p.Value.DealMessage(MessageType.MessageFriend, info, e.MsgContent);
                                         if (rmsg != null)
                                         {
                                             SendSessMessage(e.User, rmsg);
@@ -789,7 +803,7 @@ Designed by XBYR", @"QQ聊天程序");
                                     {
                                         continue;
                                     }
-                                    string rmsg = p.Value.StatusChanged(info, e.User.status);
+                                    string rmsg = p.Value.DealMessage(MessageType.MessageStatus, info, QQStatus.GetQQStatusByInternal(e.User.status).Status);
                                     if (rmsg != null)
                                     {
                                         SendFriendMessage(e.User, rmsg);
@@ -833,7 +847,7 @@ Designed by XBYR", @"QQ聊天程序");
                                 {
                                     continue;
                                 }
-                                string rmsg = p.Value.Input(info);
+                                string rmsg = p.Value.DealMessage(MessageType.MessageInput,info,null);
                                 if (rmsg != null)
                                 {
                                     SendFriendMessage(e.User, rmsg);
