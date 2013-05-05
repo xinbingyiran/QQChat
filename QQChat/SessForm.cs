@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WebQQ2.WebQQ2;
@@ -91,7 +92,7 @@ namespace QQChat
                     {
                         msg += "[发送失败]";
                     }
-                    var imessage = MainForm.mainForm.TransMessage(msg + Environment.NewLine, Friend.uin.ToString());
+                    var imessage = MainForm.mainForm.TransMessage(msg + Environment.NewLine, Friend.uin.ToString(),0);
                     var c = FormHelper.PickColor();
                     foreach (var emessage in imessage)
                     {
@@ -119,52 +120,47 @@ namespace QQChat
                 }).Start();
         }
 
-        public void AppendMessage(string message, object friend, DateTime time)
+        public void AppendMessage(object sender, DateTime time, params IRichMessage[] messages)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => AppendMessage(message, friend, time)));
+                BeginInvoke(new MethodInvoker(() => AppendMessage(sender, time, messages)));
                 return;
             }
-            if (string.IsNullOrEmpty(message))
+            if (messages == null || messages.Length == 0)
                 return;
-            QQFriend qfriend = friend as QQFriend;
-            if (qfriend != this.Friend)
+            var qfriend = sender as QQFriend;
+            if (qfriend == null)
                 return;
-            string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message);
-            Color c = FormHelper.PickColor();
-            //richTextBox1.AppendLine(rmessage, c);
-            new Task(() =>
+            if (qfriend != Friend)
+                return;
+
+            IRichMessage hmessage = new RichMessageText(string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}", time, Environment.NewLine))
             {
-                if (qfriend != null)
+                MessageColor = messages[0].MessageColor
+            };
+            if (this.IsHandleCreated)
+            {
+                BeginInvoke(new MethodInvoker(() =>
                 {
-                    List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, qfriend.uin.ToString());
+                    hmessage.AppendTo(richTextBox1);
                     foreach (IRichMessage msg in messages)
                     {
-                        msg.MessageColor = c;
+                        msg.AppendTo(richTextBox1);
                     }
-                    if (this.IsHandleCreated)
-                    {
-                        BeginInvoke(new MethodInvoker(() =>
-                            {
-                                foreach (IRichMessage msg in messages)
-                                {
-                                    msg.AppendTo(richTextBox1);
-                                }
-                                richTextBox1.AppendLine("", c);
-                            }));
-                    }
-                    else
-                    {
-                        _oldMessage.AddRange(messages);
-                        _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = c });
-                        if (_oldMessage.Count > 50)
-                        {
-                            _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
-                        }
-                    }
+                    richTextBox1.AppendLine("");
+                }));
+            }
+            else
+            {
+                _oldMessage.Add(hmessage);
+                _oldMessage.AddRange(messages);
+                _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = hmessage.MessageColor });
+                if (_oldMessage.Count > 50)
+                {
+                    _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
                 }
-            }).Start();
+            }
         }
 
         private void DealOldMessage()

@@ -37,20 +37,23 @@ namespace QQChat
         {
         }
 
-        public void AppendMessage(string message, object friend, DateTime time)
+        public void AppendMessage(object sender, DateTime time, params IRichMessage[] messages)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => AppendMessage(message, friend, time)));
+                BeginInvoke(new MethodInvoker(() => AppendMessage(sender, time, messages)));
                 return;
             }
-            if (string.IsNullOrEmpty(message))
+            if (messages == null || messages.Length == 0)
                 return;
+            string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}", time, Environment.NewLine);
 
-            QQFriend qfriend = friend as QQFriend;
-            string rmessage = string.Format("接收：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message);
-            Color c = FormHelper.PickColor();
-            richTextBox1.AppendLine(rmessage, c);
+            richTextBox1.AppendLine(rmessage);
+            foreach (IRichMessage msg in messages)
+            {
+                msg.AppendTo(richTextBox1);
+            }
+            richTextBox1.AppendLine("");
         }
     }
 }

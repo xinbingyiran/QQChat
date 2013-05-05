@@ -59,7 +59,7 @@ namespace WebQQ2.WebQQ2
 
         private static readonly string qq_cface = "http://qun.qq.com/cgi/svr/chatimg/get?af=1&pic={0}&gid={1}&time={2}";
 
-        //private static readonly string qq_cface2 = "http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
+        private static readonly string qq_cface2 = "http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
 
         private static readonly string qq_deny_added_request2 = "http://s.web2.qq.com/api/deny_added_request2";
         private static readonly string qq_allow_added_request2 = "http://s.web2.qq.com/api/allow_added_request2";
@@ -81,6 +81,7 @@ namespace WebQQ2.WebQQ2
         private Dictionary<string, object> qq_get_user_friends2_post = new Dictionary<string, object>()
         {
             {"h",""},
+            {"hash",""},
             {"vfwebqq",""},
         };
         private Dictionary<string, object> qq_get_group_name_list_mask2_post = new Dictionary<string, object>()
@@ -263,6 +264,12 @@ namespace WebQQ2.WebQQ2
         {
             string url = string.Format(qq_cface, pic, gid, QQHelper.GetTime());
             return GetFileTrueUrl(url);
+        }
+
+        public string GetCFace2Url(string msg_id,string filename,string guin)
+        {
+            //"http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
+            return string.Format(qq_cface2,msg_id,filename,guin,_user.ClientID,_user.PsessionID);
         }
 
         public Stream GetOffPic(string filepath, string fuin)
@@ -462,28 +469,28 @@ namespace WebQQ2.WebQQ2
                     {
                         Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
 
-                        friend.face = Convert.ToInt64(result["face"]);
-                        friend.birthday = QQHelper.ToJson(result["birthday"]);
-                        friend.phone = result["phone"] as string;
-                        friend.occupation = result["occupation"] as string;
-                        friend.allow = Convert.ToInt64(result["allow"]);
-                        friend.college = result["college"] as string;
-                        friend.uin = Convert.ToInt64(result["uin"]);
-                        friend.blood = Convert.ToInt64(result["blood"]);
-                        friend.constel = Convert.ToInt64(result["constel"]);
-                        friend.homepage = result["homepage"] as string;
-                        friend.stat = Convert.ToInt64(result["stat"]);
-                        friend.country = result["country"] as string;
-                        friend.city = result["city"] as string;
-                        friend.personal = result["personal"] as string;
-                        friend.nick = result["nick"] as string;
-                        friend.shengxiao = Convert.ToInt64(result["shengxiao"]);
-                        friend.email = result["email"] as string;
-                        friend.token = result["token"] as string;
-                        friend.client_type = Convert.ToInt64(result["client_type"]);
-                        friend.province = result["province"] as string;
-                        friend.gender = result["gender"] as string;
-                        friend.mobile = result["mobile"] as string;
+                        if (result.ContainsKey("face")) friend.face = Convert.ToInt64(result["face"]);
+                        if (result.ContainsKey("birthday")) friend.birthday = QQHelper.ToJson(result["birthday"]);
+                        if (result.ContainsKey("phone")) friend.phone = result["phone"] as string;
+                        if (result.ContainsKey("occupation")) friend.occupation = result["occupation"] as string;
+                        if (result.ContainsKey("allow")) friend.allow = Convert.ToInt64(result["allow"]);
+                        if (result.ContainsKey("college")) friend.college = result["college"] as string;
+                        if (result.ContainsKey("uin")) friend.uin = Convert.ToInt64(result["uin"]);
+                        if (result.ContainsKey("blood")) friend.blood = Convert.ToInt64(result["blood"]);
+                        if (result.ContainsKey("constel")) friend.constel = Convert.ToInt64(result["constel"]);
+                        if (result.ContainsKey("homepage")) friend.homepage = result["homepage"] as string;
+                        if (result.ContainsKey("stat")) friend.stat = Convert.ToInt64(result["stat"]);
+                        if (result.ContainsKey("country")) friend.country = result["country"] as string;
+                        if (result.ContainsKey("city")) friend.city = result["city"] as string;
+                        if (result.ContainsKey("personal")) friend.personal = result["personal"] as string;
+                        if (result.ContainsKey("nick")) friend.nick = result["nick"] as string;
+                        if (result.ContainsKey("shengxiao")) friend.shengxiao = Convert.ToInt64(result["shengxiao"]);
+                        if (result.ContainsKey("email")) friend.email = result["email"] as string;
+                        if (result.ContainsKey("token")) friend.token = result["token"] as string;
+                        if (result.ContainsKey("client_type")) friend.client_type = Convert.ToInt64(result["client_type"]);
+                        if (result.ContainsKey("province")) friend.province = result["province"] as string;
+                        if (result.ContainsKey("gender")) friend.gender = result["gender"] as string;
+                        if (result.ContainsKey("mobile")) friend.mobile = result["mobile"] as string;
                         if (MessageFriendReceived != null)
                         {
                             MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_USER));
@@ -512,28 +519,28 @@ namespace WebQQ2.WebQQ2
                     {
                         Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
 
-                        member.face = Convert.ToInt64(result["face"]);
-                        member.birthday = QQHelper.ToJson(result["birthday"]);
-                        member.phone = result["phone"] as string;
-                        member.occupation = result["occupation"] as string;
-                        member.allow = Convert.ToInt64(result["allow"]);
-                        member.college = result["college"] as string;
-                        member.uin = Convert.ToInt64(result["uin"]);
-                        member.blood = Convert.ToInt64(result["blood"]);
-                        member.constel = Convert.ToInt64(result["constel"]);
-                        member.homepage = result["homepage"] as string;
-                        member.stat = Convert.ToInt64(result["stat"]);
-                        member.country = result["country"] as string;
-                        member.city = result["city"] as string;
-                        member.personal = result["personal"] as string;
-                        member.nick = result["nick"] as string;
-                        member.shengxiao = Convert.ToInt64(result["shengxiao"]);
-                        member.email = result["email"] as string;
-                        member.token = result["token"] as string;
-                        member.client_type = Convert.ToInt64(result["client_type"]);
-                        member.province = result["province"] as string;
-                        member.gender = result["gender"] as string;
-                        member.mobile = result["mobile"] as string;
+                        if (result.ContainsKey("face")) member.face = Convert.ToInt64(result["face"]);
+                        if (result.ContainsKey("birthday")) member.birthday = QQHelper.ToJson(result["birthday"]);
+                        if (result.ContainsKey("phone")) member.phone = result["phone"] as string;
+                        if (result.ContainsKey("occupation")) member.occupation = result["occupation"] as string;
+                        if (result.ContainsKey("allow")) member.allow = Convert.ToInt64(result["allow"]);
+                        if (result.ContainsKey("college")) member.college = result["college"] as string;
+                        if (result.ContainsKey("uin")) member.uin = Convert.ToInt64(result["uin"]);
+                        if (result.ContainsKey("blood")) member.blood = Convert.ToInt64(result["blood"]);
+                        if (result.ContainsKey("constel")) member.constel = Convert.ToInt64(result["constel"]);
+                        if (result.ContainsKey("homepage")) member.homepage = result["homepage"] as string;
+                        if (result.ContainsKey("stat")) member.stat = Convert.ToInt64(result["stat"]);
+                        if (result.ContainsKey("country")) member.country = result["country"] as string;
+                        if (result.ContainsKey("city")) member.city = result["city"] as string;
+                        if (result.ContainsKey("personal")) member.personal = result["personal"] as string;
+                        if (result.ContainsKey("nick")) member.nick = result["nick"] as string;
+                        if (result.ContainsKey("shengxiao")) member.shengxiao = Convert.ToInt64(result["shengxiao"]);
+                        if (result.ContainsKey("email")) member.email = result["email"] as string;
+                        if (result.ContainsKey("token")) member.token = result["token"] as string;
+                        if (result.ContainsKey("client_type")) member.client_type = Convert.ToInt64(result["client_type"]);
+                        if (result.ContainsKey("province")) member.province = result["province"] as string;
+                        if (result.ContainsKey("gender")) member.gender = result["gender"] as string;
+                        if (result.ContainsKey("mobile")) member.mobile = result["mobile"] as string;
                         return true;
                     }
                 }
@@ -549,7 +556,7 @@ namespace WebQQ2.WebQQ2
             return GetFriendQQNum(friend) && GetFriendStrangeInfo(friend);
         }
 
-        public bool GetGroupMemberInfos(QQGroup group,QQGroupMember member)
+        public bool GetGroupMemberInfos(QQGroup group, QQGroupMember member)
         {
             return GetGroupMemberQQNum(group, member) && GetGroupMemberStrangeInfo(member);
         }
@@ -1231,6 +1238,7 @@ namespace WebQQ2.WebQQ2
             {
                 string url = qq_get_user_friends2;
                 qq_get_user_friends2_post["h"] = "hello";
+                qq_get_user_friends2_post["hash"] = QQHelper.GetToken(_user);
                 qq_get_user_friends2_post["vfwebqq"] = _user.VfWebQQ;
                 string para = QQHelper.ToPostData(qq_get_user_friends2_post);
                 string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
@@ -1604,8 +1612,8 @@ namespace WebQQ2.WebQQ2
                                 group.allMembers.Add(newitem.uin, newitem);
                                 group.members.Add(newitem.uin, newitem);
                             }
-                            newitem.client_type = Convert.ToInt64(member["client_type"]);
-                            newitem.stat = Convert.ToInt64(member["stat"]);
+                            if (member.ContainsKey("client_type")) newitem.client_type = Convert.ToInt64(member["client_type"]);
+                            if (member.ContainsKey("stat")) newitem.stat = Convert.ToInt64(member["stat"]);
                         }
                     }
                     #endregion

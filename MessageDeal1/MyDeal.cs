@@ -117,27 +117,30 @@ namespace MessageDeal1
             _learning.Clear();
             try
             {
-                string[] lines = File.ReadAllLines(_filePath);
-                Dictionary<string, string> dir = new Dictionary<string, string>();
-                foreach (string line in lines)
+                if (File.Exists(_filePath))
                 {
-                    string[] items = line.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
-                    if (items.Length == 2 && items[0].Length >= 2)
+                    string[] lines = File.ReadAllLines(_filePath);
+                    Dictionary<string, string> dir = new Dictionary<string, string>();
+                    foreach (string line in lines)
                     {
-                        if (dir.ContainsKey(items[0]))
+                        string[] items = line.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
+                        if (items.Length == 2 && items[0].Length >= 2)
                         {
-                            dir[items[0]] = dir[items[0]] + lineSep + items[1];
-                        }
-                        else
-                        {
-                            dir.Add(items[0], items[1]);
+                            if (dir.ContainsKey(items[0]))
+                            {
+                                dir[items[0]] = dir[items[0]] + lineSep + items[1];
+                            }
+                            else
+                            {
+                                dir.Add(items[0], items[1]);
+                            }
                         }
                     }
-                }
-                _learning = dir.ToList();
-                if (_learning.Count != lines.Length)
-                {
-                    SetSaveFlag();
+                    _learning = dir.ToList();
+                    if (_learning.Count != lines.Length)
+                    {
+                        SetSaveFlag();
+                    }
                 }
             }
             catch (Exception)

@@ -29,9 +29,9 @@ namespace QQChat.Classes
         /// <summary>
         /// 收到消息并添加到窗口
         /// </summary>
-        /// <param name="message">收到的消息内容</param>
-        /// <param name="extend">附加信息</param>
+        /// <param name="sender">发送者</param>
         /// <param name="time">发送时间</param>
-        void AppendMessage(string message,object extend,DateTime time);
+        /// <param name="messages">收到的消息内容</param>
+        void AppendMessage(object sender,DateTime time,params IRichMessage[] messages);
     }
 }

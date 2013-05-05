@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
+using WebQQ2.WebQQ2;
 
 namespace WebQQ2.Extends
 {
@@ -75,6 +76,43 @@ namespace WebQQ2.Extends
         {
             string str = ToJson(input);
             return "r=" + HttpUtility.UrlEncode(str);
+        }
+
+        public static string GetToken(QQUser user)
+        {
+            return GetToken(user.QQNum, user.PtWebQQ);
+        }
+
+
+        public static string GetToken(string b, string i)
+        {
+            var a = i + "password error";
+            var s = "";
+            var j = "";
+            for (; ; )
+            {
+                if (s.Length <= a.Length)
+                {
+                    s += b;
+                    if (s.Length == a.Length)
+                        break;
+                }
+                else
+                {
+                    s = s.Substring(0, a.Length);
+                    break;
+                }
+            }
+            for (var d = 0; d < s.Length; d++)
+                j += (char)(s[d] ^ a[d]);
+            var a2 = "0123456789ABCDEF";
+            s = "";
+            for (var d = 0; d < j.Length; d++)
+            {
+                s += a2[j[d] >> 4 & 15];
+                s += a2[j[d] & 15];
+            }
+            return s;
         }
     }
 }

@@ -72,8 +72,8 @@ namespace HaveAJoke
             jokes.Clear();
             if (!File.Exists(_filepath))
             {
-                File.WriteAllText(_filepath, "[\"无标题\",\"无笑话\"]");
-                jokes.Add(new string[] { "无标题", "无笑话" });
+                File.WriteAllText(_filepath, "[\"笑话\",\"这真是一个笑话\"]");
+                jokes.Add(new string[] { "笑话", "这真是一个笑话" });
             }
             try
             {

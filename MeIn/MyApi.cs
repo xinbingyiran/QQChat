@@ -210,58 +210,61 @@ namespace MeIn
             try
             {
                 _meinAll.Clear();
-                string[] lines = File.ReadAllLines(_meinfilePath);
-                Int64 loadtime = DateTime.Now.Ticks;
-                foreach (string line in lines)
+                if (File.Exists(_meinfilePath))
                 {
-                    meinItem item;
-                    try
+                    string[] lines = File.ReadAllLines(_meinfilePath);
+                    Int64 loadtime = DateTime.Now.Ticks;
+                    foreach (string line in lines)
                     {
-                        item = JsonConvert.DeserializeObject<meinItem>(line);
-                        if (item.uin == null || item.nick == null)
-                        {
-                            throw new Exception();
-                        }
-                    }
-                    catch (Exception)
-                    {
+                        meinItem item;
                         try
                         {
-                            var olditem =
-                                JsonConvert.DeserializeObject<KeyValuePair<string, Dictionary<string, object>>>(line);
-                            item = new meinItem
-                                {
-                                    uin = olditem.Key,
-                                    mein = Convert.ToInt64(olditem.Value["mein"]),
-                                    score = Convert.ToInt64(olditem.Value["score"]),
-                                    time = new DateTime(Convert.ToInt64(olditem.Value["time"])),
-                                    nick = olditem.Value["nick"] as string,
-                                    mark = olditem.Value["mark"] as string,
-                                    lasttime = new DateTime(Convert.ToInt64(olditem.Value["time"])),
-                                    lastsay = "签到",
-                                };
-                            SetSaveFlag();
+                            item = JsonConvert.DeserializeObject<meinItem>(line);
+                            if (item.uin == null || item.nick == null)
+                            {
+                                throw new Exception();
+                            }
                         }
                         catch (Exception)
                         {
-                            continue;
+                            try
+                            {
+                                var olditem =
+                                    JsonConvert.DeserializeObject<KeyValuePair<string, Dictionary<string, object>>>(line);
+                                item = new meinItem
+                                    {
+                                        uin = olditem.Key,
+                                        mein = Convert.ToInt64(olditem.Value["mein"]),
+                                        score = Convert.ToInt64(olditem.Value["score"]),
+                                        time = new DateTime(Convert.ToInt64(olditem.Value["time"])),
+                                        nick = olditem.Value["nick"] as string,
+                                        mark = olditem.Value["mark"] as string,
+                                        lasttime = new DateTime(Convert.ToInt64(olditem.Value["time"])),
+                                        lastsay = "签到",
+                                    };
+                                SetSaveFlag();
+                            }
+                            catch (Exception)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (_meinAll.ContainsKey(item.uin))
+                        {
+                            meinItem newitem = item;
+                            newitem.score += _meinAll[item.uin].score;
+                            _meinAll[item.uin] = newitem;
+                        }
+                        else
+                        {
+                            _meinAll.Add(item.uin, item);
                         }
                     }
-
-                    if (_meinAll.ContainsKey(item.uin))
+                    if (_meinAll.Count != lines.Length)
                     {
-                        meinItem newitem = item;
-                        newitem.score += _meinAll[item.uin].score;
-                        _meinAll[item.uin] = newitem;
+                        SetSaveFlag();
                     }
-                    else
-                    {
-                        _meinAll.Add(item.uin, item);
-                    }
-                }
-                if (_meinAll.Count != lines.Length)
-                {
-                    SetSaveFlag();
                 }
             }
             catch (Exception)

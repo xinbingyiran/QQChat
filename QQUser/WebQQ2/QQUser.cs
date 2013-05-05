@@ -68,7 +68,7 @@ namespace WebQQ2.WebQQ2
             return QQGroups.GetQQGroup(gid);
         }
 
-        public QQFriend GetUserFriend(long uin,bool canAddSess)
+        public QQFriend GetUserFriend(long uin, bool canAddSess)
         {
             return QQFriends.GetQQFriend(uin, canAddSess);
         }
@@ -77,5 +77,6 @@ namespace WebQQ2.WebQQ2
         {
             return QQFriends.GetQQSess(uin);
         }
+
     }
 }

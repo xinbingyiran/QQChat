@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WebQQ2.WebQQ2;
@@ -81,7 +82,7 @@ namespace QQChat
                     {
                         msg += "[发送失败]";
                     }
-                    var imessage = MainForm.mainForm.TransMessage(msg + Environment.NewLine, "000000");
+                    var imessage = MainForm.mainForm.TransMessage(msg + Environment.NewLine, "000000", 0);
                     var c = FormHelper.PickColor();
                     foreach (var emessage in imessage)
                     {
@@ -109,48 +110,42 @@ namespace QQChat
                 }).Start();
         }
 
-        public void AppendMessage(string message, object member, DateTime time)
+        public void AppendMessage(object sender, DateTime time, params IRichMessage[] messages)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(() => AppendMessage(message, member, time)));
+                BeginInvoke(new MethodInvoker(() => AppendMessage(sender, time, messages)));
                 return;
             }
-            QQGroupMember gmember = member as QQGroupMember;
-            if (string.IsNullOrEmpty(message))
+            if (messages == null || messages.Length == 0)
                 return;
-            string rmessage = string.Format("接收[{3}]：{0:yyyy-MM-dd HH:mm:ss}{1}{2}", time, Environment.NewLine, message, gmember == null ? "" : string.Format("{0}[{1}]", gmember.card ?? gmember.nick, gmember.num));
-            Color c = FormHelper.PickColor();
-            //richTextBox1.AppendLine(rmessage, c);
-            new Task(() =>
+            QQGroupMember gmember = sender as QQGroupMember;
+            IRichMessage hmessage = new RichMessageText(string.Format("接收[{0}]：{1:yyyy-MM-dd HH:mm:ss}{2}", gmember == null ? "" : string.Format("{0}[{1}]", gmember.card ?? gmember.nick, gmember.num), time, Environment.NewLine))
             {
-                List<IRichMessage> messages = MainForm.mainForm.TransMessage(rmessage, gmember == null ? "" : gmember.uin.ToString());
-
-                foreach (IRichMessage msg in messages)
+                MessageColor = messages[0].MessageColor
+            };
+            if (this.IsHandleCreated)
+            {
+                BeginInvoke(new MethodInvoker(() =>
                 {
-                    msg.MessageColor = c;
-                }
-                if (this.IsHandleCreated)
-                {
-                    BeginInvoke(new MethodInvoker(() =>
+                    hmessage.AppendTo(richTextBox1);
+                    foreach (IRichMessage msg in messages)
                     {
-                        foreach (IRichMessage msg in messages)
-                        {
-                            msg.AppendTo(richTextBox1);
-                        }
-                        richTextBox1.AppendLine("", c);
-                    }));
-                }
-                else
-                {
-                    _oldMessage.AddRange(messages);
-                    _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = c });
-                    if (_oldMessage.Count > 50)
-                    {
-                        _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
+                        msg.AppendTo(richTextBox1);
                     }
+                    richTextBox1.AppendLine("");
+                }));
+            }
+            else
+            {
+                _oldMessage.Add(hmessage);
+                _oldMessage.AddRange(messages);
+                _oldMessage.Add(new RichMessageText(Environment.NewLine) { MessageColor = hmessage.MessageColor });
+                if (_oldMessage.Count > 50)
+                {
+                    _oldMessage.RemoveRange(0, _oldMessage.Count - 50);
                 }
-            }).Start();
+            }
         }
 
         private void DealOldMessage()
@@ -303,7 +298,7 @@ namespace QQChat
                         friend.vip_level = member.vip_level;
                         friend.is_vip = member.is_vip;
                         friend.id = Group.gid;
-                        MainForm.mainForm.SetSessText(friend, null, DateTime.Now);
+                        MainForm.mainForm.SetSessText(friend, null, DateTime.Now,0);
                     }).Start();
                 }
             }
