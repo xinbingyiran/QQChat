@@ -69,6 +69,11 @@ namespace ZhenyaoBot
             }
         }
 
+        public MyApi()
+        {
+            _botid = defaultbotid;
+        }
+
 
         private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
         {
