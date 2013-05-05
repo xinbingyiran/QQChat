@@ -83,8 +83,8 @@ namespace MeIn
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
             {
                 {"签到", "个人签到，我的世界，你曾经来过。"},
-                {"签到排名", "个人签到，我的世界，你曾经来过。"},
-                {"成绩排名", "个人签到，我的世界，你曾经来过。"}
+                {"签到排名", "查看签到次数排名。"},
+                {"成绩排名", "查看签到成绩排名。"}
             };
 
         private readonly Dictionary<string, meinItem> _meinAll;

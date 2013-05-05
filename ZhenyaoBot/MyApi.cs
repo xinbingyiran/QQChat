@@ -3,38 +3,51 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MessageDeal;
-using System.Windows.Forms;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace WebApi
+namespace ZhenyaoBot
 {
-    public class MyWebApi : TMessage
+    public class MyApi : TMessage
     {
-        public override string PluginName
-        {
-            get { return "Web信息处理"; }
-        }
+
+        private bool _autoreplay = false;
+        private Int32 _botid;
+        private const Int32 defaultbotid = 728;
 
         public override string Setting
         {
             get
             {
-                return (Enabled ? "1" : "0");
+                return (Enabled ? "1" : "0") + (_autoreplay ? "1" : "0") + _botid;
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && value.Length > 0)
+                if (!string.IsNullOrEmpty(value) && value.Length > 2)
                 {
                     Enabled = value[0] == '1';
+                    _autoreplay = value[1] == '1';
+                    _botid = defaultbotid;
+                    if (!Int32.TryParse(value.Substring(2), out _botid))
+                    {
+                        _botid = defaultbotid;
+                    }
                 }
             }
         }
 
+        public override string PluginName
+        {
+            get { return "真药机器人"; }
+        }
+
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
         {
+            {"启用","start"},
+            {"停用","stop"},
+            {"状态","status"},
         };
 
         public override Dictionary<string, string> Menus
@@ -44,14 +57,8 @@ namespace WebApi
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
-            {"-ip ip地址","IP地址"},
-            {"-mo/手机 手机号码","手机号码"},
-            {"-tq/天气 城市名","天气预报"},
-            {"-md5 字符串","32位md5加密"},
-            {"-cfs 字符串","cfs加密"},
-            {"-4e 字符串","Base64加密"},
-            {"-4d 字符串","Base64解密"},
-            {"-fy 字符串","中文到英文翻译"},
+            {"-i 对话","直接对话"},
+            {"-s 查/启/停","状态切换与查询"},
         };
 
         public override Dictionary<string, string> Filters
@@ -153,11 +160,11 @@ namespace WebApi
 
         private static string spacialurl = "http://lover.zhenyao.net/chat-g.json";
 
-        private static string spacialurl_post = "score=true&botid=1366&msg={0}&type=3";
+        private static string spacialurl_post = "score=true&botid={0}&msg={1}&type=3";
 
         private string GetBotMessage(string msg)
         {
-            string postd = string.Format(spacialurl_post, System.Web.HttpUtility.UrlEncode(msg));
+            string postd = string.Format(spacialurl_post, _botid,System.Web.HttpUtility.UrlEncode(msg));
             string rstr = PostUrlText(spacialurl, Encoding.Default.GetBytes(postd));
             if (rstr != null)
             {
@@ -197,46 +204,30 @@ namespace WebApi
             {
                 switch (substring[0])
                 {
-                    //{"ip","http://api.liqwei.com/location/?ip={0}"},
-                    //{"mo","http://api.liqwei.com/location/?mobile={0}"},
-                    //{"tq","http://api.liqwei.com/weather/?city={0}"},
-                    //{"b6e","http://api.liqwei.com/security/?base64encode={0}"},
-                    //{"b6d","http://api.liqwei.com/security/?base64decode={0}"},
-                    case "-ip":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/location/?ip={0}",
-                            System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
+                    case "-i":
+                        rstr = GetBotMessage(substring[1]);
                         break;
-                    case "-mo":
-                    case "-手机":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/location/?mobile={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-tq":
-                    case "-天气":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/weather/?city={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-md5":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?md5={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-cfs":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?cfs={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-4e":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?base64encode={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-4d":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?base64decode={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-fy":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/translate/?language=zh-CN|en&content={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
+                    case "-s":
+                        if (substring[1].Contains('查'))
+                        {
+                            return "当前回复状态为" + (_autoreplay ? "启用" : "停用");
+                        }
+                        else if (substring[1].Contains('启'))
+                        {
+                            _autoreplay = true;
+                            return "当前回复状态为启用";
+                        }
+                        else if (substring[1].Contains('停'))
+                        {
+                            _autoreplay = false;
+                            return "当前回复状态为停用";
+                        }
                         break;
                     default:
+                        if (_autoreplay)
+                        {
+                            rstr = GetBotMessage(message);
+                        }
                         break;
                 }
             }
@@ -257,7 +248,30 @@ namespace WebApi
         {
             get
             {
-                return "Web信息处理。\r\n信息来自网上，谨慎使用。";
+                return "真药网机器人。\r\n信息来自 http://lover.zhenyao.net/ 。";
+            }
+        }
+
+        public override void MenuClicked(string menuName)
+        {
+            LastMessage = null;
+            if (menuName == "start")
+            {
+                _autoreplay = true;
+                LastMessage = "当前回复状态为启用";
+            }
+            else if (menuName == "stop")
+            {
+                _autoreplay = false;
+                LastMessage = "当前回复状态为停用";
+            }
+            else if (menuName == "status")
+            {
+                LastMessage = "当前回复状态为" + (_autoreplay ? "启用" : "停用");
+            }
+            if (LastMessage != null && OnMessage != null)
+            {
+                OnMessage(this, EventArgs.Empty);
             }
         }
     }
