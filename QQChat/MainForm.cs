@@ -901,7 +901,7 @@ Designed by XBYR", @"QQ聊天程序");
                 _system.BringToFront();
                 _system.UpdateTitle();
             }
-            _system.AppendMessage(friend, time, TransMessage(message, friend.uin.ToString(), msg_id).ToArray());
+            _system.AppendMessage(friend, time, TransMessage(message, friend == null?"":friend.uin.ToString(), msg_id).ToArray());
         }
 
         public GroupForm GetGroupForm(QQGroup group)
