@@ -23,6 +23,8 @@ namespace MessageDeal1
 
 
         private bool _autoreplay;
+        private bool _enablestudy;
+        private bool _enablefind;
 
         public static readonly string lineSep = @"<br/>";
 
@@ -37,14 +39,19 @@ namespace MessageDeal1
         {
             get
             {
-                return (Enabled ? "1" : "0") + (_autoreplay ? "1" : "0");
+                return (Enabled ? "1" : "0")
+                    + (_autoreplay ? "1" : "0")
+                    + (_enablestudy ? "1" : "0")
+                    + (_enablefind ? "1" : "0");
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && value.Length == 2)
+                if (!string.IsNullOrEmpty(value) && value.Length == 4)
                 {
                     Enabled = value[0] == '1';
                     _autoreplay = value[1] == '1';
+                    _enablestudy = value[2] == '1';
+                    _enablefind = value[3] == '1';
                 }
             }
         }
@@ -53,34 +60,21 @@ namespace MessageDeal1
             get { return "学话鹦鹉"; }
         }
 
-        private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
-        {
-            {"自动自动启","start"},
-            {"自动回复停","stop"},
-            {"自动回复状态","status"},
-        };
-
-        private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
-        {
-            {"-学 问题 答案","学说话[问题不能有空格]"},
-            {"-忘 问题","忘记学过的话"},
-            {"-列[ 开始位置]","列出学会的问题,从开始位置开始的相临五条内容"},
-            {"-查 问题关键字","查看学会的问题,从问题查答案"},
-            {"-反 回答关键字","查看学会的问题,从答案查问题"},
-            {"-问/答 问题","问问题"},
-            {"-状[ 查/启/停]","自动回答问题状态查询/启用/停用"},
-        };
-
-        public override Dictionary<string, string> Menus
-        {
-            get { return _menus; }
-        }
-
         public override Dictionary<string, string> Filters
         {
             get
             {
-                return _filters;
+                Dictionary<string, string> d = new Dictionary<string, string>();
+                if (_enablestudy)
+                {
+                    d.Add("-学/忘 问题[ 答案]","学/忘问题[问题不能有空格]");
+                }
+                if(_enablefind)
+                {
+                    d.Add("-列[ 开始位置]","列出五条学会的问题");
+                    d.Add("-查/反 问题关键字","查看学会的问题/答案");
+                }
+                return d;
             }
         }
 
@@ -91,6 +85,8 @@ namespace MessageDeal1
             _learning = new List<KeyValuePair<string, string>>();
             _currentIndex = new Dictionary<string, FindIndex>();
             _autoreplay = true;
+            _enablefind = true;
+            _enablestudy = true;
             var assemblay = this.GetType().Assembly;
             _filePath = assemblay.Location;
             _filePath = _filePath.Substring(0, _filePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
@@ -194,6 +190,8 @@ namespace MessageDeal1
             {
                 case '学':
                     {
+                        if (!_enablestudy)
+                            return null;
                         var wd = submessage.Split(new char[] { ' ' }, StringSplitOptions.None);
                         if (wd.Length != 2)
                         {
@@ -209,6 +207,8 @@ namespace MessageDeal1
                     }
                 case '忘':
                     {
+                        if (!_enablestudy)
+                            return null;
                         if (submessage.Length < 2)
                         {
                             return "呵呵，问题请至少输入两个字哦。";
@@ -219,6 +219,8 @@ namespace MessageDeal1
                     }
                 case '列':
                     {
+                        if (!_enablefind)
+                            return null;
                         int count = 5;
                         int index = 0;
                         try
@@ -245,6 +247,8 @@ namespace MessageDeal1
                     }
                 case '查':
                     {
+                        if (!_enablefind)
+                            return null;
                         if (String.IsNullOrEmpty(submessage))
                             return "呵呵，想查什么呢。";
                         int count = 5;
@@ -269,6 +273,8 @@ namespace MessageDeal1
                     }
                 case '反':
                     {
+                        if (!_enablefind)
+                            return null;
                         if (String.IsNullOrEmpty(submessage))
                             return "呵呵，想查什么呢。";
                         int count = 5;
@@ -291,33 +297,6 @@ namespace MessageDeal1
                         _currentIndex.SetIndex("反", submessage, index);
                         return sb.ToString().Replace(lineSep, Environment.NewLine);
                     }
-                case '问':
-                case '答':
-                    if (String.IsNullOrEmpty(submessage))
-                        return "呵呵，想问查什么呢。";
-                    if (submessage.Length < 2)
-                    {
-                        return "呵呵，问题请至少输入两个字哦。";
-                    }
-                    return GetReturnMessage(submessage) ?? "这个问题的答案还没人教过我哎。";
-                case '状':
-                    {
-                        if (submessage.Contains('查'))
-                        {
-                            return "当前自动回答问题状态为" + (_autoreplay ? "启用" : "停用");
-                        }
-                        else if (submessage.Contains('启'))
-                        {
-                            _autoreplay = true;
-                            return "当前自动回答问题状态为启用";
-                        }
-                        else if (submessage.Contains('停'))
-                        {
-                            _autoreplay = false;
-                            return "当前自动回答问题状态为停用";
-                        }
-                    }
-                    break;
                 default:
                     break;
             }
@@ -342,31 +321,6 @@ namespace MessageDeal1
                 }
             }
             return retstr;
-        }
-
-        public override event EventHandler<EventArgs> OnMessage;
-
-        public override void MenuClicked(string menuName)
-        {
-            LastMessage = null;
-            if (menuName == "start")
-            {
-                _autoreplay = true;
-                LastMessage = "当前自动回答问题状态为启用";
-            }
-            else if (menuName == "stop")
-            {
-                _autoreplay = false;
-               LastMessage = "当前自动回答问题状态为停用";
-            }
-            else if (menuName == "status")
-            {
-                LastMessage = "当前自动回答问题状态为" + (_autoreplay ? "启用" : "停用");
-            }
-            if(LastMessage != null && OnMessage != null)
-            {
-                OnMessage(this, EventArgs.Empty);
-            }
         }
 
         public override void OnExited()

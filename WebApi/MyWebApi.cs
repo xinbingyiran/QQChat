@@ -33,15 +33,6 @@ namespace WebApi
             }
         }
 
-        private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
-        {
-        };
-
-        public override Dictionary<string, string> Menus
-        {
-            get { return _menus; }
-        }
-
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
             {"-ip ip地址","IP地址"},

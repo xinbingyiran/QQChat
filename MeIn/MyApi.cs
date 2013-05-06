@@ -83,8 +83,8 @@ namespace MeIn
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
             {
                 {"签到", "个人签到，我的世界，你曾经来过。"},
-                {"签到排名", "查看签到次数排名。"},
-                {"成绩排名", "查看签到成绩排名。"}
+                {"排名", "查看签到次数排名。"},
+                {"成绩", "查看签到成绩排名。"}
             };
 
         private readonly Dictionary<string, meinItem> _meinAll;
@@ -386,7 +386,7 @@ namespace MeIn
             }
             #endregion
 
-            else if (message == "签到排名")
+            else if (message == "排名")
             {
                 var gstr = p1 + "|";
                 var gstrlen = gstr.Length;
@@ -406,7 +406,7 @@ namespace MeIn
                 }
                 return sb.ToString();
             }
-            else if (message == "成绩排名")
+            else if (message == "成绩")
             {
                 var gstr = p1 + "|";
                 var gstrlen = gstr.Length;

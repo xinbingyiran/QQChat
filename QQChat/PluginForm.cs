@@ -76,8 +76,8 @@ namespace QQChat
             if (_plugin == null)
             {
                 return;
-            }
-            richTextBox1.Text = _plugin.Setting;
+            } 
+            InternalInitPlugin();
         }
 
         private void buttonOK_Click(object sender, EventArgs e)

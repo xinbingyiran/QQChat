@@ -12,8 +12,6 @@ namespace ZhenyaoBot
 {
     public class MyApi : TMessage
     {
-
-        private bool _autoreplay = false;
         private Int32 _botid;
         private const Int32 defaultbotid = 728;
 
@@ -21,14 +19,13 @@ namespace ZhenyaoBot
         {
             get
             {
-                return (Enabled ? "1" : "0") + (_autoreplay ? "1" : "0") + _botid;
+                return (Enabled ? "1" : "0") + _botid;
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && value.Length > 2)
+                if (!string.IsNullOrEmpty(value) && value.Length > 1)
                 {
                     Enabled = value[0] == '1';
-                    _autoreplay = value[1] == '1';
                     _botid = defaultbotid;
                     if (!Int32.TryParse(value.Substring(2), out _botid))
                     {
@@ -43,22 +40,8 @@ namespace ZhenyaoBot
             get { return "真药机器人"; }
         }
 
-        private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
-        {
-            {"启用","start"},
-            {"停用","stop"},
-            {"状态","status"},
-        };
-
-        public override Dictionary<string, string> Menus
-        {
-            get { return _menus; }
-        }
-
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
-            {"-i 对话","直接对话"},
-            {"-s 查/启/停","状态切换与查询"},
         };
 
         public override Dictionary<string, string> Filters
@@ -169,7 +152,7 @@ namespace ZhenyaoBot
 
         private string GetBotMessage(string msg)
         {
-            string postd = string.Format(spacialurl_post, _botid,System.Web.HttpUtility.UrlEncode(msg));
+            string postd = string.Format(spacialurl_post, _botid, System.Web.HttpUtility.UrlEncode(msg));
             string rstr = PostUrlText(spacialurl, Encoding.Default.GetBytes(postd));
             if (rstr != null)
             {
@@ -203,38 +186,10 @@ namespace ZhenyaoBot
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
-            string[] substring = message.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
             string rstr = null;
             try
             {
-                switch (substring[0])
-                {
-                    case "-i":
-                        rstr = GetBotMessage(substring[1]);
-                        break;
-                    case "-s":
-                        if (substring[1].Contains('查'))
-                        {
-                            return "当前回复状态为" + (_autoreplay ? "启用" : "停用");
-                        }
-                        else if (substring[1].Contains('启'))
-                        {
-                            _autoreplay = true;
-                            return "当前回复状态为启用";
-                        }
-                        else if (substring[1].Contains('停'))
-                        {
-                            _autoreplay = false;
-                            return "当前回复状态为停用";
-                        }
-                        break;
-                    default:
-                        if (_autoreplay)
-                        {
-                            rstr = GetBotMessage(message);
-                        }
-                        break;
-                }
+                rstr = GetBotMessage(message);
             }
             catch (Exception)
             {
@@ -254,29 +209,6 @@ namespace ZhenyaoBot
             get
             {
                 return "真药网机器人。\r\n信息来自 http://lover.zhenyao.net/ 。";
-            }
-        }
-
-        public override void MenuClicked(string menuName)
-        {
-            LastMessage = null;
-            if (menuName == "start")
-            {
-                _autoreplay = true;
-                LastMessage = "当前回复状态为启用";
-            }
-            else if (menuName == "stop")
-            {
-                _autoreplay = false;
-                LastMessage = "当前回复状态为停用";
-            }
-            else if (menuName == "status")
-            {
-                LastMessage = "当前回复状态为" + (_autoreplay ? "启用" : "停用");
-            }
-            if (LastMessage != null && OnMessage != null)
-            {
-                OnMessage(this, EventArgs.Empty);
             }
         }
     }
