@@ -60,12 +60,9 @@ namespace ZhenyaoBot
 
         private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            CancellationToken token = tokenSource.Token;
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
-                token.ThrowIfCancellationRequested();
                 HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
                 myRequest.Method = "GET";
                 myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
@@ -73,7 +70,7 @@ namespace ZhenyaoBot
                 myRequest.AllowAutoRedirect = true;
                 myRequest.KeepAlive = true;
                 response = (HttpWebResponse)myRequest.GetResponse();
-            }, token);
+            });
             task.Start();
             bool wait = task.Wait(timeout);
             if (wait)
@@ -102,12 +99,9 @@ namespace ZhenyaoBot
 
         private HttpWebResponse GetPostResponse(string url, byte[] postData, int timeout = 60000)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            CancellationToken token = tokenSource.Token;
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
-                token.ThrowIfCancellationRequested();
                 HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
                 myRequest.Method = "POST";
                 myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
@@ -118,7 +112,7 @@ namespace ZhenyaoBot
                     sw.Write(postData, 0, postData.Length);
                 }
                 response = (HttpWebResponse)myRequest.GetResponse();
-            }, token);
+            });
             task.Start();
             bool wait = task.Wait(timeout);
             if (wait)

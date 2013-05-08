@@ -98,7 +98,7 @@ namespace MessageDeal1
                     _timer.AutoReset = true;
                     _timer.Interval = 300000;
                     _timer.Elapsed += _timer_Elapsed;
-                    System.Threading.Thread.Sleep(new Random().Next(300000));
+                    System.Threading.Thread.Sleep(new Random().Next((Int32)_timer.Interval));
                     _timer.Start();
                 }).Start();
         }

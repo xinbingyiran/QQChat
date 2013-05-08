@@ -682,7 +682,6 @@ namespace WebQQ2.WebQQ2
             _messageTaskCts = new CancellationTokenSource();
             _messageTask = new Task(() =>
                 {
-                    _messageTaskCts.Token.ThrowIfCancellationRequested();
                     GetMessage();
                 }, _messageTaskCts.Token);
             _messageTask.Start();
@@ -692,6 +691,7 @@ namespace WebQQ2.WebQQ2
         {
             while (_user.Status != QQStatus.StatusOffline.StatusInternal)
             {
+                _messageTaskCts.Token.ThrowIfCancellationRequested();
                 GetMessageSub();
             }
         }
@@ -1716,12 +1716,9 @@ namespace WebQQ2.WebQQ2
         }
         private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            CancellationToken token = tokenSource.Token;
             HttpWebResponse response = null;
             Task task = new Task(() =>
                 {
-                    token.ThrowIfCancellationRequested();
                     HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
                     myRequest.Method = "GET";
                     myRequest.Referer = qq_referurl;
@@ -1731,7 +1728,7 @@ namespace WebQQ2.WebQQ2
                     myRequest.AllowAutoRedirect = true;
                     myRequest.KeepAlive = true;
                     response = (HttpWebResponse)myRequest.GetResponse();
-                }, token);
+                });
             task.Start();
             bool wait = task.Wait(timeout);
             if (wait)
@@ -1741,12 +1738,9 @@ namespace WebQQ2.WebQQ2
 
         private HttpWebResponse GetPostResponse(string url, byte[] postData, int timeout = 60000)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            CancellationToken token = tokenSource.Token;
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
-                token.ThrowIfCancellationRequested();
                 HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
                 myRequest.Method = "POST";
                 myRequest.Referer = qq_referurl;
@@ -1759,7 +1753,7 @@ namespace WebQQ2.WebQQ2
                     sw.Write(postData, 0, postData.Length);
                 }
                 response = (HttpWebResponse)myRequest.GetResponse();
-            }, token);
+            });
             task.Start();
             bool wait = task.Wait(timeout);
             if (wait)
@@ -1770,15 +1764,12 @@ namespace WebQQ2.WebQQ2
 
         public string GetFileTrueUrl(string url, int timeout = 60000)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            CancellationToken token = tokenSource.Token;
             String newUrl = null;
             Task task = new Task(() =>
             {
 
                 try
                 {
-                    token.ThrowIfCancellationRequested();
                     HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
                     myRequest.Method = "GET";
                     myRequest.Referer = qq_referurl;
@@ -1806,7 +1797,7 @@ namespace WebQQ2.WebQQ2
                 {
                     newUrl = null;
                 }
-            }, token);
+            });
             task.Start();
             bool wait = task.Wait(timeout);
             if (wait)
