@@ -236,8 +236,6 @@ namespace WebApi
             return null;
         }
 
-        public override event EventHandler<EventArgs> OnMessage;
-
         public override string AboutMessage
         {
             get
