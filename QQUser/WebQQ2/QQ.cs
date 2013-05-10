@@ -266,10 +266,10 @@ namespace WebQQ2.WebQQ2
             return GetFileTrueUrl(url);
         }
 
-        public string GetCFace2Url(string msg_id,string filename,string guin)
+        public string GetCFace2Url(string msg_id, string filename, string guin)
         {
             //"http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
-            return string.Format(qq_cface2,msg_id,filename,guin,_user.ClientID,_user.PsessionID);
+            return string.Format(qq_cface2, msg_id, filename, guin, _user.ClientID, _user.PsessionID);
         }
 
         public Stream GetOffPic(string filepath, string fuin)
@@ -393,22 +393,33 @@ namespace WebQQ2.WebQQ2
 
         public string LogOutQQ2()
         {
-            if (_user.PtWebQQ == null || _user.PtWebQQ.Length == 0)
+            try
             {
-                return "尚未全局登录成功";
-            }
-            string url = string.Format(qq_logout2, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
-            string retstr = GetUrlText(url);
-            if (retstr != null && retstr.Length > 0)
-            {
-                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
-                if (root["retcode"] as int? == 0)
+                if (_user.PtWebQQ == null || _user.PtWebQQ.Length == 0)
                 {
-                    _user.Status = "offline";
+                    return "尚未全局登录成功";
                 }
-                else
+                string url = string.Format(qq_logout2, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
+                string retstr = GetUrlText(url);
+                if (retstr != null && retstr.Length > 0)
                 {
-                    return QQHelper.ToJson(root);
+                    Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                    if (root["retcode"] as int? == 0)
+                    {
+                        _user.Status = "offline";
+                    }
+                    else
+                    {
+                        return QQHelper.ToJson(root);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (_messageTaskCts != null && !_messageTaskCts.IsCancellationRequested)
+                {
+                    _messageTaskCts.Cancel(false);
+                    _messageTaskCts = null;
                 }
             }
             return null;
@@ -668,22 +679,14 @@ namespace WebQQ2.WebQQ2
 
         public void StartGetMessage()
         {
-            if (_messageTask != null)
-            {
-                try
-                {
-                    _messageTaskCts.Cancel(false);
-                }
-                catch (Exception)
-                {
-                }
-                _messageTask = null;
-            }
-            _messageTaskCts = new CancellationTokenSource();
             _messageTask = new Task(() =>
+            {
+                if (_messageTaskCts == null)
                 {
-                    GetMessage();
-                }, _messageTaskCts.Token);
+                    _messageTaskCts = new CancellationTokenSource();
+                }
+                GetMessage();
+            });
             _messageTask.Start();
         }
 
@@ -1716,6 +1719,11 @@ namespace WebQQ2.WebQQ2
         }
         private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
         {
+            if (_messageTaskCts == null)
+            {
+                _messageTaskCts = new CancellationTokenSource();
+            }
+            _messageTaskCts.Token.ThrowIfCancellationRequested();
             HttpWebResponse response = null;
             Task task = new Task(() =>
                 {
@@ -1730,7 +1738,7 @@ namespace WebQQ2.WebQQ2
                     response = (HttpWebResponse)myRequest.GetResponse();
                 });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout, _messageTaskCts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -1738,6 +1746,11 @@ namespace WebQQ2.WebQQ2
 
         private HttpWebResponse GetPostResponse(string url, byte[] postData, int timeout = 60000)
         {
+            if (_messageTaskCts == null)
+            {
+                _messageTaskCts = new CancellationTokenSource();
+            }
+            _messageTaskCts.Token.ThrowIfCancellationRequested();
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
@@ -1755,7 +1768,7 @@ namespace WebQQ2.WebQQ2
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout, _messageTaskCts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -1764,6 +1777,11 @@ namespace WebQQ2.WebQQ2
 
         public string GetFileTrueUrl(string url, int timeout = 60000)
         {
+            if (_messageTaskCts == null)
+            {
+                _messageTaskCts = new CancellationTokenSource();
+            }
+            _messageTaskCts.Token.ThrowIfCancellationRequested();
             String newUrl = null;
             Task task = new Task(() =>
             {
@@ -1799,7 +1817,7 @@ namespace WebQQ2.WebQQ2
                 }
             });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout, _messageTaskCts.Token);
             if (wait)
                 return newUrl;
             throw new TimeoutException();

@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace WebApi
 {
@@ -15,34 +16,48 @@ namespace WebApi
     {
         public override string PluginName
         {
-            get { return "Web信息处理"; }
+            get { return "天气预报"; }
         }
+
+        private static CancellationTokenSource _cts;
+
+        private static string _defaultCity = "保定";
+        private static string _defaultCityCode = "101090201";
+        private static string _filepath;
 
         public override string Setting
         {
             get
             {
-                return (Enabled ? "1" : "0");
+                return (Enabled ? "1" : "0") + _defaultCity;
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && value.Length > 0)
+                if (!string.IsNullOrEmpty(value) && value.Length > 1)
                 {
                     Enabled = value[0] == '1';
+                    _defaultCity = value.Substring(1);
                 }
             }
         }
 
-        private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
+        private Dictionary<string, string> _menus = new Dictionary<string, string>
         {
-            {"-ip ip地址","IP地址"},
-            {"-mo/手机 手机号码","手机号码"},
-            {"-tq/天气 城市名","天气预报"},
-            {"-md5 字符串","32位md5加密"},
-            {"-cfs 字符串","cfs加密"},
-            {"-4e 字符串","Base64加密"},
-            {"-4d 字符串","Base64解密"},
-            {"-fy 字符串","中文到英文翻译"},
+            {"重载","reload"},
+        };
+
+        public override Dictionary<string, string> Menus
+        {
+            get { return _menus; }
+        }
+
+        private static Dictionary<string, string> _filters = new Dictionary<string, string>
+        {
+            {"天气[ 城市]","显示指定城市的天气"}
+        };
+
+        private static Dictionary<string, string> _citycode = new Dictionary<string, string>
+        {
         };
 
         public override Dictionary<string, string> Filters
@@ -53,9 +68,66 @@ namespace WebApi
             }
         }
 
+        public MyWebApi()
+        {
+            var assemblay = this.GetType().Assembly;
+            var filedir = assemblay.Location;
+            filedir = filedir.Substring(0, filedir.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+            _filepath = filedir + this.GetType().FullName + ".db";
+            new Task(() =>
+            {
+                LoadPara();
+            }).Start();
+        }
+
+        private void LoadPara()
+        {
+            _citycode.Clear();
+            string[] lines;
+            try
+            {
+                if (!File.Exists(_filepath))
+                {
+                    lines = WebApi.Properties.Resources.DefaultCode.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                    File.WriteAllText(_filepath, WebApi.Properties.Resources.DefaultCode);
+                }
+                else
+                {
+                    lines = File.ReadAllLines(_filepath);
+                }
+                var len = lines.Length;
+                for (int i = 0; i < len; i++)
+                {
+                    try
+                    {
+                        var jsonstrs = JsonConvert.DeserializeObject<string[]>(lines[i]);
+                        //if (jsonstrs.Length == 2 && !_citycode.ContainsKey(jsonstrs[0]))
+                        {
+                            _citycode.Add(jsonstrs[0], jsonstrs[1]);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (OnMessage != null)
+                        {
+                            LastMessage = ex.Message + "@" + (i + 1);
+                            OnMessage(this, EventArgs.Empty);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
 
         private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
         {
+            if (_cts == null)
+            {
+                _cts = new CancellationTokenSource();
+            }
+            _cts.Token.ThrowIfCancellationRequested();
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
@@ -68,7 +140,7 @@ namespace WebApi
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout, _cts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -95,6 +167,11 @@ namespace WebApi
 
         private HttpWebResponse GetPostResponse(string url, byte[] postData, int timeout = 60000)
         {
+            if (_cts == null)
+            {
+                _cts = new CancellationTokenSource();
+            }
+            _cts.Token.ThrowIfCancellationRequested();
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
@@ -110,7 +187,7 @@ namespace WebApi
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout, _cts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -135,35 +212,7 @@ namespace WebApi
             return null;
         }
 
-
-        private static string spacialurl = "http://lover.zhenyao.net/chat-g.json";
-
-        private static string spacialurl_post = "score=true&botid=1366&msg={0}&type=3";
-
-        private string GetBotMessage(string msg)
-        {
-            string postd = string.Format(spacialurl_post, System.Web.HttpUtility.UrlEncode(msg));
-            string rstr = PostUrlText(spacialurl, Encoding.Default.GetBytes(postd));
-            if (rstr != null)
-            {
-                try
-                {
-                    System.Web.Script.Serialization.JavaScriptSerializer jss = new System.Web.Script.Serialization.JavaScriptSerializer();
-                    Dictionary<string, object> dss = (Dictionary<string, object>)jss.Deserialize(rstr, typeof(Dictionary<string, object>));
-                    System.Collections.ArrayList arr = dss["messages"] as System.Collections.ArrayList;
-                    StringBuilder sb = new StringBuilder();
-                    foreach (Dictionary<string, object> item in arr)
-                    {
-                        sb.AppendLine(item["message"].ToString());
-                    }
-                    return sb.ToString().Trim();
-                }
-                catch (Exception)
-                {
-                }
-            }
-            return null;
-        }
+        private static readonly string weatherurl = "http://m.weather.com.cn/data/{0}.html";
 
         public override string DealMessage(string messageType, Dictionary<string, object> info, string message)
         {
@@ -180,49 +229,40 @@ namespace WebApi
             string rstr = null;
             try
             {
-                switch (substring[0])
+                if (substring.Length > 0 && substring[0] == "天气")
                 {
-                    //{"ip","http://api.liqwei.com/location/?ip={0}"},
-                    //{"mo","http://api.liqwei.com/location/?mobile={0}"},
-                    //{"tq","http://api.liqwei.com/weather/?city={0}"},
-                    //{"b6e","http://api.liqwei.com/security/?base64encode={0}"},
-                    //{"b6d","http://api.liqwei.com/security/?base64decode={0}"},
-                    case "-ip":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/location/?ip={0}",
-                            System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-mo":
-                    case "-手机":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/location/?mobile={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-tq":
-                    case "-天气":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/weather/?city={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-md5":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?md5={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-cfs":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?cfs={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-4e":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?base64encode={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-4d":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/security/?base64decode={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    case "-fy":
-                        rstr = GetUrlText(string.Format("http://api.liqwei.com/translate/?language=zh-CN|en&content={0}",
-                        System.Web.HttpUtility.UrlEncode(substring[1], Encoding.GetEncoding("GBK"))));
-                        break;
-                    default:
-                        break;
+                    string citycode = _defaultCityCode;
+                    if (substring.Length > 1)
+                    {
+                        if (_citycode.ContainsKey(substring[1]))
+                        {
+                            citycode = _citycode[substring[1]];
+                        }
+                        else
+                        {
+                            throw new Exception("天气代码未找到");
+                        }
+                    }
+                    string url = string.Format(weatherurl, citycode);
+                    string urlresult = GetUrlText(url);
+                    if (urlresult != null)
+                    {
+                        var result = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(urlresult);
+                        if (result != null && result.ContainsKey("weatherinfo"))
+                        {
+                            var w = result["weatherinfo"];
+                            if (w != null)
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                sb.AppendLine(string.Format("{0}  {1}  {2}：", w["date_y"], w["week"], w["city"]));
+                                sb.AppendLine(string.Format("今日天气: {0}  {1}  {2}", w["weather1"], w["wind1"], w["temp1"]));
+                                sb.AppendLine(string.Format("穿衣指数：{0}  {1}", w["index"], w["index_d"]));
+                                sb.AppendLine(string.Format("明日天气：{0}  {1}  {2}", w["weather2"], w["wind2"], w["temp2"]));
+                                sb.AppendLine(string.Format("后日天气：{0}  {1}  {2}", w["weather3"], w["wind3"], w["temp3"]));
+                                rstr = sb.ToString();
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception)
@@ -236,12 +276,37 @@ namespace WebApi
             return null;
         }
 
+        public override event EventHandler<EventArgs> OnMessage;
+
+        public override void MenuClicked(string menuName)
+        {
+            if (menuName == "reload")
+            {
+                LoadPara();
+                LastMessage = "重载参数完成，请刷新查看";
+                if (OnMessage != null)
+                {
+                    OnMessage(this, EventArgs.Empty);
+                }
+            }
+        }
+
         public override string AboutMessage
         {
             get
             {
-                return "Web信息处理。\r\n信息来自网上，谨慎使用。";
+                return "天气预报。\r\n信息采集于天气网。";
             }
+        }
+
+        public override void OnExited()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel(false);
+                _cts = null;
+            }
+            base.OnExited();
         }
     }
 }

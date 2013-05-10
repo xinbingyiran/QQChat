@@ -14,6 +14,7 @@ namespace ZhenyaoBot
     {
         private Int32 _botid;
         private const Int32 defaultbotid = 728;
+        private static CancellationTokenSource _cts;
 
         public override string Setting
         {
@@ -60,6 +61,11 @@ namespace ZhenyaoBot
 
         private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
         {
+            if (_cts == null)
+            {
+                _cts = new CancellationTokenSource();
+            }
+            _cts.Token.ThrowIfCancellationRequested();
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
@@ -72,7 +78,7 @@ namespace ZhenyaoBot
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout,_cts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -99,6 +105,11 @@ namespace ZhenyaoBot
 
         private HttpWebResponse GetPostResponse(string url, byte[] postData, int timeout = 60000)
         {
+            if (_cts == null)
+            {
+                _cts = new CancellationTokenSource();
+            }
+            _cts.Token.ThrowIfCancellationRequested();
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
@@ -114,7 +125,7 @@ namespace ZhenyaoBot
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout);
+            bool wait = task.Wait(timeout,_cts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -202,6 +213,16 @@ namespace ZhenyaoBot
             {
                 return "真药网机器人。\r\n信息来自 http://lover.zhenyao.net/ 。";
             }
+        }
+
+        public override void OnExited()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel(false);
+                _cts = null;
+            }
+            base.OnExited();
         }
     }
 }
