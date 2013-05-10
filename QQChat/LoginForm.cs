@@ -76,6 +76,7 @@ namespace QQChat
             panel1.Visible = true;
             pictureBoxCode.Image = image;
             SetInfo("需要输入验证码");
+            EnableLog(true);
         }
 
         private void SetTextCode(string text)
@@ -87,6 +88,7 @@ namespace QQChat
             }
             panel1.Visible = false;
             textBoxCode.Text = text;
+            EnableLog(true);
         }
 
         private void SetInfo(string text)
@@ -100,6 +102,11 @@ namespace QQChat
         }
 
         private void textBoxUser_Leave(object sender, EventArgs e)
+        {
+            CheckUser();
+        }
+
+        private void CheckUser()
         {
             const string mstr = @"\d{5,12}";
             if (Regex.IsMatch(textBoxUser.Text, mstr))
@@ -209,16 +216,26 @@ namespace QQChat
             this.Close();
         }
 
-        private void LoginForm_Activated(object sender, EventArgs e)
+        private void LoginForm_Shown(object sender, EventArgs e)
         {
-            EnableLog(true);
-            if (textBoxUser.Text.Length == 0)
+            if (this.Visible)
             {
-                textBoxUser.Focus();
-            }
-            else
-            {
-                textBoxPass.Focus();
+                EnableLog(true);
+                if (textBoxUser.Text.Length == 0)
+                {
+                    textBoxUser.Focus();
+                }
+                else
+                {
+                    if (!textBoxUser.Focused)
+                    {
+                        CheckUser();
+                    }
+                    else
+                    {
+                        textBoxPass.Focus();
+                    }
+                }
             }
         }
 

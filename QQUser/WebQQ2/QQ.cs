@@ -395,12 +395,17 @@ namespace WebQQ2.WebQQ2
         {
             try
             {
+                if (_messageTaskCts != null && !_messageTaskCts.IsCancellationRequested)
+                {
+                    _messageTaskCts.Cancel(false);
+                    _messageTaskCts = null;
+                }
                 if (_user.PtWebQQ == null || _user.PtWebQQ.Length == 0)
                 {
                     return "尚未全局登录成功";
                 }
                 string url = string.Format(qq_logout2, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
-                string retstr = GetUrlText(url);
+                string retstr = GetUrlText(url,3000);
                 if (retstr != null && retstr.Length > 0)
                 {
                     Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
@@ -416,11 +421,6 @@ namespace WebQQ2.WebQQ2
             }
             catch (Exception)
             {
-                if (_messageTaskCts != null && !_messageTaskCts.IsCancellationRequested)
-                {
-                    _messageTaskCts.Cancel(false);
-                    _messageTaskCts = null;
-                }
             }
             return null;
         }
@@ -1735,6 +1735,7 @@ namespace WebQQ2.WebQQ2
                     myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
                     myRequest.AllowAutoRedirect = true;
                     myRequest.KeepAlive = true;
+                    _messageTaskCts.Token.ThrowIfCancellationRequested();
                     response = (HttpWebResponse)myRequest.GetResponse();
                 });
             task.Start();
@@ -1761,6 +1762,7 @@ namespace WebQQ2.WebQQ2
                 myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
                 myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
                 myRequest.ContentLength = postData.Length;
+                _messageTaskCts.Token.ThrowIfCancellationRequested();
                 using (var sw = myRequest.GetRequestStream())
                 {
                     sw.Write(postData, 0, postData.Length);
@@ -1799,6 +1801,7 @@ namespace WebQQ2.WebQQ2
                     myRequest.Headers.Add("Accept-Encoding", "gzip,deflate");
                     myRequest.Headers.Add("Accept-Language", "zh-CN,zh;q=0.8");
                     myRequest.Headers.Add("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3");
+                    _messageTaskCts.Token.ThrowIfCancellationRequested();
                     HttpWebResponse myResponse = (HttpWebResponse)myRequest.GetResponse();//1
                     WebHeaderCollection headers = myResponse.Headers;
                     if ((myResponse.StatusCode == System.Net.HttpStatusCode.Found) ||

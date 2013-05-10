@@ -39,10 +39,12 @@ namespace QQChat
             private set;
         }
 
+        private LoginForm _loginForm;
+
         public LoginForm LoginForm
         {
-            get;
-            private set;
+            get { return _loginForm; }
+            private set { _loginForm = value; }
         }
 
         private TreeNode _vfzNode = new TreeNode() { Text = @"未分组", Tag = -1, Name = "-1" };
@@ -218,11 +220,16 @@ Designed by XBYR", @"QQ聊天程序");
                 BeginInvoke(new MethodInvoker(ReturnToLogIn));
                 return;
             }
+            if (LoginForm.Visible)
+            {
+                return;
+            }
             this.Clear();
             this.Hide();
             if (LoginForm.ShowDialog() != DialogResult.OK)
             {
                 this.Close();
+                return;
             }
             this.Show();
             this.InitUser(LoginForm.QQ);
@@ -901,7 +908,7 @@ Designed by XBYR", @"QQ聊天程序");
                 _system.BringToFront();
                 _system.UpdateTitle();
             }
-            _system.AppendMessage(friend, time, TransMessage(message, friend == null?"":friend.uin.ToString(), msg_id).ToArray());
+            _system.AppendMessage(friend, time, TransMessage(message, friend == null ? "" : friend.uin.ToString(), msg_id).ToArray());
         }
 
         public GroupForm GetGroupForm(QQGroup group)
