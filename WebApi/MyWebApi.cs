@@ -256,7 +256,11 @@ namespace WebApi
                                 StringBuilder sb = new StringBuilder();
                                 sb.AppendLine(string.Format("{0}  {1}  {2}：", w["date_y"], w["week"], w["city"]));
                                 sb.AppendLine(string.Format("今日天气: {0}  {1}  {2}", w["weather1"], w["wind1"], w["temp1"]));
-                                sb.AppendLine(string.Format("穿衣指数：{0}  {1}", w["index"], w["index_d"]));
+                                //sb.AppendLine(string.Format("穿衣指数：{0}  {1}", w["index"], w["index_d"]));
+                                sb.AppendLine(string.Format("紫外线强度：{0}", w["index_uv"]));
+                                sb.AppendLine(string.Format("人体舒适度：{0}", w["index_co"]));
+                                sb.AppendLine(string.Format("晨练指数：{0}", w["index_cl"]));
+                                sb.AppendLine(string.Format("晾晒指数：{0}", w["index_ls"]));
                                 sb.AppendLine(string.Format("明日天气：{0}  {1}  {2}", w["weather2"], w["wind2"], w["temp2"]));
                                 sb.AppendLine(string.Format("后日天气：{0}  {1}  {2}", w["weather3"], w["wind3"], w["temp3"]));
                                 rstr = sb.ToString();
