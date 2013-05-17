@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace MessageDeal1
 {
@@ -67,12 +68,12 @@ namespace MessageDeal1
                 Dictionary<string, string> d = new Dictionary<string, string>();
                 if (_enablestudy)
                 {
-                    d.Add("-学/忘 问题[ 答案]","学/忘问题[问题不能有空格]");
+                    d.Add("-学/忘 问题[ 答案]", "学/忘问题[问题不能有空格]");
                 }
-                if(_enablefind)
+                if (_enablefind)
                 {
-                    d.Add("-列[ 开始位置]","列出五条学会的问题");
-                    d.Add("-查/反 问题关键字","查看学会的问题/答案");
+                    d.Add("-列[ 开始位置]", "列出五条学会的问题");
+                    d.Add("-查/反 问题关键字", "查看学会的问题/答案");
                 }
                 return d;
             }
@@ -119,8 +120,8 @@ namespace MessageDeal1
                     Dictionary<string, string> dir = new Dictionary<string, string>();
                     foreach (string line in lines)
                     {
-                        string[] items = line.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
-                        if (items.Length == 2 && items[0].Length >= 2)
+                        var items = JsonConvert.DeserializeObject<string[]>(line);
+                        if (items != null && items.Length == 2 && items[0].Length > 1)
                         {
                             if (dir.ContainsKey(items[0]))
                             {
@@ -155,7 +156,7 @@ namespace MessageDeal1
             {
                 if (_saveFlag)
                 {
-                    var lines = _learning.Select(ele => ele.Key + ' ' + ele.Value);
+                    var lines = _learning.Select(ele => JsonConvert.SerializeObject(new string[] { ele.Key, ele.Value }));
                     File.WriteAllLines(_filePath, lines);
                     _saveFlag = false;
                 }
@@ -192,7 +193,7 @@ namespace MessageDeal1
                     {
                         if (!_enablestudy)
                             return null;
-                        var wd = submessage.Split(new char[] { ' ' }, StringSplitOptions.None);
+                        var wd = submessage.Split(new char[] { ' ' }, 2, StringSplitOptions.None);
                         if (wd.Length != 2)
                         {
                             return null;
