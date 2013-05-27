@@ -16,19 +16,24 @@ namespace ZhenyaoBot
         private const Int32 defaultbotid = 728;
         private static CancellationTokenSource _cts;
 
+        public bool _friendEnable;
+        public bool _groupEnable;
+
         public override string Setting
         {
             get
             {
-                return (Enabled ? "1" : "0") + _botid;
+                return (Enabled ? "1" : "0") + (_friendEnable ? "1" : "0") + (_groupEnable ? "1" : "0") + _botid;
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && value.Length > 1)
+                if (!string.IsNullOrEmpty(value) && value.Length > 3)
                 {
                     Enabled = value[0] == '1';
+                    _friendEnable = value[1] == '1';
+                    _groupEnable = value[2] == '1';
                     _botid = defaultbotid;
-                    if (!Int32.TryParse(value.Substring(2), out _botid))
+                    if (!Int32.TryParse(value.Substring(4), out _botid))
                     {
                         _botid = defaultbotid;
                     }
@@ -55,6 +60,8 @@ namespace ZhenyaoBot
 
         public MyApi()
         {
+            _friendEnable = true;
+            _groupEnable = true;
             _botid = defaultbotid;
         }
 
@@ -78,7 +85,7 @@ namespace ZhenyaoBot
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout,_cts.Token);
+            bool wait = task.Wait(timeout, _cts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
@@ -125,7 +132,7 @@ namespace ZhenyaoBot
                 response = (HttpWebResponse)myRequest.GetResponse();
             });
             task.Start();
-            bool wait = task.Wait(timeout,_cts.Token);
+            bool wait = task.Wait(timeout, _cts.Token);
             if (wait)
                 return response;
             throw new TimeoutException();
