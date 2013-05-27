@@ -195,6 +195,10 @@ namespace ZhenyaoBot
             }
             if (!Enabled)
                 return null;
+            if (messageType == MessageType.MessageFriend && !_friendEnable)
+                return null;
+            if (messageType == MessageType.MessageGroup && !_groupEnable)
+                return null;
             if (string.IsNullOrEmpty(message))
                 return null;
             message = message.Trim();
