@@ -33,7 +33,7 @@ namespace ZhenyaoBot
                     _friendEnable = value[1] == '1';
                     _groupEnable = value[2] == '1';
                     _botid = defaultbotid;
-                    if (!Int32.TryParse(value.Substring(4), out _botid))
+                    if (!Int32.TryParse(value.Substring(3), out _botid))
                     {
                         _botid = defaultbotid;
                     }
