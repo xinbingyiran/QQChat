@@ -22,6 +22,7 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_check = "http://check.ptlogin2.qq.com/check?uin={0}&appid=1003903&r={1:f16}";
         private static readonly string qq_getimage = "http://captcha.qq.com/getimage?aid=1003903&r={0:f16}&uin={1}";
         private static readonly string qq_login = "http://ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=1&aid=1003903&u1=http%3A%2F%2Fw.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-6-9305&mibao_css=m_webqq&t=1&g=1";
+        private static readonly string qq_check_sig = "http://ptlogin4.web2.qq.com/check_sig?pttype=1&uin={0}&service=login&nodirect=0&ptsig={1}&s_url=http%3a%2f%2fweb2.qq.com%2floginproxy.html%3flogin2qq%3d1%26webqq%5ftype%3d10&f_url=&ptlang=2052&ptredirect=100&aid=1003903&daid=164&j_later=0&low_login_hour=0&regmaster=0";
         private static readonly string qq_login2 = "http://d.web2.qq.com/channel/login2";
         private static readonly string qq_get_user_friends2 = "http://s.web2.qq.com/api/get_user_friends2";
         //private static readonly string qq_get_friend_info2 = "http://s.web2.qq.com/api/get_friend_info2?tuin={0}&verifysession=&code=&vfwebqq={1}&t={2}";
@@ -76,6 +77,7 @@ namespace WebQQ2.WebQQ2
            {"ptwebqq",""},
            {"passwd_sig",""},
            {"clientid",""},
+           {"psessionid",null}
         };
 
         private Dictionary<string, object> qq_get_user_friends2_post = new Dictionary<string, object>()
@@ -363,7 +365,7 @@ namespace WebQQ2.WebQQ2
             qq_login2_post["status"] = logStatus;
             qq_login2_post["ptwebqq"] = _user.PtWebQQ;
             qq_login2_post["clientid"] = _user.ClientID;
-            string para = QQHelper.ToPostData(qq_login2_post);
+            string para = QQHelper.ToPostData(qq_login2_post) + string.Format("&clientid={0}&psessionid=null", _user.ClientID);
             string retstr = PostUrlText(url, Encoding.Default.GetBytes(para));
             _user.VfWebQQ = null;
             _user.PsessionID = null;

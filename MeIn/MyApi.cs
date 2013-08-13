@@ -62,6 +62,7 @@ namespace MeIn
     internal struct iniItem
     {
         public bool autoIn;
+        public bool signed;
         public bool isEnable;
         public string item;
         public Int32 min;
@@ -77,6 +78,8 @@ namespace MeIn
             {
                 {"自动记录启","start"},
                 {"自动记录停","stop"},
+                {"签到功能启","enable"},
+                {"签到功能停","disable"},
                 {"自动记录状态","status"},
             };
 
@@ -107,6 +110,7 @@ namespace MeIn
             _iniItem = new iniItem
                 {
                     isEnable = false,
+                    signed = false,
                     autoIn = false,
                     item = "积分",
                     pdata = "",
@@ -309,123 +313,125 @@ namespace MeIn
 
             #region 签到
 
-            if (message == "签到")
+            if (_iniItem.signed)
             {
-                meinItem item;
-                if (!_meinAll.ContainsKey(uin))
+                if (message == "签到")
                 {
-                    //return string.Format(_unregStr, nick, _personStr);
-                    item = new meinItem
-                        {
-                            uin = uin,
-                            mein = 0,
-                            score = 0,
-                            time = DateTime.MinValue,
-                            nick = nick,
-                            mark = mark,
-                        };
-                    _meinAll.Add(uin, item);
-                }
-                else
-                {
-                    item = _meinAll[uin];
-                    DateTime ntime = item.time + _iniItem.timespan;
-                    if (ntime > now)
+                    meinItem item;
+                    if (!_meinAll.ContainsKey(uin))
                     {
-                        leave = ntime - now;
-                        return string.Format(
-                            @"{0}，签到失败
+                        //return string.Format(_unregStr, nick, _personStr);
+                        item = new meinItem
+                            {
+                                uin = uin,
+                                mein = 0,
+                                score = 0,
+                                time = DateTime.MinValue,
+                                nick = nick,
+                                mark = mark,
+                            };
+                        _meinAll.Add(uin, item);
+                    }
+                    else
+                    {
+                        item = _meinAll[uin];
+                        DateTime ntime = item.time + _iniItem.timespan;
+                        if (ntime > now)
+                        {
+                            leave = ntime - now;
+                            return string.Format(
+                                @"{0}，签到失败
 上次签到时间为{1:yyyy-MM-dd HH:mm:ss}
 距下次可签到剩余{2}:{3:D2}:{4:D2}
 共成功签到{5}次,获得{6}{7}
 {8}",
-                            name, //0
-                            item.time, //1
-                            leave.Ticks / TimeSpan.TicksPerHour, //2
-                            leave.Minutes, //3
-                            leave.Seconds, //4
-                            item.mein, //5
-                            item.score, //6
-                            _iniItem.item, //7
-                            _iniItem.pdata //8
-                            );
+                                name, //0
+                                item.time, //1
+                                leave.Ticks / TimeSpan.TicksPerHour, //2
+                                leave.Minutes, //3
+                                leave.Seconds, //4
+                                item.mein, //5
+                                item.score, //6
+                                _iniItem.item, //7
+                                _iniItem.pdata //8
+                                );
+                        }
                     }
-                }
-                Int32 i = r.Next(_iniItem.mintomax) + _iniItem.min;
-                item = new meinItem
-                    {
-                        uin = uin,
-                        mein = item.mein + 1,
-                        score = item.score + i,
-                        time = now,
-                        nick = nick,
-                        mark = mark,
-                        lasttime = item.lasttime,
-                        lastsay = item.lastsay,
-                    };
-                _meinAll[uin] = item;
-                SetSaveFlag();
-                leave = _iniItem.timespan;
-                return string.Format(
-                    @"{0}，签到成功
+                    Int32 i = r.Next(_iniItem.mintomax) + _iniItem.min;
+                    item = new meinItem
+                        {
+                            uin = uin,
+                            mein = item.mein + 1,
+                            score = item.score + i,
+                            time = now,
+                            nick = nick,
+                            mark = mark,
+                            lasttime = item.lasttime,
+                            lastsay = item.lastsay,
+                        };
+                    _meinAll[uin] = item;
+                    SetSaveFlag();
+                    leave = _iniItem.timespan;
+                    return string.Format(
+                        @"{0}，签到成功
 {1:yyyy-MM-dd HH:mm:ss}获取{2}{3}
 距下次可签到剩余{4}:{5:D2}:{6:D2}
 共成功签到{7}次,获得{8}{3}
 {9}",
-                    name, //0
-                    now, //1
-                    i, //2
-                    _iniItem.item, //3
-                    leave.Ticks / TimeSpan.TicksPerHour, //4
-                    leave.Minutes, //5
-                    leave.Seconds, //6
-                    item.mein,
-                    item.score,
-                    _iniItem.pdata
-                    );
+                        name, //0
+                        now, //1
+                        i, //2
+                        _iniItem.item, //3
+                        leave.Ticks / TimeSpan.TicksPerHour, //4
+                        leave.Minutes, //5
+                        leave.Seconds, //6
+                        item.mein,
+                        item.score,
+                        _iniItem.pdata
+                        );
+                }
+                else if (message == "排名")
+                {
+                    var gstr = p1 + "|";
+                    var gstrlen = gstr.Length;
+                    var items = _meinAll.Values.Where(ele => ele.uin.StartsWith(gstr)).ToArray();
+                    if (items.Length == 0)
+                    {
+                        return "无排名";
+                    }
+                    Array.Sort(items, MeinTimesComparer.Default);
+                    int length = items.Length > _iniItem.top ? _iniItem.top : items.Length;
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("排名结果：");
+                    for (int i = 0; i < length; i++)
+                    {
+                        sb.AppendFormat("第{0}名：{1} 次 {2}[{3}]", i + 1, items[i].mein, items[i].mark == null ? items[i].nick : items[i].mark, items[i].uin.Substring(gstrlen));
+                        sb.AppendLine();
+                    }
+                    return sb.ToString();
+                }
+                else if (message == "成绩")
+                {
+                    var gstr = p1 + "|";
+                    var gstrlen = gstr.Length;
+                    var items = _meinAll.Values.Where(ele => ele.uin.StartsWith(p1 + "|")).ToArray();
+                    if (items.Length == 0)
+                    {
+                        return "无排名";
+                    }
+                    Array.Sort(items, MeinScoreComparer.Default);
+                    int length = items.Length > _iniItem.top ? _iniItem.top : items.Length;
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("排名结果：");
+                    for (int i = 0; i < length; i++)
+                    {
+                        sb.AppendFormat("第{0}名：{1} {2} {3}[{4}]", i + 1, items[i].score, _iniItem.item, items[i].mark == null ? items[i].nick : items[i].mark, items[i].uin.Substring(gstrlen));
+                        sb.AppendLine();
+                    }
+                    return sb.ToString();
+                }
             }
             #endregion
-
-            else if (message == "排名")
-            {
-                var gstr = p1 + "|";
-                var gstrlen = gstr.Length;
-                var items = _meinAll.Values.Where(ele => ele.uin.StartsWith(gstr)).ToArray();
-                if (items.Length == 0)
-                {
-                    return "无排名";
-                }
-                Array.Sort(items, MeinTimesComparer.Default);
-                int length = items.Length > _iniItem.top ? _iniItem.top : items.Length;
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("排名结果：");
-                for (int i = 0; i < length; i++)
-                {
-                    sb.AppendFormat("第{0}名：{1} 次 {2}[{3}]", i + 1, items[i].mein, items[i].mark == null ? items[i].nick : items[i].mark, items[i].uin.Substring(gstrlen));
-                    sb.AppendLine();
-                }
-                return sb.ToString();
-            }
-            else if (message == "成绩")
-            {
-                var gstr = p1 + "|";
-                var gstrlen = gstr.Length;
-                var items = _meinAll.Values.Where(ele => ele.uin.StartsWith(p1 + "|")).ToArray();
-                if (items.Length == 0)
-                {
-                    return "无排名";
-                }
-                Array.Sort(items, MeinScoreComparer.Default);
-                int length = items.Length > _iniItem.top ? _iniItem.top : items.Length;
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("排名结果：");
-                for (int i = 0; i < length; i++)
-                {
-                    sb.AppendFormat("第{0}名：{1} {2} {3}[{4}]", i + 1, items[i].score, _iniItem.item, items[i].mark == null ? items[i].nick : items[i].mark, items[i].uin.Substring(gstrlen));
-                    sb.AppendLine();
-                }
-                return sb.ToString();
-            }
             else if (_iniItem.autoIn)
             {
                 meinItem theitem;
@@ -469,9 +475,19 @@ namespace MeIn
                 _iniItem.autoIn = false;
                 LastMessage = "当前自动记录状态为停用";
             }
+            else if (menuName == "enable")
+            {
+                _iniItem.signed = true;
+                LastMessage = "当前签到状态为启用";
+            }
+            else if (menuName == "disable")
+            {
+                _iniItem.signed = false;
+                LastMessage = "当前签到状态为停用";
+            }
             else if (menuName == "status")
             {
-                LastMessage = "当前自动记录状态为" + (_iniItem.autoIn ? "启用" : "停用");
+                LastMessage = "当前自动记录状态" + (_iniItem.autoIn ? "启用" : "停用") + " 签到状态" + (_iniItem.signed ? "启用" : "停用");
             }
             if (LastMessage != null && OnMessage != null)
             {
