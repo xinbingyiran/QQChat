@@ -80,8 +80,81 @@ namespace WebQQ2.Extends
 
         public static string GetToken(QQUser user)
         {
-            return GetToken(user.QQNum, user.PtWebQQ);
+            return GetToken2(user.QQNum, user.PtWebQQ);
         }
+
+        public struct u
+        {
+            public int s;
+            public int e;
+            public u(int w, int G)
+            {
+                this.s = w;
+                this.e = G;
+            }
+        }
+
+        public static string GetToken2(string w, string G)
+        {
+            int wi = (int)Convert.ToInt64(w);
+            int[] I = new int[4];
+            I[0] = wi >> 24 & 255;
+            I[1] = wi >> 16 & 255;
+            I[2] = wi >> 8 & 255;
+            I[3] = wi & 255;
+            var T = new List<int>();
+            for (int i = 0; i < G.Length; ++i)
+            {
+                T.Add(G[i]);
+            }
+            var V = new Stack<u>();
+            V.Push(new u(0, T.Count - 1));
+            for (; V.Count > 0;) {
+                var P = V.Pop();
+                if (! (P.s >= P.e || P.s < 0 || P.e >= T.Count)) if (P.s + 1 == P.e) {
+                    if (T[P.s] > T[P.e]) {
+                        var Z = T[P.s];
+                        T[P.s] = T[P.e];
+                        T[P.e] = Z;
+                    }
+                } else {
+                    int Z = P.s;
+                    int U = P.e;
+                    int X = T[P.s];
+                    for (; P.s < P.e;) {
+                        for (; P.s < P.e && T[P.e] >= X;) {
+                            P.e--;
+                            I[0] = I[0] + 3 & 255;
+                        }
+                        if (P.s < P.e) {
+                            T[P.s] = T[P.e];
+                            P.s++;
+                            I[1] = I[1] * 13 + 43 & 255;
+                        }
+                        for (; P.s < P.e && T[P.s] <= X;) {
+                            P.s++;
+                            I[2] = I[2] - 3 & 255;
+                        }
+                        if (P.s < P.e) {
+                            T[P.e] = T[P.s];
+                            P.e--;
+                            I[3] = (I[0] ^ I[1] ^ I[2] ^ I[3] + 1) & 255;
+                        }
+                    }
+                    T[P.s] = X;
+                    V.Push(new u(Z, P.s - 1));
+                    V.Push(new u(P.s + 1, U));
+                }
+            }
+            string TE = "0123456789ABCDEF";
+            string VE = "";
+            for (int i = 0; i < I.Length; i++) {
+                VE += TE[I[i] >> 4 & 15];
+                VE += TE[I[i] & 15];
+            }
+            return VE;
+        }
+
 
 
         public static string GetToken(string b, string i)

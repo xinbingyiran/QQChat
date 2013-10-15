@@ -46,6 +46,20 @@ namespace ZhenyaoBot
             get { return "真药机器人"; }
         }
 
+        public override Dictionary<string, string> Menus
+        {
+            get { return _menus; }
+        }
+
+        private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
+        {
+            {"好友回复启","start"},
+            {"好友回复停","stop"},
+            {"群回复启","enable"},
+            {"群回复停","disable"},
+            {"状态","status"},
+        };
+
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
         {
         };
@@ -225,6 +239,41 @@ namespace ZhenyaoBot
                 return "真药网机器人。\r\n信息来自 http://lover.zhenyao.net/ 。";
             }
         }
+
+        public override void MenuClicked(string menuName)
+        {
+            LastMessage = null;
+            if (menuName == "start")
+            {
+                _friendEnable = true;
+                LastMessage = "当前好友回复为启用";
+            }
+            else if (menuName == "stop")
+            {
+                _friendEnable = false;
+                LastMessage = "当前好友回复为停用";
+            }
+            else if (menuName == "enable")
+            {
+                _groupEnable = true;
+                LastMessage = "当前群回复为启用";
+            }
+            else if (menuName == "disable")
+            {
+                _groupEnable = false;
+                LastMessage = "当前群回复为停用";
+            }
+            else if (menuName == "status")
+            {
+                LastMessage = "当前好友回复" + (_friendEnable ? "启用" : "停用") + " 群回复" + (_groupEnable ? "启用" : "停用");
+            }
+            if (LastMessage != null && OnMessage != null)
+            {
+                OnMessage(this, EventArgs.Empty);
+            }
+        }
+
+        public override event EventHandler<EventArgs> OnMessage;
 
         public override void OnExited()
         {

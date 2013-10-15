@@ -76,11 +76,11 @@ namespace MeIn
     {
         private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
             {
-                {"自动记录启","start"},
-                {"自动记录停","stop"},
-                {"签到功能启","enable"},
-                {"签到功能停","disable"},
-                {"自动记录状态","status"},
+                {"记录启","start"},
+                {"记录停","stop"},
+                {"签到启","enable"},
+                {"签到停","disable"},
+                {"状态","status"},
             };
 
         private static readonly Dictionary<string, string> _filters = new Dictionary<string, string>
@@ -468,26 +468,26 @@ namespace MeIn
             if (menuName == "start")
             {
                 _iniItem.autoIn = true;
-                LastMessage = "当前自动记录状态为启用";
+                LastMessage = "当前记录状态为启用";
             }
             else if (menuName == "stop")
             {
                 _iniItem.autoIn = false;
-                LastMessage = "当前自动记录状态为停用";
+                LastMessage = "当前记录状态为停用";
             }
             else if (menuName == "enable")
             {
                 _iniItem.signed = true;
-                LastMessage = "当前签到状态为启用";
+                LastMessage = "当前签到为启用";
             }
             else if (menuName == "disable")
             {
                 _iniItem.signed = false;
-                LastMessage = "当前签到状态为停用";
+                LastMessage = "当前签到为停用";
             }
             else if (menuName == "status")
             {
-                LastMessage = "当前自动记录状态" + (_iniItem.autoIn ? "启用" : "停用") + " 签到状态" + (_iniItem.signed ? "启用" : "停用");
+                LastMessage = "当前记录" + (_iniItem.autoIn ? "启用" : "停用") + " 签到" + (_iniItem.signed ? "启用" : "停用");
             }
             if (LastMessage != null && OnMessage != null)
             {

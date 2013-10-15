@@ -41,15 +41,15 @@ namespace WebApi
             }
         }
 
-        private Dictionary<string, string> _menus = new Dictionary<string, string>
-        {
-            {"重载","reload"},
-        };
-
         public override Dictionary<string, string> Menus
         {
             get { return _menus; }
         }
+
+        private Dictionary<string, string> _menus = new Dictionary<string, string>
+        {
+            {"重载","reload"},
+        };
 
         private static Dictionary<string, string> _filters = new Dictionary<string, string>
         {
@@ -101,7 +101,7 @@ namespace WebApi
                     try
                     {
                         var jsonstrs = JsonConvert.DeserializeObject<string[]>(lines[i]);
-                        //if (jsonstrs.Length == 2 && !_citycode.ContainsKey(jsonstrs[0]))
+                        if (jsonstrs.Length == 2 && !_citycode.ContainsKey(jsonstrs[0]))
                         {
                             _citycode.Add(jsonstrs[0], jsonstrs[1]);
                         }

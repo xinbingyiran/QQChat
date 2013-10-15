@@ -61,6 +61,20 @@ namespace MessageDeal1
             get { return "学话鹦鹉"; }
         }
 
+        public override Dictionary<string, string> Menus
+        {
+            get { return _menus; }
+        }
+
+        private static readonly Dictionary<string, string> _menus = new Dictionary<string, string>
+        {
+            {"学习功能启","start"},
+            {"学习功能停","stop"},
+            {"查找功能启","enable"},
+            {"查找功能停","disable"},
+            {"状态","status"},
+        };
+
         public override Dictionary<string, string> Filters
         {
             get
@@ -323,6 +337,41 @@ namespace MessageDeal1
             }
             return retstr;
         }
+
+        public override void MenuClicked(string menuName)
+        {
+            LastMessage = null;
+            if (menuName == "start")
+            {
+                _enablestudy = true;
+                LastMessage = "当前学习功能为启用";
+            }
+            else if (menuName == "stop")
+            {
+                _enablestudy = false;
+                LastMessage = "当前学习功能为停用";
+            }
+            else if (menuName == "enable")
+            {
+                _enablefind = true;
+                LastMessage = "当前查找功能为启用";
+            }
+            else if (menuName == "disable")
+            {
+                _enablefind = false;
+                LastMessage = "当前查找功能为停用";
+            }
+            else if (menuName == "status")
+            {
+                LastMessage = "当前学习功能" + (_enablestudy ? "启用" : "停用") + " 查找功能" + (_enablefind ? "启用" : "停用");
+            }
+            if (LastMessage != null && OnMessage != null)
+            {
+                OnMessage(this, EventArgs.Empty);
+            }
+        }
+
+        public override event EventHandler<EventArgs> OnMessage;
 
         public override void OnExited()
         {
