@@ -42,6 +42,10 @@
             this.tabPageG = new System.Windows.Forms.TabPage();
             this.buttong = new System.Windows.Forms.Button();
             this.treeViewG = new System.Windows.Forms.TreeView();
+            this.buttonfd = new System.Windows.Forms.Button();
+            this.buttongd = new System.Windows.Forms.Button();
+            this.buttongget = new System.Windows.Forms.Button();
+            this.buttonfget = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -117,6 +121,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.buttonfget);
+            this.tabPage1.Controls.Add(this.buttonfd);
             this.tabPage1.Controls.Add(this.buttonf);
             this.tabPage1.Controls.Add(this.treeViewF);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -129,10 +135,9 @@
             // 
             // buttonf
             // 
-            this.buttonf.Dock = System.Windows.Forms.DockStyle.Top;
-            this.buttonf.Location = new System.Drawing.Point(3, 3);
+            this.buttonf.Location = new System.Drawing.Point(6, 6);
             this.buttonf.Name = "buttonf";
-            this.buttonf.Size = new System.Drawing.Size(226, 23);
+            this.buttonf.Size = new System.Drawing.Size(50, 23);
             this.buttonf.TabIndex = 1;
             this.buttonf.Text = "刷新";
             this.buttonf.UseVisualStyleBackColor = true;
@@ -142,15 +147,17 @@
             // 
             this.treeViewF.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.treeViewF.FullRowSelect = true;
-            this.treeViewF.Location = new System.Drawing.Point(3, 32);
+            this.treeViewF.Location = new System.Drawing.Point(3, 35);
             this.treeViewF.Name = "treeViewF";
-            this.treeViewF.Size = new System.Drawing.Size(226, 287);
+            this.treeViewF.Size = new System.Drawing.Size(226, 284);
             this.treeViewF.TabIndex = 0;
             this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
             this.treeViewF.DoubleClick += new System.EventHandler(this.treeViewF_DoubleClick);
             // 
             // tabPageG
             // 
+            this.tabPageG.Controls.Add(this.buttongget);
+            this.tabPageG.Controls.Add(this.buttongd);
             this.tabPageG.Controls.Add(this.buttong);
             this.tabPageG.Controls.Add(this.treeViewG);
             this.tabPageG.Location = new System.Drawing.Point(4, 22);
@@ -163,10 +170,9 @@
             // 
             // buttong
             // 
-            this.buttong.Dock = System.Windows.Forms.DockStyle.Top;
-            this.buttong.Location = new System.Drawing.Point(3, 3);
+            this.buttong.Location = new System.Drawing.Point(6, 6);
             this.buttong.Name = "buttong";
-            this.buttong.Size = new System.Drawing.Size(226, 23);
+            this.buttong.Size = new System.Drawing.Size(51, 23);
             this.buttong.TabIndex = 2;
             this.buttong.Text = "刷新";
             this.buttong.UseVisualStyleBackColor = true;
@@ -176,12 +182,54 @@
             // 
             this.treeViewG.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.treeViewG.FullRowSelect = true;
-            this.treeViewG.Location = new System.Drawing.Point(3, 32);
+            this.treeViewG.Location = new System.Drawing.Point(3, 35);
             this.treeViewG.Name = "treeViewG";
-            this.treeViewG.Size = new System.Drawing.Size(226, 287);
+            this.treeViewG.Size = new System.Drawing.Size(226, 284);
             this.treeViewG.TabIndex = 0;
             this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
             this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
+            // 
+            // buttonfd
+            // 
+            this.buttonfd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonfd.Location = new System.Drawing.Point(173, 6);
+            this.buttonfd.Name = "buttonfd";
+            this.buttonfd.Size = new System.Drawing.Size(53, 23);
+            this.buttonfd.TabIndex = 2;
+            this.buttonfd.Text = "导出";
+            this.buttonfd.UseVisualStyleBackColor = true;
+            this.buttonfd.Click += new System.EventHandler(this.buttonfd_Click);
+            // 
+            // buttongd
+            // 
+            this.buttongd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttongd.Location = new System.Drawing.Point(169, 6);
+            this.buttongd.Name = "buttongd";
+            this.buttongd.Size = new System.Drawing.Size(57, 23);
+            this.buttongd.TabIndex = 3;
+            this.buttongd.Text = "导出";
+            this.buttongd.UseVisualStyleBackColor = true;
+            this.buttongd.Click += new System.EventHandler(this.buttongd_Click);
+            // 
+            // buttongget
+            // 
+            this.buttongget.Location = new System.Drawing.Point(63, 6);
+            this.buttongget.Name = "buttongget";
+            this.buttongget.Size = new System.Drawing.Size(61, 23);
+            this.buttongget.TabIndex = 4;
+            this.buttongget.Text = "获取";
+            this.buttongget.UseVisualStyleBackColor = true;
+            this.buttongget.Click += new System.EventHandler(this.buttongget_Click);
+            // 
+            // buttonfget
+            // 
+            this.buttonfget.Location = new System.Drawing.Point(62, 6);
+            this.buttonfget.Name = "buttonfget";
+            this.buttonfget.Size = new System.Drawing.Size(50, 23);
+            this.buttonfget.TabIndex = 3;
+            this.buttonfget.Text = "获取";
+            this.buttonfget.UseVisualStyleBackColor = true;
+            this.buttonfget.Click += new System.EventHandler(this.buttonfget_Click);
             // 
             // MainForm
             // 
@@ -224,6 +272,10 @@
         private System.Windows.Forms.ToolStripMenuItem 设置ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 好友弹窗ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 群组弹窗ToolStripMenuItem;
+        private System.Windows.Forms.Button buttonfd;
+        private System.Windows.Forms.Button buttongd;
+        private System.Windows.Forms.Button buttonfget;
+        private System.Windows.Forms.Button buttongget;
     }
 }
 

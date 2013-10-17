@@ -34,5 +34,55 @@ namespace WebQQ2.WebQQ2
         public string homepage { get; set; }
         public string personal { get; set; }
         public long shengxiao { get; set; }
+
+
+        public string LongName
+        {
+            get
+            {
+                if (this.card != null)
+                {
+                    return string.Format("{0}[{1}]({2})", this.nick, this.card, this.num);
+                }
+                return string.Format("{0}({1})", this.nick, this.num);
+            }
+        }
+
+        public string ShortName
+        {
+            get
+            {
+                if (this.card != null)
+                {
+                    return string.Format("{0}[{1}]", this.nick, this.card);
+                }
+                return string.Format("{0}", this.nick);
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                if (this.card != null && this.card.Length > 0)
+                {
+                    return string.Format("{0}", this.card);
+                }
+                if (this.nick != null && this.nick.Length > 0)
+                {
+                    return string.Format("{0}", this.nick);
+                }
+                if (this.num != 0)
+                {
+                    return string.Format("QQUser:{0}", this.num);
+                }
+                return string.Format("UIN:{0}", this.uin);
+            }
+        }
+
+        public bool IsFull
+        {
+            get { return this.num != 0; }
+        }
     }
 }

@@ -134,7 +134,7 @@ Designed by XBYR", @"QQ聊天程序");
             if (treeViewG.SelectedNode != null)
             {
                 var uin = Convert.ToInt64(treeViewG.SelectedNode.Tag);
-                new Task(() => GetGroupNum(uin)).Start();
+                new Task(() => GetGroupInfo(uin)).Start();
             }
         }
 
@@ -397,23 +397,18 @@ Designed by XBYR", @"QQ聊天程序");
             var f = _qq.User.GetUserFriend(uin, false);
             if (f != null && _qq.User.QQFriends.FriendList.Values.Contains(f))
             {
-                CheckFriend(f);
+                CheckFriend(f,true);
             }
         }
 
-        private void GetGroupNum(long uin)
+        private void GetGroupInfo(long uin)
         {
             var g = _qq.User.GetUserGroup(uin);
             if (g != null && _qq.User.QQGroups.GroupList.Values.Contains(g))
             {
-                if (g.num == 0)
-                {
-                    _qq.GetGroupQQNum(g);
-                    RefreshGroup(g);
-                }
+                CheckGroup(g, true);
             }
         }
-
 
         private void RefreshUser(QQFriend friend, bool? isMessage = null)
         {
@@ -966,17 +961,37 @@ Designed by XBYR", @"QQ聊天程序");
             }
         }
 
-        public void CheckFriend(QQFriend friend)
+        public void CheckFriend(QQFriend friend, bool awaysCheck = false)
         {
             if (friend == null)
                 return;
-            if (friend.num == 0)
+            if (friend.num == 0 || awaysCheck)
             {
                 _qq.GetFriendInfos(friend);
             }
-            if (friend.birthday == null)
+            if (friend.birthday == null || awaysCheck)
             {
                 _qq.GetFriendStrangeInfo(friend);
+            }
+        }
+
+        public void CheckGroup(QQGroup group, bool awaysCheck = false)
+        {
+            if (group == null)
+                return;
+            if (group.num == 0 || awaysCheck)
+            {
+                _qq.GetGroupQQNum(group);
+            }
+        }
+
+        public void CheckGroupMember(QQGroup group, QQGroupMember member, bool awaysCheck = false)
+        {
+            if (group == null || member == null)
+                return;
+            if (member.num == 0 || awaysCheck)
+            {
+                _qq.GetGroupMemberInfos(group,member);
             }
         }
 
@@ -1576,6 +1591,105 @@ Designed by XBYR", @"QQ聊天程序");
                 }
             }
             return _settings;
+        }
+
+        private void buttonfd_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+            string filename = sfd.FileName;
+            List<string> lines = new List<string>();
+            QQFriends result = _qq.User.QQFriends;
+            foreach (var f in result.FriendList)
+            {
+                f.Value.tag = 0;
+            }
+            foreach (var g in result.GroupList)
+            {
+                lines.Add(g.Value.name + ":");
+                foreach (var f in result.FriendList)
+                {
+                    if (f.Value.categories == g.Value.index)
+                    {
+                        f.Value.tag = 1;
+                        lines.Add("\t" + f.Value.LongName);
+                    }
+                }
+            }
+            lines.Add(_vfzNode.Text + ":");
+            foreach (var f in result.FriendList)
+            {
+                if (f.Value.tag as int? == 0)
+                {
+                    lines.Add("\t" + f.Value.LongName);
+                }
+            }
+            File.WriteAllLines(filename, lines);
+        }
+
+        private void buttongd_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+            string filename = sfd.FileName;
+            List<string> lines = new List<string>();
+            QQGroups result = _qq.User.QQGroups;
+            foreach (var g in result.GroupList)
+            {
+                lines.Add(g.Value.LongName);
+            }
+            File.WriteAllLines(filename, lines);
+        }
+
+        private CancellationTokenSource _getFriendCTS;
+        private CancellationTokenSource _getGroupCTS;
+
+        private void buttonfget_Click(object sender, EventArgs e)
+        {
+            new Task(() =>
+            {
+                if (_getFriendCTS != null)
+                {
+                    _getFriendCTS.Cancel();
+                    _getFriendCTS = null;
+                }
+                if (_getFriendCTS == null)
+                {
+                    _getFriendCTS = new CancellationTokenSource();
+                }
+                foreach (var friend in _qq.User.QQFriends.FriendList)
+                {
+                    _getFriendCTS.Token.ThrowIfCancellationRequested();
+                    CheckFriend(friend.Value);
+                }
+            }).Start();
+        }
+
+        private void buttongget_Click(object sender, EventArgs e)
+        {
+            new Task(() =>
+            {
+                if (_getGroupCTS != null)
+                {
+                    _getGroupCTS.Cancel();
+                    _getGroupCTS = null;
+                }
+                if (_getGroupCTS == null)
+                {
+                    _getGroupCTS = new CancellationTokenSource();
+                }
+                foreach (var group in _qq.User.QQGroups.GroupList)
+                {
+                    _getGroupCTS.Token.ThrowIfCancellationRequested();
+                    CheckGroup(group.Value);
+                }
+            }).Start();
         }
     }
 }

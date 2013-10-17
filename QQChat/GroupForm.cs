@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -211,7 +212,7 @@ namespace QQChat
         private void InsertQQGroupMember(QQGroupMember member, int type)
         {
             if (member == null) return;
-            var item = new ListViewItem(new string[] { member.card ?? member.nick, member.num.ToString() })
+            var item = new ListViewItem(new string[] { member.LongName })
             {
                 ForeColor = colors[type],
                 Tag = member
@@ -234,12 +235,12 @@ namespace QQChat
 
                                 BeginInvoke(new MethodInvoker(() =>
                                 {
-                                    e.Item.SubItems[1].Text = member.num.ToString();
+                                    e.Item.Text = member.LongName;
                                 }));
                             }
                             BeginInvoke(new MethodInvoker(() =>
                             {
-                                e.Item.SubItems[1].Text = member.num.ToString();
+                                e.Item.Text = member.LongName;
                                 richTextBox3.Clear();
                                 richTextBox3.AppendLine(string.Format("昵称:{0}", member.nick));
                                 richTextBox3.AppendLine(string.Format("名片:{0}", member.card));
@@ -359,6 +360,58 @@ namespace QQChat
             }
             MessageBox.Show("未找到");
             return;
+        }
+
+        private CancellationTokenSource _getMemberCTS;
+
+        private void buttongmget_Click(object sender, EventArgs e)
+        {
+            new Task(() =>
+            {
+                if (_getMemberCTS != null)
+                {
+                    _getMemberCTS.Cancel();
+                    _getMemberCTS = null;
+                }
+                if (_getMemberCTS == null)
+                {
+                    _getMemberCTS = new CancellationTokenSource();
+                }
+                foreach (var member in Group.allMembers)
+                {
+                    _getMemberCTS.Token.ThrowIfCancellationRequested();
+                    GetQQMemberNum(member.Value);
+                    BeginInvoke(new MethodInvoker(() =>
+                    {
+                        foreach (ListViewItem item in listView1.Items)
+                        {
+                            QQGroupMember tagMember = item.Tag as QQGroupMember;
+                            if (tagMember != null && tagMember.uin == member.Value.uin)
+                            {
+                                item.Text = tagMember.LongName;
+                                break;
+                            }
+                        }
+                    }));
+                }
+            }).Start();
+        }
+
+        private void buttongmd_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+            string filename = sfd.FileName;
+            List<string> lines = new List<string>();
+            var result = Group.allMembers;
+            foreach (var g in result.Values)
+            {
+                lines.Add(g.LongName);
+            }
+            File.WriteAllLines(filename, lines);
         }
     }
 }

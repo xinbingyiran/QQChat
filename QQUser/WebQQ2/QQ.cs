@@ -1251,8 +1251,11 @@ namespace WebQQ2.WebQQ2
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
                 if (root != null && root["retcode"] as int? == 0)
                 {
-                    _user.QQFriends.Clear();
+                    //Dictionary<long, QQFriendDir> oldgroups = new Dictionary<long, QQFriendDir>(_user.QQFriends.GroupList);
+                    Dictionary<long, QQFriend> oldfriends = new Dictionary<long, QQFriend>(_user.QQFriends.FriendList);
+                    Dictionary<long, QQFriend> oldsesses = new Dictionary<long, QQFriend>(_user.QQFriends.SessList);
                     Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
+                    _user.QQFriends.Clear();
                     foreach (Dictionary<string, object> item in result["categories"] as ArrayList)
                     {
                         _user.QQFriends.Add(new QQFriendDir()
@@ -1271,16 +1274,28 @@ namespace WebQQ2.WebQQ2
                     _user.QQFriends.Add(nofriendgroup);
                     foreach (Dictionary<string, object> item in result["friends"] as ArrayList)
                     {
-                        _user.QQFriends.Add(new QQFriend()
+                        QQFriend friend = null;
+                        long uin = Convert.ToInt64(item["uin"]);
+                        if (oldfriends.ContainsKey(uin))
                         {
-                            uin = Convert.ToInt64(item["uin"]),
-                            flag_friends = Convert.ToInt64(item["flag"]),
-                            categories = Convert.ToInt64(item["categories"]),
-                        });
+                            friend = oldfriends[uin];
+                        }
+                        else if (oldsesses.ContainsKey(uin))
+                        {
+                            friend = oldsesses[uin];
+                        }
+                        else
+                        {
+                            friend = new QQFriend() { uin = uin };
+                        }
+                        friend.flag_friends = Convert.ToInt64(item["flag"]);
+                        friend.categories = Convert.ToInt64(item["categories"]);
+                        _user.QQFriends.Add(friend);
                     }
                     foreach (Dictionary<string, object> item in result["info"] as ArrayList)
                     {
-                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["uin"]), false);
+                        long uin = Convert.ToInt64(item["uin"]);
+                        QQFriend user = _user.GetUserFriend(uin, false);
                         if (user != null)
                         {
                             user.face = Convert.ToInt64(item["face"]);
@@ -1290,7 +1305,8 @@ namespace WebQQ2.WebQQ2
                     }
                     foreach (Dictionary<string, object> item in result["vipinfo"] as ArrayList)
                     {
-                        QQFriend user = _user.GetUserFriend(Convert.ToInt64(item["u"]), false);
+                        long uin = Convert.ToInt64(item["u"]);
+                        QQFriend user = _user.GetUserFriend(uin, false);
                         if (user != null)
                         {
                             user.is_vip = Convert.ToInt64(item["is_vip"]);
@@ -1299,19 +1315,30 @@ namespace WebQQ2.WebQQ2
                     }
                     foreach (Dictionary<string, object> item in result["marknames"] as ArrayList)
                     {
-                        QQFriend user = _user.QQFriends.FriendList.FirstOrDefault(ele => ele.Value.uin == Convert.ToInt64(item["uin"])).Value;
+                        long uin = Convert.ToInt64(item["u"]);
+                        QQFriend user = _user.GetUserFriend(uin, false); 
                         if (user != null)
                         {
                             user.markname = item["markname"].ToString();
                         }
                         else
                         {
-                            _user.QQFriends.Add(new QQFriend()
+                            QQFriend friend = null;
+                            if (oldfriends.ContainsKey(uin))
                             {
-                                uin = Convert.ToInt64(item["uin"]),
-                                markname = item["markname"].ToString(),
-                                categories = nofriendgroup.index
-                            });
+                                friend = oldfriends[uin];
+                            }
+                            else if (oldsesses.ContainsKey(uin))
+                            {
+                                friend = oldsesses[uin];
+                            }
+                            else
+                            {
+                                friend = new QQFriend() { uin = uin };
+                            }
+                            friend.markname = item["markname"].ToString();
+                            friend.categories = nofriendgroup.index;
+                            _user.QQFriends.Add(friend);
                         }
                     }
                 }
@@ -1358,17 +1385,28 @@ namespace WebQQ2.WebQQ2
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
                 if (root != null && root["retcode"] as int? == 0)
                 {
+                    Dictionary<long, QQGroup> oldgroup = new Dictionary<long, QQGroup>(_user.QQGroups.GroupList);
                     _user.QQGroups.Clear();
                     Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
                     foreach (Dictionary<string, object> item in result["gnamelist"] as ArrayList)
                     {
-                        _user.QQGroups.Add(new QQGroup()
+                        long gid = Convert.ToInt64(item["gid"]);
+                        QQGroup group = null;
+                        if (oldgroup.ContainsKey(gid))
                         {
-                            flag = Convert.ToInt64(item["flag"]),
-                            gid = Convert.ToInt64(item["gid"]),
-                            code = Convert.ToInt64(item["code"]),
-                            name = item["name"].ToString(),
-                        });
+                            group = oldgroup[gid];
+                        }
+                        else
+                        {
+                            group = new QQGroup()
+                             {
+                                 gid = Convert.ToInt64(item["gid"]),
+                             };
+                        }
+                        group.flag = Convert.ToInt64(item["flag"]);
+                        group.code = Convert.ToInt64(item["code"]);
+                        group.name = item["name"].ToString();
+                        _user.QQGroups.Add(group);
                     }
                 }
             }
@@ -1512,6 +1550,7 @@ namespace WebQQ2.WebQQ2
                 {
                     Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
                     //stats,minfo,ginfo,vipinfo,cards[不一定有]
+                    Dictionary<long, QQGroupMember> oldmembers = new Dictionary<long, QQGroupMember>(group.allMembers);
                     group.Clear();
                     #region ginfo
                     if (result.Keys.Contains("ginfo"))
@@ -1537,11 +1576,17 @@ namespace WebQQ2.WebQQ2
                             var members = ginfo["members"] as ArrayList;
                             foreach (Dictionary<string, object> member in members)
                             {
-                                QQGroupMember newitem = new QQGroupMember()
+                                long uin = Convert.ToInt64(member["muin"]);
+                                QQGroupMember newitem = null;
+                                if(oldmembers.ContainsKey(uin))
                                 {
-                                    uin = Convert.ToInt64(member["muin"]),
-                                    mflag = Convert.ToInt64(member["mflag"]),
+                                    newitem = oldmembers[uin];
+                                }
+                                newitem = new QQGroupMember()
+                                {
+                                    uin = uin
                                 };
+                                newitem.mflag = Convert.ToInt64(member["mflag"]);
                                 group.allMembers.Add(newitem.uin, newitem);
                                 if ((newitem.mflag & 1) != 0)
                                 {
