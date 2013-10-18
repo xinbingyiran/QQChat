@@ -20,7 +20,7 @@ namespace WebQQ2.WebQQ2
         public long level { get; set; }
         public long option { get; set; }
         public QQGroupMember owner { get; set; }
-        public Dictionary<long,QQGroupMember> leaders { get; set; }
+        public Dictionary<long, QQGroupMember> leaders { get; set; }
         public Dictionary<long, QQGroupMember> members { get; set; }
         public Dictionary<long, QQGroupMember> allMembers { get; set; }
 
@@ -49,12 +49,12 @@ namespace WebQQ2.WebQQ2
 
         public QQGroupMember GetGroupMember(long uin)
         {
-            var member = allMembers.FirstOrDefault(ele=>ele.Key == uin).Value;
-            if (member == null)
+            if (allMembers.ContainsKey(uin))
             {
-                member = new QQGroupMember() { uin = uin};
-                allMembers.Add(uin, member);
+                return allMembers[uin];
             }
+            QQGroupMember member = new QQGroupMember() { uin = uin };
+            allMembers.Add(uin, member);
             return member;
         }
 

@@ -299,7 +299,7 @@ namespace QQChat
                         friend.vip_level = member.vip_level;
                         friend.is_vip = member.is_vip;
                         friend.id = Group.gid;
-                        MainForm.mainForm.SetSessText(friend, null, DateTime.Now,0);
+                        MainForm.mainForm.SetSessText(friend, null, DateTime.Now, 0);
                     }).Start();
                 }
             }
@@ -366,33 +366,54 @@ namespace QQChat
 
         private void buttongmget_Click(object sender, EventArgs e)
         {
+            if (_getMemberCTS != null)
+            {
+                _getMemberCTS.Cancel();
+                _getMemberCTS = null;
+            }
+            if (_getMemberCTS == null)
+            {
+                _getMemberCTS = new CancellationTokenSource();
+            }
+            Dictionary<ListViewItem, QQGroupMember> items = new Dictionary<ListViewItem, QQGroupMember>();
+            foreach (ListViewItem item in listView1.Items)
+            {
+                QQGroupMember tagMember = item.Tag as QQGroupMember;
+                if (tagMember != null)
+                {
+                    items.Add(item, tagMember);
+                }
+            }
             new Task(() =>
             {
-                if (_getMemberCTS != null)
+                int tasknum = 0;
+                foreach (var item in items)
                 {
-                    _getMemberCTS.Cancel();
-                    _getMemberCTS = null;
-                }
-                if (_getMemberCTS == null)
-                {
-                    _getMemberCTS = new CancellationTokenSource();
-                }
-                foreach (var member in Group.allMembers)
-                {
-                    _getMemberCTS.Token.ThrowIfCancellationRequested();
-                    GetQQMemberNum(member.Value);
-                    BeginInvoke(new MethodInvoker(() =>
+                    while (tasknum > 10)
                     {
-                        foreach (ListViewItem item in listView1.Items)
+                        _getMemberCTS.Token.WaitHandle.WaitOne(100);
+                        _getMemberCTS.Token.ThrowIfCancellationRequested();
+                    }
+                    tasknum++;
+                    new Task(() =>
                         {
-                            QQGroupMember tagMember = item.Tag as QQGroupMember;
-                            if (tagMember != null && tagMember.uin == member.Value.uin)
+                            try
                             {
-                                item.Text = tagMember.LongName;
-                                break;
+                                _getMemberCTS.Token.ThrowIfCancellationRequested();
+                                GetQQMemberNum(item.Value);
+                                _getMemberCTS.Token.ThrowIfCancellationRequested();
+                                BeginInvoke(new MethodInvoker(() =>
+                                {
+                                    item.Key.Text = item.Value.LongName;
+                                }));
                             }
-                        }
-                    }));
+                            catch (Exception)
+                            { }
+                            finally
+                            {
+                                tasknum--;
+                            }
+                        }).Start();
                 }
             }).Start();
         }
@@ -400,18 +421,26 @@ namespace QQChat
         private void buttongmd_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "文本文件|*.txt|所有文件|*.*";
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
             }
             string filename = sfd.FileName;
             List<string> lines = new List<string>();
-            var result = Group.allMembers;
+            lines.Add(Group.LongName);
+            lines.Add("所有者\t" + Group.owner.LongName);
+            var result = Group.leaders;
             foreach (var g in result.Values)
             {
-                lines.Add(g.LongName);
+                lines.Add("管理\t" + g.LongName);
             }
-            File.WriteAllLines(filename, lines);
+            result = Group.members;
+            foreach (var g in result.Values)
+            {
+                lines.Add("\t" + g.LongName);
+            }
+            File.AppendAllLines(filename, lines);
         }
     }
 }

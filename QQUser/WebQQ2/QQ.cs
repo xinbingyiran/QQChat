@@ -408,7 +408,7 @@ namespace WebQQ2.WebQQ2
                     return "尚未全局登录成功";
                 }
                 string url = string.Format(qq_logout2, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
-                string retstr = GetUrlText(url,3000);
+                string retstr = GetUrlText(url, 3000);
                 if (retstr != null && retstr.Length > 0)
                 {
                     Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
@@ -1272,51 +1272,65 @@ namespace WebQQ2.WebQQ2
                         name = "[已删除]",
                     };
                     _user.QQFriends.Add(nofriendgroup);
-                    foreach (Dictionary<string, object> item in result["friends"] as ArrayList)
+                    var friends = result["friends"] as ArrayList;
+                    var info = result["info"] as ArrayList;
+                    var vipinfo = result["vipinfo"] as ArrayList;
+                    for (int i = 0; i < friends.Count; i++)
                     {
-                        QQFriend friend = null;
-                        long uin = Convert.ToInt64(item["uin"]);
+                        Dictionary<string, object> friend = friends[i] as Dictionary<string, object>;
+                        Dictionary<string, object> infoi = info[i] as Dictionary<string, object>;
+                        Dictionary<string, object> vipinfoi = vipinfo[i] as Dictionary<string, object>;
+                        QQFriend newfriend = null;
+                        long uin = Convert.ToInt64(friend["uin"]);
                         if (oldfriends.ContainsKey(uin))
                         {
-                            friend = oldfriends[uin];
+                            newfriend = oldfriends[uin];
                         }
                         else if (oldsesses.ContainsKey(uin))
                         {
-                            friend = oldsesses[uin];
+                            newfriend = oldsesses[uin];
                         }
                         else
                         {
-                            friend = new QQFriend() { uin = uin };
+                            newfriend = new QQFriend() { uin = uin };
                         }
-                        friend.flag_friends = Convert.ToInt64(item["flag"]);
-                        friend.categories = Convert.ToInt64(item["categories"]);
-                        _user.QQFriends.Add(friend);
+                        newfriend.flag_friends = Convert.ToInt64(friend["flag"]);
+                        newfriend.categories = Convert.ToInt64(friend["categories"]);
+                        //info
+                        newfriend.face = Convert.ToInt64(infoi["face"]);
+                        newfriend.flag_info = Convert.ToInt64(infoi["flag"]);
+                        newfriend.nick = Convert.ToString(infoi["nick"]);
+                        //vipinfo
+                        newfriend.is_vip = Convert.ToInt64(vipinfoi["is_vip"]);
+                        newfriend.vip_level = Convert.ToInt64(vipinfoi["vip_level"]);
+                        //
+                        _user.QQFriends.Add(newfriend);
                     }
-                    foreach (Dictionary<string, object> item in result["info"] as ArrayList)
-                    {
-                        long uin = Convert.ToInt64(item["uin"]);
-                        QQFriend user = _user.GetUserFriend(uin, false);
-                        if (user != null)
-                        {
-                            user.face = Convert.ToInt64(item["face"]);
-                            user.flag_info = Convert.ToInt64(item["flag"]);
-                            user.nick = item["nick"].ToString();
-                        }
-                    }
-                    foreach (Dictionary<string, object> item in result["vipinfo"] as ArrayList)
-                    {
-                        long uin = Convert.ToInt64(item["u"]);
-                        QQFriend user = _user.GetUserFriend(uin, false);
-                        if (user != null)
-                        {
-                            user.is_vip = Convert.ToInt64(item["is_vip"]);
-                            user.vip_level = Convert.ToInt64(item["vip_level"]);
-                        }
-                    }
+                    //foreach (Dictionary<string, object> infoi in result["info"] as ArrayList)
+                    //{
+                    //    long uin = Convert.ToInt64(infoi["uin"]);
+                    //    QQFriend user = _user.GetUserFriend(uin, false);
+                    //    if (user != null)
+                    //    {
+                    //        user.face = Convert.ToInt64(infoi["face"]);
+                    //        user.flag_info = Convert.ToInt64(infoi["flag"]);
+                    //        user.nick = Convert.ToString(infoi["nick"]);
+                    //    }
+                    //}
+                    //foreach (Dictionary<string, object> vipinfoi in result["vipinfo"] as ArrayList)
+                    //{
+                    //    long uin = Convert.ToInt64(vipinfoi["u"]);
+                    //    QQFriend user = _user.GetUserFriend(uin, false);
+                    //    if (user != null)
+                    //    {
+                    //        user.is_vip = Convert.ToInt64(vipinfoi["is_vip"]);
+                    //        user.vip_level = Convert.ToInt64(vipinfoi["vip_level"]);
+                    //    }
+                    //}
                     foreach (Dictionary<string, object> item in result["marknames"] as ArrayList)
                     {
                         long uin = Convert.ToInt64(item["u"]);
-                        QQFriend user = _user.GetUserFriend(uin, false); 
+                        QQFriend user = _user.GetUserFriend(uin, false);
                         if (user != null)
                         {
                             user.markname = item["markname"].ToString();
@@ -1549,9 +1563,9 @@ namespace WebQQ2.WebQQ2
                 if (root != null && root["retcode"] as int? == 0)
                 {
                     Dictionary<string, object> result = root["result"] as Dictionary<string, object>;
-                    //stats,minfo,ginfo,vipinfo,cards[不一定有]
                     Dictionary<long, QQGroupMember> oldmembers = new Dictionary<long, QQGroupMember>(group.allMembers);
                     group.Clear();
+
                     #region ginfo
                     if (result.Keys.Contains("ginfo"))
                     {
@@ -1574,11 +1588,18 @@ namespace WebQQ2.WebQQ2
                         if (ginfo.Keys.Contains("members"))
                         {
                             var members = ginfo["members"] as ArrayList;
-                            foreach (Dictionary<string, object> member in members)
+                            var minfo = result["minfo"] as ArrayList;
+                            var vipinfo = result["vipinfo"] as ArrayList;
+                            //var stats = result["stats"] as ArrayList;
+                            //var cards = result["cards"] as ArrayList;
+                            for (int i = 0; i < members.Count; i++)
                             {
+                                Dictionary<string, object> member = members[i] as Dictionary<string, object>;
+                                Dictionary<string, object> m = minfo[i] as Dictionary<string, object>;
+                                Dictionary<string, object> vip = vipinfo[i] as Dictionary<string, object>;
                                 long uin = Convert.ToInt64(member["muin"]);
                                 QQGroupMember newitem = null;
-                                if(oldmembers.ContainsKey(uin))
+                                if (oldmembers.ContainsKey(uin))
                                 {
                                     newitem = oldmembers[uin];
                                 }
@@ -1587,6 +1608,41 @@ namespace WebQQ2.WebQQ2
                                     uin = uin
                                 };
                                 newitem.mflag = Convert.ToInt64(member["mflag"]);
+                                //minfo
+                                newitem.province = m["province"].ToString();
+                                newitem.country = m["country"].ToString();
+                                newitem.city = m["city"].ToString();
+                                newitem.nick = m["nick"].ToString();
+                                newitem.gender = m["gender"].ToString();
+                                //vipinfo
+                                newitem.vip_level = Convert.ToInt64(vip["vip_level"]);
+                                newitem.is_vip = Convert.ToInt64(vip["is_vip"]);
+                                //stats
+                                //for (int j = 0; j < stats.Count; j++)
+                                //{
+                                //    var stat = stats[j] as Dictionary<string, object>;
+                                //    long statuin = Convert.ToInt64(stat["uin"]);
+                                //    if (statuin == uin)
+                                //    {
+                                //        if (member.ContainsKey("client_type")) newitem.client_type = Convert.ToInt64(stat["client_type"]);
+                                //        if (member.ContainsKey("stat")) newitem.stat = Convert.ToInt64(stat["stat"]);
+                                //        stats.RemoveAt(j);
+                                //        break;
+                                //    }
+                                //}
+                                ////cards
+                                //for (int j = 0; j < cards.Count; j++)
+                                //{
+                                //    var card = cards[j] as Dictionary<string, object>;
+                                //    long carduin = Convert.ToInt64(card["muin"]);
+                                //    if (carduin == uin)
+                                //    {
+                                //        newitem.card = card["card"].ToString();
+                                //        cards.RemoveAt(j);
+                                //        break;
+                                //    }
+                                //}
+                                //
                                 group.allMembers.Add(newitem.uin, newitem);
                                 if ((newitem.mflag & 1) != 0)
                                 {
@@ -1605,66 +1661,66 @@ namespace WebQQ2.WebQQ2
                     }
                         #endregion
 
-                    #region minfo
+                    //#region minfo
 
-                    if (result.Keys.Contains("minfo"))
-                    {
-                        var minfo = result["minfo"] as ArrayList;
-                        foreach (Dictionary<string, object> member in minfo)
-                        {
-                            var newitem = group.GetGroupMember(Convert.ToInt64(member["uin"]));
-                            if (newitem == null)
-                            {
-                                newitem = new QQGroupMember() { uin = Convert.ToInt64(member["uin"]) };
-                                group.allMembers.Add(newitem.uin, newitem);
-                                group.members.Add(newitem.uin, newitem);
-                            }
-                            newitem.province = member["province"].ToString();
-                            newitem.country = member["country"].ToString();
-                            newitem.city = member["city"].ToString();
-                            newitem.nick = member["nick"].ToString();
-                            newitem.gender = member["gender"].ToString();
-                        }
-                    }
-                    #endregion
+                    //if (result.Keys.Contains("minfo"))
+                    //{
+                    //    var minfo = result["minfo"] as ArrayList;
+                    //    foreach (Dictionary<string, object> m in minfo)
+                    //    {
+                    //        var newitem = group.GetGroupMember(Convert.ToInt64(m["uin"]));
+                    //        if (newitem == null)
+                    //        {
+                    //            newitem = new QQGroupMember() { uin = Convert.ToInt64(m["uin"]) };
+                    //            group.allMembers.Add(newitem.uin, newitem);
+                    //            group.members.Add(newitem.uin, newitem);
+                    //        }
+                    //        newitem.province = m["province"].ToString();
+                    //        newitem.country = m["country"].ToString();
+                    //        newitem.city = m["city"].ToString();
+                    //        newitem.nick = m["nick"].ToString();
+                    //        newitem.gender = m["gender"].ToString();
+                    //    }
+                    //}
+                    //#endregion
 
-                    #region vipinfo
+                    //#region vipinfo
 
-                    if (result.Keys.Contains("vipinfo"))
-                    {
-                        var minfo = result["vipinfo"] as ArrayList;
-                        foreach (Dictionary<string, object> member in minfo)
-                        {
-                            var newitem = group.GetGroupMember(Convert.ToInt64(member["u"]));
-                            if (newitem == null)
-                            {
-                                newitem = new QQGroupMember() { uin = Convert.ToInt64(member["u"]) };
-                                group.allMembers.Add(newitem.uin, newitem);
-                                group.members.Add(newitem.uin, newitem);
-                            }
-                            newitem.vip_level = Convert.ToInt64(member["vip_level"]);
-                            newitem.is_vip = Convert.ToInt64(member["is_vip"]);
-                        }
-                    }
-                    #endregion
+                    //if (result.Keys.Contains("vipinfo"))
+                    //{
+                    //    var vipinfo = result["vipinfo"] as ArrayList;
+                    //    foreach (Dictionary<string, object> vip in vipinfo)
+                    //    {
+                    //        var newitem = group.GetGroupMember(Convert.ToInt64(vip["u"]));
+                    //        if (newitem == null)
+                    //        {
+                    //            newitem = new QQGroupMember() { uin = Convert.ToInt64(vip["u"]) };
+                    //            group.allMembers.Add(newitem.uin, newitem);
+                    //            group.members.Add(newitem.uin, newitem);
+                    //        }
+                    //        newitem.vip_level = Convert.ToInt64(vip["vip_level"]);
+                    //        newitem.is_vip = Convert.ToInt64(vip["is_vip"]);
+                    //    }
+                    //}
+                    //#endregion
 
                     #region stats
 
                     if (result.Keys.Contains("stats"))
                     {
                         //{"stats":[{"client_type":41,"uin":344420262,"stat":10}],
-                        var minfo = result["stats"] as ArrayList;
-                        foreach (Dictionary<string, object> member in minfo)
+                        var stats = result["stats"] as ArrayList;
+                        foreach (Dictionary<string, object> stat in stats)
                         {
-                            var newitem = group.GetGroupMember(Convert.ToInt64(member["uin"]));
+                            var newitem = group.GetGroupMember(Convert.ToInt64(stat["uin"]));
                             if (newitem == null)
                             {
-                                newitem = new QQGroupMember() { uin = Convert.ToInt64(member["uin"]) };
+                                newitem = new QQGroupMember() { uin = Convert.ToInt64(stat["uin"]) };
                                 group.allMembers.Add(newitem.uin, newitem);
                                 group.members.Add(newitem.uin, newitem);
                             }
-                            if (member.ContainsKey("client_type")) newitem.client_type = Convert.ToInt64(member["client_type"]);
-                            if (member.ContainsKey("stat")) newitem.stat = Convert.ToInt64(member["stat"]);
+                            if (stat.ContainsKey("client_type")) newitem.client_type = Convert.ToInt64(stat["client_type"]);
+                            if (stat.ContainsKey("stat")) newitem.stat = Convert.ToInt64(stat["stat"]);
                         }
                     }
                     #endregion
@@ -1672,17 +1728,17 @@ namespace WebQQ2.WebQQ2
 
                     if (result.Keys.Contains("cards"))
                     {
-                        var minfo = result["cards"] as ArrayList;
-                        foreach (Dictionary<string, object> member in minfo)
+                        var cards = result["cards"] as ArrayList;
+                        foreach (Dictionary<string, object> card in cards)
                         {
-                            var newitem = group.GetGroupMember(Convert.ToInt64(member["muin"]));
+                            var newitem = group.GetGroupMember(Convert.ToInt64(card["muin"]));
                             if (newitem == null)
                             {
-                                newitem = new QQGroupMember() { uin = Convert.ToInt64(member["muin"]) };
+                                newitem = new QQGroupMember() { uin = Convert.ToInt64(card["muin"]) };
                                 group.allMembers.Add(newitem.uin, newitem);
                                 group.members.Add(newitem.uin, newitem);
                             }
-                            newitem.card = member["card"].ToString();
+                            newitem.card = card["card"].ToString();
                         }
                     }
                     #endregion

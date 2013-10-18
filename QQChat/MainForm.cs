@@ -397,7 +397,7 @@ Designed by XBYR", @"QQ聊天程序");
             var f = _qq.User.GetUserFriend(uin, false);
             if (f != null && _qq.User.QQFriends.FriendList.Values.Contains(f))
             {
-                CheckFriend(f,true);
+                CheckFriend(f, true);
             }
         }
 
@@ -845,7 +845,11 @@ Designed by XBYR", @"QQ聊天程序");
                         {
                             if (e.Msgs["type"] as string == "verify_required")
                             {
-                                long gid = _qq.User.QQFriends.GroupList.Keys.FirstOrDefault();
+                                long gid = 0;
+                                if (_qq.User.QQFriends.GroupList.Any())
+                                {
+                                    gid = _qq.User.QQFriends.GroupList.First().Key;
+                                }
                                 if (gid < 0) gid = 0;
                                 long uin = _qq.AllowFriendAddAndAddFriend(Convert.ToInt64(e.Msgs["account"]), gid, "");
                                 if (uin > 0)
@@ -991,7 +995,7 @@ Designed by XBYR", @"QQ聊天程序");
                 return;
             if (member.num == 0 || awaysCheck)
             {
-                _qq.GetGroupMemberInfos(group,member);
+                _qq.GetGroupMemberInfos(group, member);
             }
         }
 
@@ -1596,6 +1600,7 @@ Designed by XBYR", @"QQ聊天程序");
         private void buttonfd_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "文本文件|*.txt|所有文件|*.*";
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -1627,12 +1632,13 @@ Designed by XBYR", @"QQ聊天程序");
                     lines.Add("\t" + f.Value.LongName);
                 }
             }
-            File.WriteAllLines(filename, lines);
+            File.AppendAllLines(filename, lines);
         }
 
         private void buttongd_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "文本文件|*.txt|所有文件|*.*";
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -1644,7 +1650,7 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 lines.Add(g.Value.LongName);
             }
-            File.WriteAllLines(filename, lines);
+            File.AppendAllLines(filename, lines);
         }
 
         private CancellationTokenSource _getFriendCTS;
@@ -1652,42 +1658,82 @@ Designed by XBYR", @"QQ聊天程序");
 
         private void buttonfget_Click(object sender, EventArgs e)
         {
+            if (_getFriendCTS != null)
+            {
+                _getFriendCTS.Cancel();
+                _getFriendCTS = null;
+            }
+            if (_getFriendCTS == null)
+            {
+                _getFriendCTS = new CancellationTokenSource();
+            }
             new Task(() =>
             {
-                if (_getFriendCTS != null)
-                {
-                    _getFriendCTS.Cancel();
-                    _getFriendCTS = null;
-                }
-                if (_getFriendCTS == null)
-                {
-                    _getFriendCTS = new CancellationTokenSource();
-                }
+                int tasknum = 0;
+
                 foreach (var friend in _qq.User.QQFriends.FriendList)
                 {
-                    _getFriendCTS.Token.ThrowIfCancellationRequested();
-                    CheckFriend(friend.Value);
+                    while (tasknum > 10)
+                    {
+                        _getFriendCTS.Token.WaitHandle.WaitOne(100);
+                        _getFriendCTS.Token.ThrowIfCancellationRequested();
+                    }
+                    tasknum++;
+                    new Task(() =>
+                    {
+                        try
+                        {
+                            _getFriendCTS.Token.ThrowIfCancellationRequested();
+                            CheckFriend(friend.Value);
+                        }
+                        catch (Exception)
+                        { }
+                        finally
+                        {
+                            tasknum--;
+                        }
+                    }).Start();
                 }
             }).Start();
         }
 
         private void buttongget_Click(object sender, EventArgs e)
         {
+            if (_getGroupCTS != null)
+            {
+                _getGroupCTS.Cancel();
+                _getGroupCTS = null;
+            }
+            if (_getGroupCTS == null)
+            {
+                _getGroupCTS = new CancellationTokenSource();
+            }
             new Task(() =>
             {
-                if (_getGroupCTS != null)
-                {
-                    _getGroupCTS.Cancel();
-                    _getGroupCTS = null;
-                }
-                if (_getGroupCTS == null)
-                {
-                    _getGroupCTS = new CancellationTokenSource();
-                }
+                int tasknum = 0;
+
                 foreach (var group in _qq.User.QQGroups.GroupList)
                 {
-                    _getGroupCTS.Token.ThrowIfCancellationRequested();
-                    CheckGroup(group.Value);
+                    while (tasknum > 10)
+                    {
+                        _getGroupCTS.Token.WaitHandle.WaitOne(100);
+                        _getGroupCTS.Token.ThrowIfCancellationRequested();
+                    }
+                    tasknum++;
+                    new Task(() =>
+                    {
+                        try
+                        {
+                            _getGroupCTS.Token.ThrowIfCancellationRequested();
+                            CheckGroup(group.Value);
+                        }
+                        catch (Exception)
+                        { }
+                        finally
+                        {
+                            tasknum--;
+                        }
+                    }).Start();
                 }
             }).Start();
         }

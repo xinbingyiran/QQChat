@@ -45,23 +45,27 @@ namespace WebQQ2.WebQQ2
 
         public QQFriend GetQQFriend(long uin, bool canAddSess)
         {
-            var member = FriendList.FirstOrDefault(ele => ele.Value.uin == uin).Value;
-            if (member == null && canAddSess)
+            if (FriendList.ContainsKey(uin))
             {
-                member = new QQFriend() { categories = -1, uin = uin };
-                FriendList.Add(uin, member);
+                return FriendList[uin];
             }
-            return member;
+            if (canAddSess)
+            {
+                var member = new QQFriend() { categories = -1, uin = uin };
+                FriendList.Add(uin, member);
+                return member;
+            }
+            return null;
         }
 
         public QQFriend GetQQSess(long uin)
         {
-            var member = SessList.FirstOrDefault(ele => ele.Value.uin == uin).Value;
-            if (member == null)
+            if (SessList.ContainsKey(uin))
             {
-                member = new QQFriend() { categories = 99999999, uin = uin };
-                SessList.Add(uin, member);
+                return SessList[uin];
             }
+            var member = new QQFriend() { categories = 99999999, uin = uin };
+            SessList.Add(uin, member);
             return member;
         }
     }
