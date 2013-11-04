@@ -1329,7 +1329,7 @@ namespace WebQQ2.WebQQ2
                     //}
                     foreach (Dictionary<string, object> item in result["marknames"] as ArrayList)
                     {
-                        long uin = Convert.ToInt64(item["u"]);
+                        long uin = Convert.ToInt64(item["uin"]);
                         QQFriend user = _user.GetUserFriend(uin, false);
                         if (user != null)
                         {
