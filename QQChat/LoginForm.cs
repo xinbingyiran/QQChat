@@ -147,8 +147,12 @@ namespace QQChat
 
         private void GetVerifyImage()
         {
-            Image result = QQ.GetVerifyImage();
-            SetImageCode(result);
+            try
+            {
+                Image result = QQ.GetVerifyImage();
+                SetImageCode(result);
+            }
+            catch (Exception) { }
         }
 
         private void button1_Click(object sender, EventArgs e)

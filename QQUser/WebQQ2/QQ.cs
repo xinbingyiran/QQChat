@@ -19,9 +19,9 @@ namespace WebQQ2.WebQQ2
         #region urldefine
 
         private static readonly string qq_referurl = "http://d.web2.qq.com/proxy.html";
-        private static readonly string qq_check = "http://check.ptlogin2.qq.com/check?uin={0}&appid=1003903&r={1:f16}";
-        private static readonly string qq_getimage = "http://captcha.qq.com/getimage?aid=1003903&r={0:f16}&uin={1}";
-        //private static readonly string qq_login = "http://ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=1&aid=1003903&u1=http%3A%2F%2Fw.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-6-9305&mibao_css=m_webqq&t=1&g=1";
+        private static readonly string qq_check = "https://ssl.ptlogin2.qq.com/check?uin={0}&appid=1003903&r={1:f16}";
+        private static readonly string qq_getimage = "https://ssl.captcha.qq.com/getimage?aid=1003903&r={0:f16}&uin={1}";
+        //private static readonly string qq_login = "https://ssl.ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=1&aid=1003903&u1=http%3A%2F%2Fw.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-6-9305&mibao_css=m_webqq&t=1&g=1";
         private static readonly string qq_loginnew = "https://ssl.ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=0&aid=1003903&u1=http%3A%2F%2Fweb2.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=1-15-19876&mibao_css=m_webqq&t=1&g=1&js_type=0&js_ver=10042&login_sig=ies07xzizpY30I2qFMaEp0PXOM3SxgBi40YEjvys0DDcV9vnSQ5Yg4xWNO9H7btA";
         private static readonly string qq_login2 = "http://d.web2.qq.com/channel/login2";
         private static readonly string qq_get_user_friends2 = "http://s.web2.qq.com/api/get_user_friends2";
@@ -348,10 +348,25 @@ namespace WebQQ2.WebQQ2
                 int start = result.IndexOf('(');
                 string sub = result.Substring(start + 1, result.LastIndexOf(')') - start - 1);
                 string[] sublist = sub.Split(',');
+                string sub0 = sublist[0].Trim().Trim('\'');
                 string sub2 = sublist[2].Trim().Trim('\'');
-                string sub2r = GetUrlText(sub2);
-                _user.QQName = sublist[5].Trim().Trim('\'');
-                result = _user.QQName + ":" + sublist[4].Trim().Trim('\'');
+                if (sub0 == "0")
+                {
+                    try
+                    {
+                        string sub2r = GetUrlText(sub2);
+                        _user.QQName = sublist[5].Trim().Trim('\'');
+                        result = _user.QQName + ":" + sublist[4].Trim().Trim('\'');
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                }
+                else
+                {
+                    result = sub2;
+                }
             }
             return result;
         }

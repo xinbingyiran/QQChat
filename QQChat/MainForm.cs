@@ -75,12 +75,12 @@ namespace QQChat
         {
             try
             {
-                string[] lines = new[] { 
+                Paras = new[] { 
                     LoginForm.UserString,
                     LoginForm.PassString,
                     JsonConvert.SerializeObject(_settings)
                 };
-                File.WriteAllLines(_fileName, lines);
+                File.WriteAllLines(_fileName, Paras);
             }
             catch (Exception) { }
         }
