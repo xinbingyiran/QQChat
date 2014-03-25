@@ -66,6 +66,8 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_allow_added_request2 = "http://s.web2.qq.com/api/allow_added_request2";
         private static readonly string qq_allow_and_add2 = "http://s.web2.qq.com/api/allow_and_add2";
 
+        private static readonly string qq_zone_friend="http://r.qzone.qq.com/cgi-bin/tfriend/friend_ship_manager.cgi?uin={0}&do=1&rd={2}&fupdate=1&clean=1&g_tk={1}";
+
 
         #endregion
 
@@ -335,14 +337,20 @@ namespace WebQQ2.WebQQ2
             string url = string.Format(qq_loginnew, _user.QQNum, mpass, vercode);
             string result = GetUrlText(url);
             _user.PtWebQQ = null;
+            _user.GTK = null;
             foreach (Cookie v in _cookiecontainer.GetCookies(new Uri(url)))
             {
                 if (string.Compare(v.Name, "ptwebqq") == 0)
                 {
                     _user.PtWebQQ = v.Value;
-                    break;
+                }
+                if (string.Compare(v.Name, "skey") == 0)
+                {
+                    _user.skey = v.Value;
+                    _user.GTK = QQHelper.getGTK(_user.skey);
                 }
             }
+
             if (result.StartsWith("ptuiCB"))
             {
                 int start = result.IndexOf('(');
@@ -386,6 +394,7 @@ namespace WebQQ2.WebQQ2
             _user.VfWebQQ = null;
             _user.PsessionID = null;
             _user.Status = "offline";
+
             if (retstr != null && retstr.Length > 0)
             {
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
@@ -1401,6 +1410,15 @@ namespace WebQQ2.WebQQ2
             {
             }
             return _user.QQFriends;
+        }
+
+        public object GetFriendInfoFromZone()
+        {
+            var furl = string.Format(qq_zone_friend, _user.QQNum, _user.GTK, _random.NextDouble());
+            var fresult = GetUrlText(furl);
+            int fstart = fresult.IndexOf('(');
+            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
         }
 
         public QQGroups RefreshGroupList()

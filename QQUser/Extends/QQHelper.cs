@@ -80,7 +80,7 @@ namespace WebQQ2.Extends
 
         public static string GetToken(QQUser user)
         {
-            return GetToken2(user.QQNum, user.PtWebQQ);
+            return GetToken3(user.QQNum, user.PtWebQQ);
         }
 
         public struct u
@@ -92,6 +92,30 @@ namespace WebQQ2.Extends
                 this.s = w;
                 this.e = G;
             }
+        }
+
+
+        public static string GetToken3(string b, string i)
+        {
+            int bi = (int)Convert.ToInt64(b);
+            var a0 = new int[4];
+            for (var s = 0; s < i.Length; s++) a0[s % 4] ^= i[s];
+            var j0 = new string[] { "EC", "OK" };
+            var d0 = new int[4];
+            d0[0] = bi >> 24 & 255 ^ j0[0][0];
+            d0[1] = bi >> 16 & 255 ^ j0[0][1];
+            d0[2] = bi >> 8 & 255 ^ j0[1][0];
+            d0[3] = bi & 255 ^ j0[1][1];
+            var j = new int[8];
+            for (var s = 0; s < 8; s++) j[s] = s % 2 == 0 ? a0[s >> 1] : d0[s >> 1];
+            var a = "0123456789ABCDEF";
+            var d = "";
+            for (var s = 0; s < j.Length; s++)
+            {
+                d += a[j[s] >> 4 & 15];
+                d += a[j[s] & 15];
+            }
+            return d;
         }
 
         public static string GetToken2(string w, string G)
@@ -109,46 +133,57 @@ namespace WebQQ2.Extends
             }
             var V = new Stack<u>();
             V.Push(new u(0, T.Count - 1));
-            for (; V.Count > 0;) {
+            for (; V.Count > 0; )
+            {
                 var P = V.Pop();
-                if (! (P.s >= P.e || P.s < 0 || P.e >= T.Count)) if (P.s + 1 == P.e) {
-                    if (T[P.s] > T[P.e]) {
-                        var Z = T[P.s];
-                        T[P.s] = T[P.e];
-                        T[P.e] = Z;
-                    }
-                } else {
-                    int Z = P.s;
-                    int U = P.e;
-                    int X = T[P.s];
-                    for (; P.s < P.e;) {
-                        for (; P.s < P.e && T[P.e] >= X;) {
-                            P.e--;
-                            I[0] = I[0] + 3 & 255;
-                        }
-                        if (P.s < P.e) {
+                if (!(P.s >= P.e || P.s < 0 || P.e >= T.Count)) if (P.s + 1 == P.e)
+                    {
+                        if (T[P.s] > T[P.e])
+                        {
+                            var Z = T[P.s];
                             T[P.s] = T[P.e];
-                            P.s++;
-                            I[1] = I[1] * 13 + 43 & 255;
-                        }
-                        for (; P.s < P.e && T[P.s] <= X;) {
-                            P.s++;
-                            I[2] = I[2] - 3 & 255;
-                        }
-                        if (P.s < P.e) {
-                            T[P.e] = T[P.s];
-                            P.e--;
-                            I[3] = (I[0] ^ I[1] ^ I[2] ^ I[3] + 1) & 255;
+                            T[P.e] = Z;
                         }
                     }
-                    T[P.s] = X;
-                    V.Push(new u(Z, P.s - 1));
-                    V.Push(new u(P.s + 1, U));
-                }
+                    else
+                    {
+                        int Z = P.s;
+                        int U = P.e;
+                        int X = T[P.s];
+                        for (; P.s < P.e; )
+                        {
+                            for (; P.s < P.e && T[P.e] >= X; )
+                            {
+                                P.e--;
+                                I[0] = I[0] + 3 & 255;
+                            }
+                            if (P.s < P.e)
+                            {
+                                T[P.s] = T[P.e];
+                                P.s++;
+                                I[1] = I[1] * 13 + 43 & 255;
+                            }
+                            for (; P.s < P.e && T[P.s] <= X; )
+                            {
+                                P.s++;
+                                I[2] = I[2] - 3 & 255;
+                            }
+                            if (P.s < P.e)
+                            {
+                                T[P.e] = T[P.s];
+                                P.e--;
+                                I[3] = (I[0] ^ I[1] ^ I[2] ^ I[3] + 1) & 255;
+                            }
+                        }
+                        T[P.s] = X;
+                        V.Push(new u(Z, P.s - 1));
+                        V.Push(new u(P.s + 1, U));
+                    }
             }
             string TE = "0123456789ABCDEF";
             string VE = "";
-            for (int i = 0; i < I.Length; i++) {
+            for (int i = 0; i < I.Length; i++)
+            {
                 VE += TE[I[i] >> 4 & 15];
                 VE += TE[I[i] & 15];
             }
@@ -186,6 +221,16 @@ namespace WebQQ2.Extends
                 s += a2[j[d] & 15];
             }
             return s;
+        }
+
+        public static string getGTK(string str)
+        {
+            UInt32 hash = 5381;
+            for (int i = 0, len = str.Length; i < len; ++i)
+            {
+                hash += (hash << 5) + str[i];
+            }
+            return (hash & 0x7fffffff).ToString();
         }
     }
 }

@@ -22,6 +22,8 @@ namespace WebQQ2.WebQQ2
         public string ClientID { get; internal set; }
         public string PtWebQQ { get; internal set; }
         public string VfWebQQ { get; internal set; }
+        public string skey { get; internal set; }
+        public string GTK { get; internal set; }
         public string PsessionID { get; internal set; }
         public DateTime? LoginTime { get; internal set; }
         public QQGroups QQGroups { get; internal set; }
