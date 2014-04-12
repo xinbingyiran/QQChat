@@ -31,7 +31,6 @@
             this.textBoxUser = new System.Windows.Forms.TextBox();
             this.textBoxPass = new System.Windows.Forms.TextBox();
             this.textBoxCode = new System.Windows.Forms.TextBox();
-            this.pictureBoxCode = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
@@ -39,15 +38,18 @@
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCode)).BeginInit();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.pictureBoxCode = new System.Windows.Forms.PictureBox();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCode)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxUser
             // 
             this.textBoxUser.Location = new System.Drawing.Point(80, 33);
             this.textBoxUser.Name = "textBoxUser";
-            this.textBoxUser.Size = new System.Drawing.Size(197, 21);
+            this.textBoxUser.Size = new System.Drawing.Size(129, 21);
             this.textBoxUser.TabIndex = 3;
             this.textBoxUser.Leave += new System.EventHandler(this.textBoxUser_Leave);
             // 
@@ -56,7 +58,7 @@
             this.textBoxPass.Location = new System.Drawing.Point(80, 72);
             this.textBoxPass.Name = "textBoxPass";
             this.textBoxPass.PasswordChar = '＊';
-            this.textBoxPass.Size = new System.Drawing.Size(197, 21);
+            this.textBoxPass.Size = new System.Drawing.Size(129, 21);
             this.textBoxPass.TabIndex = 4;
             // 
             // textBoxCode
@@ -65,16 +67,6 @@
             this.textBoxCode.Name = "textBoxCode";
             this.textBoxCode.Size = new System.Drawing.Size(121, 21);
             this.textBoxCode.TabIndex = 1;
-            // 
-            // pictureBoxCode
-            // 
-            this.pictureBoxCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBoxCode.Location = new System.Drawing.Point(100, 3);
-            this.pictureBoxCode.Name = "pictureBoxCode";
-            this.pictureBoxCode.Size = new System.Drawing.Size(140, 60);
-            this.pictureBoxCode.TabIndex = 3;
-            this.pictureBoxCode.TabStop = false;
-            this.pictureBoxCode.Click += new System.EventHandler(this.pictureBoxCode_Click);
             // 
             // label1
             // 
@@ -96,9 +88,9 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(283, 59);
+            this.button1.Location = new System.Drawing.Point(351, 71);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(121, 43);
+            this.button1.Size = new System.Drawing.Size(53, 21);
             this.button1.TabIndex = 7;
             this.button1.Text = "登录";
             this.button1.UseVisualStyleBackColor = true;
@@ -108,9 +100,9 @@
             // 
             this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(283, 33);
+            this.comboBox1.Location = new System.Drawing.Point(233, 71);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 20);
+            this.comboBox1.Size = new System.Drawing.Size(112, 20);
             this.comboBox1.TabIndex = 6;
             // 
             // label3
@@ -141,12 +133,44 @@
             this.label4.Size = new System.Drawing.Size(0, 12);
             this.label4.TabIndex = 0;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(233, 36);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(100, 21);
+            this.button2.TabIndex = 8;
+            this.button2.Text = "浅登录";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(339, 36);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(65, 21);
+            this.button3.TabIndex = 9;
+            this.button3.Text = "功能";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // pictureBoxCode
+            // 
+            this.pictureBoxCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBoxCode.Location = new System.Drawing.Point(100, 3);
+            this.pictureBoxCode.Name = "pictureBoxCode";
+            this.pictureBoxCode.Size = new System.Drawing.Size(140, 60);
+            this.pictureBoxCode.TabIndex = 3;
+            this.pictureBoxCode.TabStop = false;
+            this.pictureBoxCode.Click += new System.EventHandler(this.pictureBoxCode_Click);
+            // 
             // LoginForm
             // 
-            this.AcceptButton = this.button1;
+            this.AcceptButton = this.button2;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(421, 189);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.comboBox1);
@@ -157,11 +181,12 @@
             this.Controls.Add(this.textBoxUser);
             this.Name = "LoginForm";
             this.Text = "LoginForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LoginForm_FormClosing);
             this.Load += new System.EventHandler(this.LoginForm_Load);
             this.Shown += new System.EventHandler(this.LoginForm_Shown);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCode)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCode)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -180,5 +205,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
     }
 }

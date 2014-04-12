@@ -66,7 +66,9 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_allow_added_request2 = "http://s.web2.qq.com/api/allow_added_request2";
         private static readonly string qq_allow_and_add2 = "http://s.web2.qq.com/api/allow_and_add2";
 
-        private static readonly string qq_zone_friend="http://r.qzone.qq.com/cgi-bin/tfriend/friend_ship_manager.cgi?uin={0}&do=1&rd={2}&fupdate=1&clean=1&g_tk={1}";
+        private static readonly string qq_zone_friend = "http://r.qzone.qq.com/cgi-bin/tfriend/friend_ship_manager.cgi?uin={0}&do=1&rd={2}&fupdate=1&clean=1&g_tk={1}";
+        private static readonly string qq_qun_group = "http://qun.qzone.qq.com/cgi-bin/get_group_list?groupcount=4&count=4&uin={0}&g_tk={1}&r={2}";
+        private static readonly string qq_qun_member = "http://qun.qzone.qq.com/cgi-bin/get_group_member?uin={0}&groupid={1}&neednum=1&g_tk={2}&r={3}";
 
 
         #endregion
@@ -344,11 +346,6 @@ namespace WebQQ2.WebQQ2
                 {
                     _user.PtWebQQ = v.Value;
                 }
-                if (string.Compare(v.Name, "skey") == 0)
-                {
-                    _user.skey = v.Value;
-                    _user.GTK = QQHelper.getGTK(_user.skey);
-                }
             }
 
             if (result.StartsWith("ptuiCB"))
@@ -363,6 +360,26 @@ namespace WebQQ2.WebQQ2
                     try
                     {
                         string sub2r = GetUrlText(sub2);
+                        foreach (Cookie v in _cookiecontainer.GetCookies(new Uri(url)))
+                        {
+                            if (string.Compare(v.Name, "skey") == 0)
+                            {
+                                _user.skey = v.Value;
+                                _user.GTK = QQHelper.getGTK(_user.skey);
+                            }
+                        }
+                        _user.QQName = sublist[5].Trim().Trim('\'');
+                        result = _user.QQName + ":" + sublist[4].Trim().Trim('\'');
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                }
+                else if (sub0 == "4")
+                {
+                    try
+                    {
                         _user.QQName = sublist[5].Trim().Trim('\'');
                         result = _user.QQName + ":" + sublist[4].Trim().Trim('\'');
                     }
@@ -378,10 +395,17 @@ namespace WebQQ2.WebQQ2
             }
             return result;
         }
+        public bool IsPreLoged
+        {
+            get
+            {
+                return User != null && User.IsPreLoged;
+            }
+        }
 
         public string LoginQQ2(string logStatus)
         {
-            if (_user.PtWebQQ == null || _user.PtWebQQ.Length == 0)
+            if (!IsPreLoged)
             {
                 return "尚未全局登录成功";
             }
@@ -427,7 +451,7 @@ namespace WebQQ2.WebQQ2
                     _messageTaskCts.Cancel(false);
                     _messageTaskCts = null;
                 }
-                if (_user.PtWebQQ == null || _user.PtWebQQ.Length == 0)
+                if (!IsPreLoged)
                 {
                     return "尚未全局登录成功";
                 }
@@ -458,7 +482,7 @@ namespace WebQQ2.WebQQ2
             {
                 this.LoginQQ2(newStatus);
             }
-            if (_user.PtWebQQ == null || _user.PtWebQQ.Length == 0)
+            if (!IsPreLoged)
             {
                 return "尚未全局登录成功";
             }
@@ -1412,15 +1436,6 @@ namespace WebQQ2.WebQQ2
             return _user.QQFriends;
         }
 
-        public object GetFriendInfoFromZone()
-        {
-            var furl = string.Format(qq_zone_friend, _user.QQNum, _user.GTK, _random.NextDouble());
-            var fresult = GetUrlText(furl);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
-        }
-
         public QQGroups RefreshGroupList()
         {
             try
@@ -1787,6 +1802,34 @@ namespace WebQQ2.WebQQ2
 
         #endregion
 
+        #region QuickOperation
+
+        public Dictionary<string, object> GetFriendInfoFromZone()
+        {
+            var furl = string.Format(qq_zone_friend, _user.QQNum, _user.GTK, _random.NextDouble());
+            var fresult = GetUrlText(furl);
+            int fstart = fresult.IndexOf('(');
+            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+        }
+        public Dictionary<string, object> GetGroupInfoFromQun()
+        {
+            var furl = string.Format(qq_qun_group, _user.QQNum, _user.GTK, _random.NextDouble());
+            var fresult = GetUrlText(furl);
+            int fstart = fresult.IndexOf('(');
+            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+        }
+        public Dictionary<string, object> GetMemberInfoFromQun(string gid)
+        {
+            var furl = string.Format(qq_qun_member, _user.QQNum, gid, _user.GTK, _random.NextDouble());
+            var fresult = GetUrlText(furl);
+            int fstart = fresult.IndexOf('(');
+            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+        }
+        #endregion
+
         #region GetPost
 
         public string GetUrlText(string url, int timeout = 60000)
@@ -1864,16 +1907,20 @@ namespace WebQQ2.WebQQ2
             HttpWebResponse response = null;
             Task task = new Task(() =>
                 {
-                    HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
-                    myRequest.Method = "GET";
-                    myRequest.Referer = qq_referurl;
-                    myRequest.CookieContainer = _cookiecontainer;
-                    myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
-                    myRequest.AllowAutoRedirect = true;
-                    myRequest.KeepAlive = true;
-                    _messageTaskCts.Token.ThrowIfCancellationRequested();
-                    response = (HttpWebResponse)myRequest.GetResponse();
+                    try
+                    {
+                        HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
+                        myRequest.Method = "GET";
+                        myRequest.Referer = qq_referurl;
+                        myRequest.CookieContainer = _cookiecontainer;
+                        myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
+                        myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
+                        myRequest.AllowAutoRedirect = true;
+                        myRequest.KeepAlive = true;
+                        _messageTaskCts.Token.ThrowIfCancellationRequested();
+                        response = (HttpWebResponse)myRequest.GetResponse();
+                    }
+                    catch (Exception) { }
                 });
             task.Start();
             bool wait = task.Wait(timeout, _messageTaskCts.Token);
@@ -1892,19 +1939,23 @@ namespace WebQQ2.WebQQ2
             HttpWebResponse response = null;
             Task task = new Task(() =>
             {
-                HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
-                myRequest.Method = "POST";
-                myRequest.Referer = qq_referurl;
-                myRequest.CookieContainer = _cookiecontainer;
-                myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
-                myRequest.ContentLength = postData.Length;
-                _messageTaskCts.Token.ThrowIfCancellationRequested();
-                using (var sw = myRequest.GetRequestStream())
+                try
                 {
-                    sw.Write(postData, 0, postData.Length);
+                    HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
+                    myRequest.Method = "POST";
+                    myRequest.Referer = qq_referurl;
+                    myRequest.CookieContainer = _cookiecontainer;
+                    myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
+                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
+                    myRequest.ContentLength = postData.Length;
+                    _messageTaskCts.Token.ThrowIfCancellationRequested();
+                    using (var sw = myRequest.GetRequestStream())
+                    {
+                        sw.Write(postData, 0, postData.Length);
+                    }
+                    response = (HttpWebResponse)myRequest.GetResponse();
                 }
-                response = (HttpWebResponse)myRequest.GetResponse();
+                catch (Exception) { }
             });
             task.Start();
             bool wait = task.Wait(timeout, _messageTaskCts.Token);

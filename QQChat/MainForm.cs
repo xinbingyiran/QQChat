@@ -40,11 +40,17 @@ namespace QQChat
         }
 
         private LoginForm _loginForm;
+        private GlobalForm _globalForm;
 
         public LoginForm LoginForm
         {
             get { return _loginForm; }
             private set { _loginForm = value; }
+        }
+        public GlobalForm GlobalForm
+        {
+            get { return _globalForm; }
+            private set { _globalForm = value; }
         }
 
         private TreeNode _vfzNode = new TreeNode() { Text = @"未分组", Tag = -1, Name = "-1" };
@@ -56,6 +62,7 @@ namespace QQChat
         {
             InitializeComponent();
             LoginForm = new LoginForm();
+            GlobalForm = new GlobalForm();
             _plugin = new PluginForm();
             mainForm = this;
             _createlock = new object();
@@ -226,6 +233,7 @@ Designed by XBYR", @"QQ聊天程序");
             }
             this.Clear();
             this.Hide();
+            _globalForm.Hide();
             if (LoginForm.ShowDialog() != DialogResult.OK)
             {
                 this.Close();
@@ -1512,7 +1520,7 @@ Designed by XBYR", @"QQ聊天程序");
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (DialogResult != System.Windows.Forms.DialogResult.Retry)
+            if (e.CloseReason == CloseReason.UserClosing && LoginForm.DialogResult == System.Windows.Forms.DialogResult.OK)
             {
                 if (MessageBox.Show(@"你确定要退出吗？", @"退出确认", MessageBoxButtons.YesNoCancel) == System.Windows.Forms.DialogResult.Yes)
                 {
@@ -1554,7 +1562,6 @@ Designed by XBYR", @"QQ聊天程序");
             }
             _groups.Clear();
             this.GetSettings();
-            this.SaveToFile();
             foreach (var p in Plugins)
             {
                 p.Value.OnExited();
@@ -1601,6 +1608,7 @@ Designed by XBYR", @"QQ聊天程序");
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "文本文件|*.txt|所有文件|*.*";
+            sfd.FileName = "Friend_" + this.Text;
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -1632,13 +1640,14 @@ Designed by XBYR", @"QQ聊天程序");
                     lines.Add("\t" + f.Value.LongName);
                 }
             }
-            File.AppendAllLines(filename, lines);
+            File.WriteAllLines(filename, lines);
         }
 
         private void buttongd_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "文本文件|*.txt|所有文件|*.*";
+            sfd.FileName = "Group_" + this.Text;
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -1650,7 +1659,7 @@ Designed by XBYR", @"QQ聊天程序");
             {
                 lines.Add(g.Value.LongName);
             }
-            File.AppendAllLines(filename, lines);
+            File.WriteAllLines(filename, lines);
         }
 
         private CancellationTokenSource _getFriendCTS;
@@ -1736,6 +1745,13 @@ Designed by XBYR", @"QQ聊天程序");
                     }).Start();
                 }
             }).Start();
+        }
+
+        private void 全局功能ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _globalForm.InitQQ(this._qq);
+            _globalForm.Show();
+            _globalForm.BringToFront();
         }
     }
 }

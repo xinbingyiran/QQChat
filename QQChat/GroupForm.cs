@@ -262,7 +262,7 @@ namespace QQChat
                 richTextBox3.AppendLine(string.Format("名称:{0}", Group.LongName));
                 richTextBox3.AppendLine(string.Format("号码:{0}", Group.num));
                 richTextBox3.AppendLine(string.Format("Level:{0}", Group.level));
-                richTextBox3.AppendLine(string.Format("备注:{0}", Group.memo));
+                richTextBox3.AppendLine(string.Format("公告:{0}", Group.memo));
                 richTextBox3.AppendLine(string.Format("fmemo:{0}", Group.fingermemo));
                 richTextBox3.AppendLine(string.Format("flag:{0}", Group.flag));
             }
@@ -422,6 +422,7 @@ namespace QQChat
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "文本文件|*.txt|所有文件|*.*";
+            sfd.FileName = "Member_" + this.Text;
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -429,6 +430,7 @@ namespace QQChat
             string filename = sfd.FileName;
             List<string> lines = new List<string>();
             lines.Add(Group.LongName);
+            lines.Add("公告\t" + Group.memo);
             lines.Add("所有者\t" + Group.owner.LongName);
             var result = Group.leaders;
             foreach (var g in result.Values)
@@ -440,7 +442,7 @@ namespace QQChat
             {
                 lines.Add("\t" + g.LongName);
             }
-            File.AppendAllLines(filename, lines);
+            File.WriteAllLines(filename, lines);
         }
     }
 }

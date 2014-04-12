@@ -37,15 +37,16 @@
             this.关于ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControlF = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.buttonfget = new System.Windows.Forms.Button();
+            this.buttonfd = new System.Windows.Forms.Button();
             this.buttonf = new System.Windows.Forms.Button();
             this.treeViewF = new System.Windows.Forms.TreeView();
             this.tabPageG = new System.Windows.Forms.TabPage();
+            this.buttongget = new System.Windows.Forms.Button();
+            this.buttongd = new System.Windows.Forms.Button();
             this.buttong = new System.Windows.Forms.Button();
             this.treeViewG = new System.Windows.Forms.TreeView();
-            this.buttonfd = new System.Windows.Forms.Button();
-            this.buttongd = new System.Windows.Forms.Button();
-            this.buttongget = new System.Windows.Forms.Button();
-            this.buttonfget = new System.Windows.Forms.Button();
+            this.全局功能ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -61,7 +62,7 @@
             this.关于ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(264, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(264, 25);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -69,29 +70,30 @@
             // 
             this.设置ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.好友弹窗ToolStripMenuItem,
-            this.群组弹窗ToolStripMenuItem});
+            this.群组弹窗ToolStripMenuItem,
+            this.全局功能ToolStripMenuItem});
             this.设置ToolStripMenuItem.Name = "设置ToolStripMenuItem";
-            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.设置ToolStripMenuItem.Text = "设置";
             // 
             // 好友弹窗ToolStripMenuItem
             // 
             this.好友弹窗ToolStripMenuItem.Name = "好友弹窗ToolStripMenuItem";
-            this.好友弹窗ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.好友弹窗ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.好友弹窗ToolStripMenuItem.Text = "好友弹窗";
             this.好友弹窗ToolStripMenuItem.Click += new System.EventHandler(this.好友弹窗ToolStripMenuItem_Click);
             // 
             // 群组弹窗ToolStripMenuItem
             // 
             this.群组弹窗ToolStripMenuItem.Name = "群组弹窗ToolStripMenuItem";
-            this.群组弹窗ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.群组弹窗ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.群组弹窗ToolStripMenuItem.Text = "群组弹窗";
             this.群组弹窗ToolStripMenuItem.Click += new System.EventHandler(this.群组弹窗ToolStripMenuItem_Click);
             // 
             // 状态ToolStripMenuItem
             // 
             this.状态ToolStripMenuItem.Name = "状态ToolStripMenuItem";
-            this.状态ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.状态ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.状态ToolStripMenuItem.Text = "状态";
             // 
             // 菜单ToolStripMenuItem
@@ -99,13 +101,13 @@
             this.菜单ToolStripMenuItem.Checked = true;
             this.菜单ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.菜单ToolStripMenuItem.Name = "菜单ToolStripMenuItem";
-            this.菜单ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.菜单ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.菜单ToolStripMenuItem.Text = "插件";
             // 
             // 关于ToolStripMenuItem
             // 
             this.关于ToolStripMenuItem.Name = "关于ToolStripMenuItem";
-            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.关于ToolStripMenuItem.Text = "关于";
             this.关于ToolStripMenuItem.Click += new System.EventHandler(this.关于ToolStripMenuItem_Click);
             // 
@@ -132,6 +134,27 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "好友";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // buttonfget
+            // 
+            this.buttonfget.Location = new System.Drawing.Point(62, 6);
+            this.buttonfget.Name = "buttonfget";
+            this.buttonfget.Size = new System.Drawing.Size(50, 23);
+            this.buttonfget.TabIndex = 3;
+            this.buttonfget.Text = "获取";
+            this.buttonfget.UseVisualStyleBackColor = true;
+            this.buttonfget.Click += new System.EventHandler(this.buttonfget_Click);
+            // 
+            // buttonfd
+            // 
+            this.buttonfd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonfd.Location = new System.Drawing.Point(173, 6);
+            this.buttonfd.Name = "buttonfd";
+            this.buttonfd.Size = new System.Drawing.Size(53, 23);
+            this.buttonfd.TabIndex = 2;
+            this.buttonfd.Text = "导出";
+            this.buttonfd.UseVisualStyleBackColor = true;
+            this.buttonfd.Click += new System.EventHandler(this.buttonfd_Click);
             // 
             // buttonf
             // 
@@ -168,6 +191,27 @@
             this.tabPageG.Text = "群";
             this.tabPageG.UseVisualStyleBackColor = true;
             // 
+            // buttongget
+            // 
+            this.buttongget.Location = new System.Drawing.Point(63, 6);
+            this.buttongget.Name = "buttongget";
+            this.buttongget.Size = new System.Drawing.Size(61, 23);
+            this.buttongget.TabIndex = 4;
+            this.buttongget.Text = "获取";
+            this.buttongget.UseVisualStyleBackColor = true;
+            this.buttongget.Click += new System.EventHandler(this.buttongget_Click);
+            // 
+            // buttongd
+            // 
+            this.buttongd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttongd.Location = new System.Drawing.Point(169, 6);
+            this.buttongd.Name = "buttongd";
+            this.buttongd.Size = new System.Drawing.Size(57, 23);
+            this.buttongd.TabIndex = 3;
+            this.buttongd.Text = "导出";
+            this.buttongd.UseVisualStyleBackColor = true;
+            this.buttongd.Click += new System.EventHandler(this.buttongd_Click);
+            // 
             // buttong
             // 
             this.buttong.Location = new System.Drawing.Point(6, 6);
@@ -189,47 +233,12 @@
             this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
             this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
             // 
-            // buttonfd
+            // 全局功能ToolStripMenuItem
             // 
-            this.buttonfd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonfd.Location = new System.Drawing.Point(173, 6);
-            this.buttonfd.Name = "buttonfd";
-            this.buttonfd.Size = new System.Drawing.Size(53, 23);
-            this.buttonfd.TabIndex = 2;
-            this.buttonfd.Text = "导出";
-            this.buttonfd.UseVisualStyleBackColor = true;
-            this.buttonfd.Click += new System.EventHandler(this.buttonfd_Click);
-            // 
-            // buttongd
-            // 
-            this.buttongd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttongd.Location = new System.Drawing.Point(169, 6);
-            this.buttongd.Name = "buttongd";
-            this.buttongd.Size = new System.Drawing.Size(57, 23);
-            this.buttongd.TabIndex = 3;
-            this.buttongd.Text = "导出";
-            this.buttongd.UseVisualStyleBackColor = true;
-            this.buttongd.Click += new System.EventHandler(this.buttongd_Click);
-            // 
-            // buttongget
-            // 
-            this.buttongget.Location = new System.Drawing.Point(63, 6);
-            this.buttongget.Name = "buttongget";
-            this.buttongget.Size = new System.Drawing.Size(61, 23);
-            this.buttongget.TabIndex = 4;
-            this.buttongget.Text = "获取";
-            this.buttongget.UseVisualStyleBackColor = true;
-            this.buttongget.Click += new System.EventHandler(this.buttongget_Click);
-            // 
-            // buttonfget
-            // 
-            this.buttonfget.Location = new System.Drawing.Point(62, 6);
-            this.buttonfget.Name = "buttonfget";
-            this.buttonfget.Size = new System.Drawing.Size(50, 23);
-            this.buttonfget.TabIndex = 3;
-            this.buttonfget.Text = "获取";
-            this.buttonfget.UseVisualStyleBackColor = true;
-            this.buttonfget.Click += new System.EventHandler(this.buttonfget_Click);
+            this.全局功能ToolStripMenuItem.Name = "全局功能ToolStripMenuItem";
+            this.全局功能ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.全局功能ToolStripMenuItem.Text = "全局功能";
+            this.全局功能ToolStripMenuItem.Click += new System.EventHandler(this.全局功能ToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -276,6 +285,7 @@
         private System.Windows.Forms.Button buttongd;
         private System.Windows.Forms.Button buttonfget;
         private System.Windows.Forms.Button buttongget;
+        private System.Windows.Forms.ToolStripMenuItem 全局功能ToolStripMenuItem;
     }
 }
 

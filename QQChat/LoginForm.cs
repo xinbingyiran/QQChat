@@ -50,7 +50,7 @@ namespace QQChat
 
         private void InitParas()
         {
-            comboBox1.DataSource = QQStatus.AllStatus;
+            comboBox1.DataSource = QQStatus.AllStatus.Except(new QQStatus[] { QQStatus.StatusOffline }).ToArray();
             comboBox1.DisplayMember = "Status";
             comboBox1.ValueMember = "StatusInternal";
             if (comboBox1.Items.Count > 0)
@@ -170,7 +170,14 @@ namespace QQChat
                 EnableLog(true);
                 return;
             }
-            LogQQ(textBoxPass.Text, textBoxCode.Text, (string)comboBox1.SelectedValue);
+            if (!QQ.IsPreLoged)
+            {
+                LogQQ(textBoxPass.Text, textBoxCode.Text, true);
+            }
+            else
+            {
+                LogQQ2();
+            }
         }
 
         private void EnableLog(bool Enable)
@@ -181,12 +188,14 @@ namespace QQChat
                 return;
             }
             button1.Enabled = Enable;
+            button2.Enabled = Enable;
         }
 
-        private void LogQQ(string pass, string code, string status)
+        private void LogQQ(string pass, string code, bool logqq2 = false)
         {
             new Task(() =>
             {
+                MainForm.mainForm.SaveToFile();
                 string result = QQ.LoginQQ(pass, code);
                 if (!QQ.User.IsPreLoged)
                 {
@@ -197,16 +206,37 @@ namespace QQChat
                 else
                 {
                     SetInfo(result);
-                    result = QQ.LoginQQ2(status);
-                    if (result != null)
+                    if (logqq2)
                     {
-                        SetInfo(result);
-                        EnableLog(true);
-                        return;
+                        LogQQ2();
                     }
-                    InitMainForm();
+                    else
+                    {
+                        EnableLog(true);
+                    }
                 }
             }).Start();
+        }
+
+        private void LogQQ2()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(LogQQ2));
+                return;
+            }
+            var status = (string)comboBox1.SelectedValue;
+            new Task((logStatus) =>
+            {
+                var result = QQ.LoginQQ2(logStatus as string);
+                if (result != null)
+                {
+                    SetInfo(result);
+                    EnableLog(true);
+                    return;
+                }
+                InitMainForm();
+            }, status).Start();
         }
 
         private void InitMainForm()
@@ -240,6 +270,51 @@ namespace QQChat
                         textBoxPass.Focus();
                     }
                 }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            EnableLog(false);
+            if (QQ == null)
+            {
+                SetInfo("用户名不能空...");
+                EnableLog(true);
+                return;
+            }
+            if (textBoxPass.Text.Length < 6)
+            {
+                SetInfo("密码长度错误...");
+                EnableLog(true);
+                return;
+            }
+            //if (!QQ.IsGlobalLog())
+            //{
+            MainForm.mainForm.GlobalForm.Hide();
+            LogQQ(textBoxPass.Text, textBoxCode.Text, false);
+            //}
+            //else
+            //{
+            //    SetInfo("你已登录...");
+            //}
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if(!QQ.IsPreLoged)
+            {
+                SetInfo("请先登录...");
+                return;
+            }
+            MainForm.mainForm.GlobalForm.InitQQ(this.QQ);
+            MainForm.mainForm.GlobalForm.Show();
+        }
+
+        private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (this.DialogResult != DialogResult.OK)
+            {
+                MainForm.mainForm.SaveToFile();
             }
         }
 
