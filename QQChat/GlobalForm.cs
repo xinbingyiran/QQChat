@@ -114,6 +114,7 @@ namespace QQChat
                     };
                     _flist.Add(friend);
                 }
+                _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
             }
             RefreshFriendUI();
         }
@@ -176,6 +177,7 @@ namespace QQChat
                     };
                     _glist.Add(friend);
                 }
+                _glist.Sort((l, r) => l.groupid.CompareTo(r.groupid));
             }
             RefreshGroupUI();
         }
@@ -294,7 +296,7 @@ img:         {7}",
                         if (l.ismanager == 0)
                             return 1;
                     }
-                    return 0;
+                    return l.uin.CompareTo(r.uin);
                 });
             }
             RefreshMemberUI();

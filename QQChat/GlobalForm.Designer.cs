@@ -30,18 +30,18 @@
         {
             this.tabControlF = new System.Windows.Forms.TabControl();
             this.tabPageF = new System.Windows.Forms.TabPage();
+            this.treeViewF = new System.Windows.Forms.TreeView();
             this.buttonfd = new System.Windows.Forms.Button();
             this.buttonf = new System.Windows.Forms.Button();
             this.tabPageG = new System.Windows.Forms.TabPage();
+            this.treeViewG = new System.Windows.Forms.TreeView();
             this.buttongd = new System.Windows.Forms.Button();
             this.buttong = new System.Windows.Forms.Button();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.treeViewF = new System.Windows.Forms.TreeView();
-            this.treeViewG = new System.Windows.Forms.TreeView();
             this.tabPageM = new System.Windows.Forms.TabPage();
             this.treeViewm = new System.Windows.Forms.TreeView();
             this.buttonmd = new System.Windows.Forms.Button();
             this.buttonmf = new System.Windows.Forms.Button();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tabControlF.SuspendLayout();
             this.tabPageF.SuspendLayout();
             this.tabPageG.SuspendLayout();
@@ -71,6 +71,15 @@
             this.tabPageF.TabIndex = 0;
             this.tabPageF.Text = "好友";
             this.tabPageF.UseVisualStyleBackColor = true;
+            // 
+            // treeViewF
+            // 
+            this.treeViewF.HideSelection = false;
+            this.treeViewF.Location = new System.Drawing.Point(6, 35);
+            this.treeViewF.Name = "treeViewF";
+            this.treeViewF.Size = new System.Drawing.Size(188, 222);
+            this.treeViewF.TabIndex = 3;
+            this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
             // 
             // buttonfd
             // 
@@ -106,6 +115,15 @@
             this.tabPageG.Text = "群";
             this.tabPageG.UseVisualStyleBackColor = true;
             // 
+            // treeViewG
+            // 
+            this.treeViewG.HideSelection = false;
+            this.treeViewG.Location = new System.Drawing.Point(6, 35);
+            this.treeViewG.Name = "treeViewG";
+            this.treeViewG.Size = new System.Drawing.Size(188, 222);
+            this.treeViewG.TabIndex = 4;
+            this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
+            // 
             // buttongd
             // 
             this.buttongd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -127,31 +145,6 @@
             this.buttong.UseVisualStyleBackColor = true;
             this.buttong.Click += new System.EventHandler(this.buttong_Click);
             // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Location = new System.Drawing.Point(226, 34);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(220, 267);
-            this.richTextBox1.TabIndex = 3;
-            this.richTextBox1.Text = "";
-            // 
-            // treeViewF
-            // 
-            this.treeViewF.Location = new System.Drawing.Point(6, 35);
-            this.treeViewF.Name = "treeViewF";
-            this.treeViewF.Size = new System.Drawing.Size(188, 222);
-            this.treeViewF.TabIndex = 3;
-            this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
-            // 
-            // treeViewG
-            // 
-            this.treeViewG.Location = new System.Drawing.Point(6, 35);
-            this.treeViewG.Name = "treeViewG";
-            this.treeViewG.Size = new System.Drawing.Size(188, 222);
-            this.treeViewG.TabIndex = 4;
-            this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
-            // 
             // tabPageM
             // 
             this.tabPageM.Controls.Add(this.treeViewm);
@@ -167,6 +160,7 @@
             // 
             // treeViewm
             // 
+            this.treeViewm.HideSelection = false;
             this.treeViewm.Location = new System.Drawing.Point(6, 35);
             this.treeViewm.Name = "treeViewm";
             this.treeViewm.Size = new System.Drawing.Size(188, 222);
@@ -193,6 +187,15 @@
             this.buttonmf.Text = "刷新";
             this.buttonmf.UseVisualStyleBackColor = true;
             this.buttonmf.Click += new System.EventHandler(this.buttonmf_Click);
+            // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(226, 34);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
+            this.richTextBox1.Size = new System.Drawing.Size(220, 267);
+            this.richTextBox1.TabIndex = 3;
+            this.richTextBox1.Text = "";
             // 
             // GlobalForm
             // 

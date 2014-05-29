@@ -32,6 +32,7 @@
             this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.好友弹窗ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.群组弹窗ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.全局功能ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.状态ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关于ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,7 +47,6 @@
             this.buttongd = new System.Windows.Forms.Button();
             this.buttong = new System.Windows.Forms.Button();
             this.treeViewG = new System.Windows.Forms.TreeView();
-            this.全局功能ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControlF.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -79,16 +79,23 @@
             // 好友弹窗ToolStripMenuItem
             // 
             this.好友弹窗ToolStripMenuItem.Name = "好友弹窗ToolStripMenuItem";
-            this.好友弹窗ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.好友弹窗ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.好友弹窗ToolStripMenuItem.Text = "好友弹窗";
             this.好友弹窗ToolStripMenuItem.Click += new System.EventHandler(this.好友弹窗ToolStripMenuItem_Click);
             // 
             // 群组弹窗ToolStripMenuItem
             // 
             this.群组弹窗ToolStripMenuItem.Name = "群组弹窗ToolStripMenuItem";
-            this.群组弹窗ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.群组弹窗ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.群组弹窗ToolStripMenuItem.Text = "群组弹窗";
             this.群组弹窗ToolStripMenuItem.Click += new System.EventHandler(this.群组弹窗ToolStripMenuItem_Click);
+            // 
+            // 全局功能ToolStripMenuItem
+            // 
+            this.全局功能ToolStripMenuItem.Name = "全局功能ToolStripMenuItem";
+            this.全局功能ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.全局功能ToolStripMenuItem.Text = "全局功能";
+            this.全局功能ToolStripMenuItem.Click += new System.EventHandler(this.全局功能ToolStripMenuItem_Click);
             // 
             // 状态ToolStripMenuItem
             // 
@@ -170,6 +177,7 @@
             // 
             this.treeViewF.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.treeViewF.FullRowSelect = true;
+            this.treeViewF.HideSelection = false;
             this.treeViewF.Location = new System.Drawing.Point(3, 35);
             this.treeViewF.Name = "treeViewF";
             this.treeViewF.Size = new System.Drawing.Size(226, 284);
@@ -226,19 +234,13 @@
             // 
             this.treeViewG.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.treeViewG.FullRowSelect = true;
+            this.treeViewG.HideSelection = false;
             this.treeViewG.Location = new System.Drawing.Point(3, 35);
             this.treeViewG.Name = "treeViewG";
             this.treeViewG.Size = new System.Drawing.Size(226, 284);
             this.treeViewG.TabIndex = 0;
             this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
             this.treeViewG.DoubleClick += new System.EventHandler(this.treeViewG_DoubleClick);
-            // 
-            // 全局功能ToolStripMenuItem
-            // 
-            this.全局功能ToolStripMenuItem.Name = "全局功能ToolStripMenuItem";
-            this.全局功能ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.全局功能ToolStripMenuItem.Text = "全局功能";
-            this.全局功能ToolStripMenuItem.Click += new System.EventHandler(this.全局功能ToolStripMenuItem_Click);
             // 
             // MainForm
             // 
