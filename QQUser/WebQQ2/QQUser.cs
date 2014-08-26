@@ -56,7 +56,7 @@ namespace WebQQ2.WebQQ2
         {
             get
             {
-                return (PtWebQQ != null && PtWebQQ.Length > 0);
+                return (GTK != null && GTK.Length > 0);
             }
         }
 
@@ -79,6 +79,5 @@ namespace WebQQ2.WebQQ2
         {
             return QQFriends.GetQQSess(uin);
         }
-
     }
 }

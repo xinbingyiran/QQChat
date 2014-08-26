@@ -55,6 +55,7 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extends\EIArray.cs" />
     <Compile Include="Extends\HEXMD5.cs" />
     <Compile Include="Extends\QQHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -28,10 +28,23 @@ namespace WebQQ2.Extends
 
         public static string GetPassword(string uin, string password, string verficode)
         {
+            var saltuin = uin2hex(uin);
             string rpass = HEXMD5.hexchar2bin(HEXMD5.Md5(password));
-            rpass = HEXMD5.Md5(rpass + uin);
+            rpass = HEXMD5.Md5(rpass + saltuin);
             rpass = HEXMD5.Md5(rpass + verficode.ToUpper());
             return rpass;
+        }
+
+        public static string uin2hex(string uin)
+        {
+            var str = Int64.Parse(uin);
+            var str2 = new char[8];
+            for (int i = 0; i < 8; i++)
+            {
+                str2[i] = (char)((str >> ((7 - i) * 8)) & 0xff);
+            }
+            var result = new string(str2);
+            return result;
         }
 
         public static string GetPassword(string password, string verifycode)
@@ -80,7 +93,9 @@ namespace WebQQ2.Extends
 
         public static string GetToken(QQUser user)
         {
-            return GetToken3(user.QQNum, user.PtWebQQ);
+            //http://web.qstatic.com/webqqpic/pubapps/0/50/eqq.all.js
+            //P = function(b, j) {
+            return GetToken4(user.QQNum, user.PtWebQQ);
         }
 
         public struct u
@@ -92,6 +107,43 @@ namespace WebQQ2.Extends
                 this.s = w;
                 this.e = G;
             }
+        }
+
+        public static string GetToken4(string b, string j)
+        {
+            var a = j + "password error";
+            var i = "";
+            var E = new EIArray<int>();
+            for (; ; )
+            {
+                if (i.Length <= a.Length)
+                {
+                    i += b;
+                    if (i.Length == a.Length)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    i = i.Substring(0, a.Length);
+                    break;
+                }
+            }
+            var c = 0;
+            for (; c < i.Length; c++)
+            {
+                E[c] = i[c] ^ a[c];
+            }
+            a = "0123456789ABCDEF";
+            i = "";
+            c = 0;
+            for (; c < E.Length; c++)
+            {
+                i += a[E[c] >> 4 & 15];
+                i += a[E[c] & 15];
+            }
+            return i;
         }
 
 

@@ -303,17 +303,17 @@ namespace WebQQ2.WebQQ2
                     result = result.Substring(ptui_checkVCStart.Length);
                     result = result.Substring(0, result.Length - 2);
                     string[] subresult = result.Split(',');
-                    if (subresult.Length == 3)
+                    if (subresult.Length >= 3)
                     {
                         string uin = subresult[2].Trim().Trim('\'');
                         string[] newstr = uin.Split(new string[] { "\\x" }, StringSplitOptions.RemoveEmptyEntries);
-                        uin = "";
+                        UInt64 uinnum = 0; 
                         foreach (string str in newstr)
                         {
-                            char c = (char)Convert.ToByte(str, 16);
-                            uin += c;
+                            uinnum <<= 8;
+                            uinnum |= Convert.ToByte(str, 16);
                         }
-                        _user.Uin = uin;
+                        _user.Uin = uinnum.ToString();
                         return subresult[1].Trim().Trim('\'');
                     }
                 }
@@ -331,6 +331,10 @@ namespace WebQQ2.WebQQ2
                     string.Format(qq_getimage, _random.NextDouble(), _user.QQNum)
                     )
                 );
+        }
+        public string GetVerifyImageUrl()
+        {
+            return string.Format(qq_getimage, _random.NextDouble(), _user.QQNum);
         }
 
         public string LoginQQ(string password, string vercode)
@@ -2017,5 +2021,31 @@ namespace WebQQ2.WebQQ2
 
         #endregion
 
+        public void UpdateCookie(Uri uri,string cookie)
+        {
+            _cookiecontainer.SetCookies(uri, cookie);
+        }
+
+
+        public void AnylizeCookie(string cookie)
+        {            
+            var cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
+            foreach (var ck in cks)
+            {
+                var kv = ck.Trim().Split(new[] { '=' }, StringSplitOptions.None);
+                if (kv.Length == 2)
+                {
+                    if (kv[0] == "skey")
+                    {
+                        _user.skey = kv[1];
+                        _user.GTK = QQHelper.getGTK(_user.skey);
+                    }
+                    else if (kv[0] == "ptui_loginuin")
+                    {
+                        _user.QQNum = kv[1];
+                    }
+                }
+            }
+        }
     }
 }

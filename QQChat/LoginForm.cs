@@ -12,6 +12,7 @@ using System.IO;
 using System.Security.Cryptography;
 using QQChat.Classes;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 
 namespace QQChat
 {
@@ -64,6 +65,7 @@ namespace QQChat
                 textBoxPass.Text = PassHelper.AESDecrypt(MainForm.mainForm.Paras[1]);
             }
             catch (Exception) { }
+            QQ = new WebQQ2.WebQQ2.QQ();        
         }
 
         private void SetImageCode(Image image)

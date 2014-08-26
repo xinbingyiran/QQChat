@@ -9,10 +9,8 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestGTK()
         {
-            string input = "@e3y041ltb";
-            string need = "344993453";
-            string result = WebQQ2.Extends.QQHelper.getGTK(input);
-            Assert.AreEqual(result,need);
+            var result = WebQQ2.Extends.QQHelper.GetPassword("841473232", "thisis", "abcd");
+            Assert.AreEqual(result,"");
         }
     }
 }
