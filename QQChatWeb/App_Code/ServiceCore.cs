@@ -14,11 +14,11 @@ namespace QQChatWeb.App_Code
 
         static ServiceCore()
         {
-            Instance._qqs = new Dictionary<string, QQ>();
+            Instance._qqs = new Dictionary<string, QQClient>();
             Instance._qqbindings = new Dictionary<string, string>();
         }
 
-        private Dictionary<string, QQ> _qqs;
+        private Dictionary<string, QQClient> _qqs;
         private Dictionary<string, string> _qqbindings;
 
         public QQ[] GetQQs()

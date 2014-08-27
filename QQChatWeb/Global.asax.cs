@@ -10,10 +10,11 @@ namespace QQChatWeb
     public class Global : System.Web.HttpApplication
     {
         public static Random R = new Random();
+        public static String ApplicationPath;
 
         protected void Application_Start(object sender, EventArgs e)
         {
-
+            ApplicationPath = Server.MapPath(".");
         }
 
         protected void Session_Start(object sender, EventArgs e)

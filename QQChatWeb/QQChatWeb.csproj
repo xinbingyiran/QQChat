@@ -204,6 +204,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Code\QQClient.cs" />
     <Compile Include="App_Code\ServiceCore.cs" />
     <Compile Include="App_Code\IForm.cs" />
     <Compile Include="App_Code\FormHelper.cs" />

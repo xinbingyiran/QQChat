@@ -379,7 +379,7 @@ Designed by XBYR", @"QQ聊天程序");
                                         GetAllGroups();
                                         Thread.Sleep(500);
                                         _qq.StartGetMessage();
-                                        break;
+                                        return;
                                     }
                                 }
 
