@@ -134,6 +134,10 @@ namespace QQChatWeb
             //{
             //    LogQQ2();
             //}
+            if(QQItem.IsPreLoged)
+            {
+                Server.Transfer("Simple.aspx",false);
+            }
         }
 
         protected void lButton_Click(object sender, EventArgs e)

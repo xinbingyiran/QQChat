@@ -21,7 +21,7 @@ namespace QQChatWeb.App_Code
         private Dictionary<string, QQClient> _qqs;
         private Dictionary<string, string> _qqbindings;
 
-        public QQ[] GetQQs()
+        public QQClient[] GetQQs()
         {
             return _qqs.Values.ToArray();
         }
@@ -43,11 +43,11 @@ namespace QQChatWeb.App_Code
             }
             if (Instance._qqs.ContainsKey(session))
             {
-                _qqs[session] = qq;
+                _qqs[session] = new QQClient { Client = qq };
             }
             else
             {
-                _qqs.Add(session, qq);
+                _qqs.Add(session, new QQClient { Client = qq });
             }
             return true;
         }
@@ -56,7 +56,7 @@ namespace QQChatWeb.App_Code
         {
             if (_qqs.ContainsKey(session))
             {
-                return _qqs[session];
+                return _qqs[session].Client;
             }
             else
             {
@@ -72,9 +72,9 @@ namespace QQChatWeb.App_Code
                 _qqbindings[qqnum] = session;
                 var oldqq = _qqs[oldsession];
                 _qqs.Remove(oldsession);
-                if (_qqbindings.ContainsKey(oldqq.User.QQNum))
+                if (_qqbindings.ContainsKey(oldqq.Client.User.QQNum))
                 {
-                    _qqbindings.Remove(oldqq.User.QQNum);
+                    _qqbindings.Remove(oldqq.Client.User.QQNum);
                 }
                 _qqs.Add(session, oldqq);
                 return true;

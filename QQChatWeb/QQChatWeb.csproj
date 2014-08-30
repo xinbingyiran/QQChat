@@ -63,6 +63,7 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
+    <Content Include="Simple.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="Resources\face.gif" />
     <Content Include="Resources\face\0.gif" />
@@ -204,7 +205,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Code\QQClient.cs" />
+    <Compile Include="App_Code\QQClient.cs" />
     <Compile Include="App_Code\ServiceCore.cs" />
     <Compile Include="App_Code\IForm.cs" />
     <Compile Include="App_Code\FormHelper.cs" />
@@ -219,6 +220,13 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Simple.aspx.cs">
+      <DependentUpon>Simple.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Simple.aspx.designer.cs">
+      <DependentUpon>Simple.aspx</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>

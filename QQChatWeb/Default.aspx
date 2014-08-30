@@ -5,12 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="refresh" content="0;url=Login.aspx" />
     <title></title>
 </head>
 <body>
     <form id="form1" runat="server">
     <div>
+        <div style="text-align:center;">
+            <a href="Login.aspx">登录</a>
+        </div>
     </div>
     </form>
 </body>

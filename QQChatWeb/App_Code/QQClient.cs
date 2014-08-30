@@ -138,7 +138,7 @@ namespace QQChatWeb.App_Code
 
         private void SendGroupMessage(QQGroup qQGroup, QQGroupMember qQGroupMember, string rmsg)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("SendGroupMessage");
         }
 
         private void SetGroupText(QQGroup qQGroup, QQGroupMember qQGroupMember, string p1, DateTime dateTime, long p2)
