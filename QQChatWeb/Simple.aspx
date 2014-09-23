@@ -19,54 +19,58 @@
             </div>
             <table style="margin: auto">
                 <tr>
-                    <td style="width: 240px;">
-                        <div>
-                            用户列表：
-                                
+                    <td style="width: 240px; vertical-align: top">
+
                         <asp:UpdatePanel ID="UpdatePanel1" runat="server">
                             <ContentTemplate>
-                                <asp:Button runat="server" ID="refreshUser" Text="刷新" OnClick="refreshUser_Click" />
-
-                                <asp:Repeater ID="userList" runat="server" OnItemCommand="userList_ItemCommand">
-                                    <ItemTemplate>
-                                        <asp:LinkButton runat="server" CommandName="l" CommandArgument="<%#Container.ItemIndex %>" Text='<%#Eval("name") + "[" + Eval("uin") + "]" %>'></asp:LinkButton>
-                                    </ItemTemplate>
-                                    <FooterTemplate>
-                                        <asp:Button runat="server" ID="exportUser" Text="导出" />
-                                    </FooterTemplate>
-                                </asp:Repeater>
+                                用户列表：<asp:Button runat="server" ID="refreshUser" Text="刷新" OnClick="refreshUser_Click" />
+                                <div style="height: 180px; overflow: scroll">
+                                    <asp:Repeater ID="userList" runat="server" OnItemCommand="userList_ItemCommand">
+                                        <ItemTemplate>
+                                            <p> <asp:Image ID="LinkButton1" runat="server" ImageUrl='<%#Eval("img")%>'></asp:Image>
+                                                <asp:LinkButton ID="fu" runat="server" CommandName="l" CommandArgument="<%#Container.ItemIndex %>" Text='<%#Eval("name") + "[" + Eval("uin") + "]" %>'></asp:LinkButton>
+                                            </p>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                                <asp:Button runat="server" ID="exportUser" Text="导出" />
                             </ContentTemplate>
+                            <Triggers>
+                                <asp:PostBackTrigger ControlID="userList" />
+                            </Triggers>
                         </asp:UpdatePanel>
 
-                        </div>
                     </td>
-                    <td style="width: 240px;">
-                        <div>
-                            群组列表：<asp:Button runat="server" ID="refreshGroup" Text="刷新" OnClick="refreshGroup_Click" />
-
-                            <asp:Repeater ID="groupList" runat="server">
-                                <ItemTemplate>
-                                    <div><%# Eval("groupname") %></div>
-                                </ItemTemplate>
-                                <FooterTemplate>
-                                    <asp:Button runat="server" ID="exportGroup" Text="导出" />
-                                </FooterTemplate>
-                            </asp:Repeater>
-                        </div>
+                    <td style="width: 240px; vertical-align: top">
+                        <asp:UpdatePanel ID="UpdatePanel2" runat="server">
+                            <ContentTemplate>
+                                群组列表：<asp:Button runat="server" ID="refreshGroup" Text="刷新" OnClick="refreshGroup_Click" />
+                                <div style="height: 180px; overflow: scroll">
+                                    <asp:Repeater ID="groupList" runat="server">
+                                        <ItemTemplate>
+                                            <div><%# Eval("groupname") %></div>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                                <asp:Button runat="server" ID="exportGroup" Text="导出" />
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
                     </td>
-                    <td style="width: 240px;">
-                        <div>
-                            成员列表：<asp:Button runat="server" ID="refreshMember" Text="刷新" OnClick="refreshMember_Click" />
+                    <td style="width: 240px; vertical-align: top">
 
-                            <asp:Repeater ID="memberList" runat="server">
-                                <ItemTemplate>
-                                    <div><% Eval("Name"); %></div>
-                                </ItemTemplate>
-                                <FooterTemplate>
-                                    <asp:Button runat="server" ID="exportMember" Text="导出" />
-                                </FooterTemplate>
-                            </asp:Repeater>
-                        </div>
+                        <asp:UpdatePanel ID="UpdatePanel3" runat="server">
+                            <ContentTemplate>
+                                成员列表：<asp:Button runat="server" ID="refreshMember" Text="刷新" OnClick="refreshMember_Click" />
+                                <div style="height: 180px; overflow: scroll">
+                                    <asp:Repeater ID="memberList" runat="server">
+                                        <ItemTemplate>
+                                            <div><% Eval("Name"); %></div>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                                <asp:Button runat="server" ID="exportMember" Text="导出" />
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
                     </td>
                 </tr>
             </table>

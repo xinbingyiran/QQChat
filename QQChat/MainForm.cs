@@ -387,8 +387,8 @@ Designed by XBYR", @"QQ聊天程序");
                         }
                         catch (Exception)
                         {
+                            BeginInvoke(new MethodInvoker(ReturnToLogIn));
                         }
-                        BeginInvoke(new MethodInvoker(ReturnToLogIn));
                     }).Start();
             }
         }

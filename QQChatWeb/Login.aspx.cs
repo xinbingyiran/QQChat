@@ -193,6 +193,7 @@ namespace QQChatWeb
 
         private void InitMainForm()
         {
+            Server.Transfer("Main.aspx", false);
         }
 
 

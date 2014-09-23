@@ -99,22 +99,26 @@ namespace QQChat
             {
                 var data = list["data"] as Dictionary<string, object>;
                 _flist.Clear();
-                foreach (Dictionary<string, object> item in data["items_list"] as ArrayList)
+                var items = data["items_list"] as ArrayList;
+                if (items != null)
                 {
-                    var friend = new QzoneFriend
+                    foreach (Dictionary<string, object> item in items)
                     {
-                        uin = Convert.ToInt64(item["uin"]),
-                        name = (string)item["name"],
-                        index = Convert.ToInt64(item["index"]),
-                        chang_pos = Convert.ToInt64(item["chang_pos"]),
-                        score = Convert.ToInt64(item["score"]),
-                        special_flag = (string)item["special_flag"],
-                        uncare_flag = (string)item["uncare_flag"],
-                        img = (string)item["img"]
-                    };
-                    _flist.Add(friend);
+                        var friend = new QzoneFriend
+                        {
+                            uin = Convert.ToInt64(item["uin"]),
+                            name = (string)item["name"],
+                            index = Convert.ToInt64(item["index"]),
+                            chang_pos = Convert.ToInt64(item["chang_pos"]),
+                            score = Convert.ToInt64(item["score"]),
+                            special_flag = (string)item["special_flag"],
+                            uncare_flag = (string)item["uncare_flag"],
+                            img = (string)item["img"]
+                        };
+                        _flist.Add(friend);
+                    }
+                    _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
                 }
-                _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
             }
             RefreshFriendUI();
         }
@@ -166,18 +170,22 @@ namespace QQChat
             {
                 var data = list["data"] as Dictionary<string, object>;
                 _glist.Clear();
-                foreach (Dictionary<string, object> item in data["group"] as ArrayList)
+                var items = data["group"] as ArrayList;
+                if (items != null)
                 {
-                    var friend = new QunGroup
+                    foreach (Dictionary<string, object> item in items)
                     {
-                        auth = Convert.ToInt64(item["auth"]),
-                        flag = Convert.ToInt64(item["flag"]),
-                        groupid = Convert.ToInt64(item["groupid"]),
-                        groupname = (string)item["groupname"],
-                    };
-                    _glist.Add(friend);
+                        var friend = new QunGroup
+                        {
+                            auth = Convert.ToInt64(item["auth"]),
+                            flag = Convert.ToInt64(item["flag"]),
+                            groupid = Convert.ToInt64(item["groupid"]),
+                            groupname = (string)item["groupname"],
+                        };
+                        _glist.Add(friend);
+                    }
+                    _glist.Sort((l, r) => l.groupid.CompareTo(r.groupid));
                 }
-                _glist.Sort((l, r) => l.groupid.CompareTo(r.groupid));
             }
             RefreshGroupUI();
         }
@@ -246,6 +254,7 @@ img:         {7}",
             if (_currentGroup == null)
             {
                 MessageBox.Show("请先选择群");
+                return;
             }
             new Task(() => GetQunMember(_currentGroup.groupid.ToString())).Start();
         }
@@ -267,37 +276,41 @@ img:         {7}",
                 _currentGroup.option = Convert.ToInt64(data["option"]);
                 _currentGroup.total = Convert.ToInt64(data["total"]);
                 _gmlist.Clear();
-                foreach (Dictionary<string, object> item in data["item"] as ArrayList)
+                var items = data["item"] as ArrayList;
+                if (items != null)
                 {
-                    var member = new QunGroupMember
+                    foreach (Dictionary<string, object> item in items)
                     {
-                        iscreator = Convert.ToInt64(item["iscreator"]),
-                        ismanager = Convert.ToInt64(item["ismanager"]),
-                        uin = Convert.ToInt64(item["uin"]),
-                        nick = (string)item["nick"],
-                    };
-                    _gmlist.Add(member);
-                }
-                _gmlist.Sort((l, r) =>
-                {
-                    if (l == r)
-                        return 0;
-                    else if (l.iscreator != 0)
-                        return -1;
-                    else if (r.iscreator != 0)
-                        return 1;
-                    else if (l.ismanager != 0)
+                        var member = new QunGroupMember
+                        {
+                            iscreator = Convert.ToInt64(item["iscreator"]),
+                            ismanager = Convert.ToInt64(item["ismanager"]),
+                            uin = Convert.ToInt64(item["uin"]),
+                            nick = (string)item["nick"],
+                        };
+                        _gmlist.Add(member);
+                    }
+                    _gmlist.Sort((l, r) =>
                     {
-                        if (r.ismanager == 0)
+                        if (l == r)
+                            return 0;
+                        else if (l.iscreator != 0)
                             return -1;
-                    }
-                    else if (r.ismanager != 0)
-                    {
-                        if (l.ismanager == 0)
+                        else if (r.iscreator != 0)
                             return 1;
-                    }
-                    return l.uin.CompareTo(r.uin);
-                });
+                        else if (l.ismanager != 0)
+                        {
+                            if (r.ismanager == 0)
+                                return -1;
+                        }
+                        else if (r.ismanager != 0)
+                        {
+                            if (l.ismanager == 0)
+                                return 1;
+                        }
+                        return l.uin.CompareTo(r.uin);
+                    });
+                }
             }
             RefreshMemberUI();
         }

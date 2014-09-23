@@ -31,9 +31,9 @@ namespace QQChatWeb
 
         private void InitParas()
         {
-            if(QQItem == null ||!QQItem.IsPreLoged)
+            if (QQItem == null || !QQItem.IsPreLoged)
             {
-                Server.Transfer("Default.aspx",false);
+                Server.Transfer("Default.aspx", false);
             }
             else
             {
@@ -70,7 +70,7 @@ namespace QQChatWeb
         [Serializable]
         class QzoneFriend
         {
-            public long uin{get;set;}
+            public long uin { get; set; }
             public string name { get; set; }
             public long index { get; set; }
             public long chang_pos { get; set; }
@@ -86,24 +86,24 @@ namespace QQChatWeb
             public long flag { get; set; }
             public long groupid { get; set; }
             public string groupname { get; set; }
-            public long alpha{get;set;}
-            public long bbscount{get;set;}
-            public long classvalue{get;set;}
-            public long create_time{get;set;}
-            public long filecount{get;set;}
-            public string finger_memo{get;set;}
-            public string group_memo{get;set;}
-            public long level{get;set;}
-            public long option{get;set;}
-            public long total{get;set;}
+            public long alpha { get; set; }
+            public long bbscount { get; set; }
+            public long classvalue { get; set; }
+            public long create_time { get; set; }
+            public long filecount { get; set; }
+            public string finger_memo { get; set; }
+            public string group_memo { get; set; }
+            public long level { get; set; }
+            public long option { get; set; }
+            public long total { get; set; }
         }
         [Serializable]
         class QunGroupMember
         {
-            public long iscreator{get;set;}
-            public long ismanager{get;set;}
-            public string nick{get;set;}
-            public long uin{get;set;}
+            public long iscreator { get; set; }
+            public long ismanager { get; set; }
+            public string nick { get; set; }
+            public long uin { get; set; }
         }
 
         private List<QzoneFriend> _flist
@@ -114,7 +114,7 @@ namespace QQChatWeb
             }
             set
             {
-                ViewState["f"] = value; 
+                ViewState["f"] = value;
             }
         }
         private List<QunGroup> _glist
@@ -125,7 +125,7 @@ namespace QQChatWeb
             }
             set
             {
-                ViewState["g"] = value; 
+                ViewState["g"] = value;
             }
         }
         private List<QunGroupMember> _gmlist
@@ -159,20 +159,24 @@ namespace QQChatWeb
             {
                 var data = list["data"] as Dictionary<string, object>;
                 _flist = new List<QzoneFriend>();
-                foreach (Dictionary<string, object> item in data["items_list"] as ArrayList)
+                var ils = data["items_list"] as ArrayList;
+                if (ils != null)
                 {
-                    var friend = new QzoneFriend
+                    foreach (Dictionary<string, object> item in data["items_list"] as ArrayList)
                     {
-                        uin = Convert.ToInt64(item["uin"]),
-                        name = (string)item["name"],
-                        index = Convert.ToInt64(item["index"]),
-                        chang_pos = Convert.ToInt64(item["chang_pos"]),
-                        score = Convert.ToInt64(item["score"]),
-                        special_flag = (string)item["special_flag"],
-                        uncare_flag = (string)item["uncare_flag"],
-                        img = (string)item["img"]
-                    };
-                    _flist.Add(friend);
+                        var friend = new QzoneFriend
+                        {
+                            uin = Convert.ToInt64(item["uin"]),
+                            name = (string)item["name"],
+                            index = Convert.ToInt64(item["index"]),
+                            chang_pos = Convert.ToInt64(item["chang_pos"]),
+                            score = Convert.ToInt64(item["score"]),
+                            special_flag = (string)item["special_flag"],
+                            uncare_flag = (string)item["uncare_flag"],
+                            img = (string)item["img"]
+                        };
+                        _flist.Add(friend);
+                    }
                 }
                 _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
             }
@@ -211,16 +215,20 @@ namespace QQChatWeb
             {
                 var data = list["data"] as Dictionary<string, object>;
                 _glist = new List<QunGroup>();
-                foreach (Dictionary<string, object> item in data["group"] as ArrayList)
+                var group = data["group"] as ArrayList;
+                if (group != null)
                 {
-                    var friend = new QunGroup
+                    foreach (Dictionary<string, object> item in group)
                     {
-                        auth = Convert.ToInt64(item["auth"]),
-                        flag = Convert.ToInt64(item["flag"]),
-                        groupid = Convert.ToInt64(item["groupid"]),
-                        groupname = (string)item["groupname"],
-                    };
-                    _glist.Add(friend);
+                        var friend = new QunGroup
+                        {
+                            auth = Convert.ToInt64(item["auth"]),
+                            flag = Convert.ToInt64(item["flag"]),
+                            groupid = Convert.ToInt64(item["groupid"]),
+                            groupname = (string)item["groupname"],
+                        };
+                        _glist.Add(friend);
+                    }
                 }
                 _glist.Sort((l, r) => l.groupid.CompareTo(r.groupid));
             }
@@ -251,30 +259,30 @@ namespace QQChatWeb
         //    File.WriteAllLines(filename, lines);
         //}
 
-//        private void treeViewF_AfterSelect(object sender, TreeViewEventArgs e)
-//        {
-//            var f = e.Node.Tag as QzoneFriend;
-//            ShowMessage(string.Format(@"uin:         {0}
-//name:        {1}
-//index:       {2}
-//chang_pos:   {3}
-//score:       {4}
-//special_flag:{5}
-//uncare_flag: {6}
-//img:         {7}",
-//                 f.uin, f.name, f.index, f.chang_pos, f.score, f.special_flag, f.uncare_flag, f.img));
-//        }
+        //        private void treeViewF_AfterSelect(object sender, TreeViewEventArgs e)
+        //        {
+        //            var f = e.Node.Tag as QzoneFriend;
+        //            ShowMessage(string.Format(@"uin:         {0}
+        //name:        {1}
+        //index:       {2}
+        //chang_pos:   {3}
+        //score:       {4}
+        //special_flag:{5}
+        //uncare_flag: {6}
+        //img:         {7}",
+        //                 f.uin, f.name, f.index, f.chang_pos, f.score, f.special_flag, f.uncare_flag, f.img));
+        //        }
 
-//        private void treeViewG_AfterSelect(object sender, TreeViewEventArgs e)
-//        {
-//            var group = e.Node.Tag as QunGroup;
-//            if (group == null)
-//            {
-//                return;
-//            }
-//            _currentGroup = group;
-//            GetQunMember(_currentGroup.groupid.ToString());
-//        }
+        //        private void treeViewG_AfterSelect(object sender, TreeViewEventArgs e)
+        //        {
+        //            var group = e.Node.Tag as QunGroup;
+        //            if (group == null)
+        //            {
+        //                return;
+        //            }
+        //            _currentGroup = group;
+        //            GetQunMember(_currentGroup.groupid.ToString());
+        //        }
 
 
         private void GetQunMember(string groupid)
@@ -294,16 +302,20 @@ namespace QQChatWeb
                 _currentGroup.option = Convert.ToInt64(data["option"]);
                 _currentGroup.total = Convert.ToInt64(data["total"]);
                 _gmlist = new List<QunGroupMember>();
-                foreach (Dictionary<string, object> item in data["item"] as ArrayList)
+                var di = data["item"] as ArrayList;
+                if (di != null)
                 {
-                    var member = new QunGroupMember
+                    foreach (Dictionary<string, object> item in di)
                     {
-                        iscreator = Convert.ToInt64(item["iscreator"]),
-                        ismanager = Convert.ToInt64(item["ismanager"]),
-                        uin = Convert.ToInt64(item["uin"]),
-                        nick = (string)item["nick"],
-                    };
-                    _gmlist.Add(member);
+                        var member = new QunGroupMember
+                        {
+                            iscreator = Convert.ToInt64(item["iscreator"]),
+                            ismanager = Convert.ToInt64(item["ismanager"]),
+                            uin = Convert.ToInt64(item["uin"]),
+                            nick = (string)item["nick"],
+                        };
+                        _gmlist.Add(member);
+                    }
                 }
                 _gmlist.Sort((l, r) =>
                 {
@@ -347,6 +359,16 @@ group_memo:  {7}",
 
         protected void userList_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            var f = _flist[e.Item.ItemIndex];
+            ShowMessage(string.Format(@"uin:         {0}
+name:        {1}
+index:       {2}
+chang_pos:   {3}
+score:       {4}
+special_flag:{5}
+uncare_flag: {6}
+img:         {7}",
+                f.uin, f.name, f.index, f.chang_pos, f.score, f.special_flag, f.uncare_flag, f.img));
 
         }
         //private void buttonmd_Click(object sender, EventArgs e)
@@ -393,15 +415,15 @@ group_memo:  {7}",
         //    File.WriteAllLines(filename, lines);
         //}
 
-//        private void treeViewm_AfterSelect(object sender, TreeViewEventArgs e)
-//        {
-//            var f = e.Node.Tag as QunGroupMember;
-//            ShowMessage(string.Format(@"uin:         {0}
-//nick:        {1}
-//iscreator:   {2}
-//ismanager:   {3}",
-//                 f.uin, f.nick, f.iscreator, f.ismanager));
-//        }
+        //        private void treeViewm_AfterSelect(object sender, TreeViewEventArgs e)
+        //        {
+        //            var f = e.Node.Tag as QunGroupMember;
+        //            ShowMessage(string.Format(@"uin:         {0}
+        //nick:        {1}
+        //iscreator:   {2}
+        //ismanager:   {3}",
+        //                 f.uin, f.nick, f.iscreator, f.ismanager));
+        //        }
 
     }
 }
