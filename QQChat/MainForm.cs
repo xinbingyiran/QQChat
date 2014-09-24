@@ -75,6 +75,10 @@ namespace QQChat
             catch (Exception)
             {
             }
+            if(_settings == null)
+            {
+                this.GetSettings();
+            }
         }
 
 
@@ -289,6 +293,7 @@ Designed by XBYR", @"QQ聊天程序");
                         AddMenu(t, o);
                         Plugins.Add(t.FullName, o);
                     }
+                    GetSettings();
                 }
                 catch (Exception ex)
                 {
@@ -1562,6 +1567,7 @@ Designed by XBYR", @"QQ聊天程序");
             }
             _groups.Clear();
             this.GetSettings();
+            this.SaveToFile();
             foreach (var p in Plugins)
             {
                 p.Value.OnExited();
