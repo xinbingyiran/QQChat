@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MessageDeal;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace MessageDeal1
+namespace Learning
 {
 
     internal struct FindIndex
@@ -191,12 +190,17 @@ namespace MessageDeal1
             {
                 return null;
             }
+            if (_autoreplay)
+            {
+                var rm = GetReturnMessage(message);
+                if (rm != null)
+                {
+                    return rm;
+                }
+            }
             if (message.Length < 2 || message[0] != '-')
             {
-                if (_autoreplay)
-                {
-                    return GetReturnMessage(message);
-                }
+                return null;
             }
             message = message.Trim().Replace(Environment.NewLine, lineSep);
             var tag = message[1];

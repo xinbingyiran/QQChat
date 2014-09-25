@@ -12,7 +12,7 @@ using Newtonsoft.Json.Converters;
 using Timer = System.Timers.Timer;
 using System.Text;
 
-namespace MeIn
+namespace AMeIn
 {
     internal struct meinItem
     {
