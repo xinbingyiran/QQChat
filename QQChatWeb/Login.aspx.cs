@@ -128,15 +128,15 @@ namespace QQChatWeb
             }
             //if (!_qq.IsPreLoged)
             //{
-                LogQQ(userPass.Text, userVerify.Text, false);
+            LogQQ(userPass.Text, userVerify.Text, false);
             //}
             //else
             //{
             //    LogQQ2();
             //}
-            if(QQItem.IsPreLoged)
+            if (QQItem.IsPreLoged)
             {
-                Server.Transfer("Simple.aspx",false);
+                Server.Transfer("Simple.aspx", false);
             }
         }
 
@@ -163,7 +163,7 @@ namespace QQChatWeb
         }
         private void LogQQ(string pass, string code, bool logqq2 = false)
         {
-            string result = QQItem.LoginQQ(pass, code);
+            string result = QQItem.LoginQQ(pass, code, true);
             if (!QQItem.User.IsPreLoged)
             {
                 SetInfo(result);

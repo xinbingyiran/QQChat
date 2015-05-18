@@ -51,6 +51,19 @@ namespace QQChat
 
         private void InitParas()
         {
+            webBrowser1.DocumentText = @"<html>
+<body>
+<script type=""text/javascript"">
+"
+                + QQChat.Properties.Resources.js +
+@"
+var getFun = function(a,b,c,d)
+{
+    return $.Encryption.getEncryption(a,b,c,d);
+}
+</script>
+</body>
+</html>";
             comboBox1.DataSource = QQStatus.AllStatus.Except(new QQStatus[] { QQStatus.StatusOffline }).ToArray();
             comboBox1.DisplayMember = "Status";
             comboBox1.ValueMember = "StatusInternal";
@@ -65,7 +78,7 @@ namespace QQChat
                 textBoxPass.Text = PassHelper.AESDecrypt(MainForm.mainForm.Paras[1]);
             }
             catch (Exception) { }
-            QQ = new WebQQ2.WebQQ2.QQ();        
+            QQ = new WebQQ2.WebQQ2.QQ();
         }
 
         private void SetImageCode(Image image)
@@ -195,10 +208,12 @@ namespace QQChat
 
         private void LogQQ(string pass, string code, bool logqq2 = false)
         {
+            var tpassobj = webBrowser1.Document.InvokeScript("getFun", new[] { pass, QQ.User.Uin, code });
             new Task(() =>
             {
                 MainForm.mainForm.SaveToFile();
-                string result = QQ.LoginQQ(pass, code);
+                var tpass = tpassobj.ToString();
+                string result = QQ.LoginQQ(tpass, code, false);
                 if (!QQ.User.IsPreLoged)
                 {
                     SetInfo(result);
@@ -303,7 +318,7 @@ namespace QQChat
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if(!QQ.IsPreLoged)
+            if (!QQ.IsPreLoged)
             {
                 SetInfo("请先登录...");
                 return;

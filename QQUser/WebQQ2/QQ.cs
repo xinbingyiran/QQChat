@@ -22,7 +22,8 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_check = "https://ssl.ptlogin2.qq.com/check?uin={0}&appid=1003903&r={1:f16}";
         private static readonly string qq_getimage = "https://ssl.captcha.qq.com/getimage?aid=1003903&r={0:f16}&uin={1}";
         //private static readonly string qq_login = "https://ssl.ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=1&aid=1003903&u1=http%3A%2F%2Fw.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-6-9305&mibao_css=m_webqq&t=1&g=1";
-        private static readonly string qq_loginnew = "https://ssl.ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=0&aid=1003903&u1=http%3A%2F%2Fweb2.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=1-15-19876&mibao_css=m_webqq&t=1&g=1&js_type=0&js_ver=10042&login_sig=ies07xzizpY30I2qFMaEp0PXOM3SxgBi40YEjvys0DDcV9vnSQ5Yg4xWNO9H7btA";
+        //private static readonly string qq_loginnew = "https://ssl.ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=0&aid=1003903&u1=http%3A%2F%2Fweb2.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=1-15-19876&mibao_css=m_webqq&t=1&g=1&js_type=0&js_ver=10042&login_sig=ies07xzizpY30I2qFMaEp0PXOM3SxgBi40YEjvys0DDcV9vnSQ5Yg4xWNO9H7btA";
+        private static readonly string qq_loginnew2 = "https://ssl.ptlogin2.qq.com/login?u={0}&p={1}&verifycode={2}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-24-36670&mibao_css=m_webqq&t=1&g=1&js_type=0&js_ver=10123&login_sig=&pt_randsalt=0&pt_vcode_v1=0&pt_verifysession_v1={3}";
         private static readonly string qq_login2 = "http://d.web2.qq.com/channel/login2";
         private static readonly string qq_get_user_friends2 = "http://s.web2.qq.com/api/get_user_friends2";
         //private static readonly string qq_get_friend_info2 = "http://s.web2.qq.com/api/get_friend_info2?tuin={0}&verifysession=&code=&vfwebqq={1}&t={2}";
@@ -314,6 +315,7 @@ namespace WebQQ2.WebQQ2
                             uinnum |= Convert.ToByte(str, 16);
                         }
                         _user.Uin = uinnum.ToString();
+                        _user.VerifySession = subresult[1].Trim().Trim('\'');
                         return subresult[1].Trim().Trim('\'');
                     }
                 }
@@ -337,10 +339,10 @@ namespace WebQQ2.WebQQ2
             return string.Format(qq_getimage, _random.NextDouble(), _user.QQNum);
         }
 
-        public string LoginQQ(string password, string vercode)
+        public string LoginQQ(string password, string vercode,bool needEncode)
         {
-            string mpass = QQHelper.GetPassword(_user.Uin, password, vercode);
-            string url = string.Format(qq_loginnew, _user.QQNum, mpass, vercode);
+            string mpass = needEncode?QQHelper.GetPassword(_user.Uin, password, vercode):password;
+            string url = string.Format(qq_loginnew2, _user.QQNum, mpass, vercode, string.IsNullOrWhiteSpace(_user.VerifySession) ? _cookiecontainer.GetCookies(new Uri("https://ssl.ptlogin2.qq.com"))["verifysession"].Value : _user.VerifySession);
             string result = GetUrlText(url);
             _user.PtWebQQ = null;
             _user.GTK = null;

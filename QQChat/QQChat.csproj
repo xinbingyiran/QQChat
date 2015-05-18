@@ -312,6 +312,7 @@
     <Content Include="Resources\face\98.gif" />
     <Content Include="Resources\face\99.gif" />
     <Content Include="Resources\face\err.gif" />
+    <None Include="Resources\js.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QQUser\WebQQ2.csproj">
