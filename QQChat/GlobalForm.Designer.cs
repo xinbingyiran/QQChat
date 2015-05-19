@@ -46,6 +46,7 @@
             this.buttonad = new System.Windows.Forms.Button();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.buttonc = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabControlF.SuspendLayout();
             this.tabPageF.SuspendLayout();
             this.tabPageG.SuspendLayout();
@@ -242,6 +243,16 @@
             this.buttonc.UseVisualStyleBackColor = true;
             this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(226, 12);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(50, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "高级";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // GlobalForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -251,6 +262,7 @@
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.buttonc);
             this.Controls.Add(this.buttonad);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.buttona);
             this.Controls.Add(this.tabControlF);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -287,5 +299,6 @@
         private System.Windows.Forms.Button buttonad;
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.Button buttonc;
+        private System.Windows.Forms.Button button1;
     }
 }

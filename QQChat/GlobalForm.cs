@@ -18,46 +18,11 @@ namespace QQChat
 {
     public partial class GlobalForm : Form
     {
-        class QzoneFriend
-        {
-            public long uin;
-            public string name;
-            public long index;
-            public long chang_pos;
-            public long score;
-            public string special_flag;
-            public string uncare_flag;
-            public string img;
-        }
-        class QunGroup
-        {
-            public long auth;
-            public long flag;
-            public long groupid;
-            public string groupname;
-            public long alpha;
-            public long bbscount;
-            public long classvalue;
-            public long create_time;
-            public long filecount;
-            public string finger_memo;
-            public string group_memo;
-            public long level;
-            public long option;
-            public long total;
-            public List<QunGroupMember> gmlist;
-        }
-        class QunGroupMember
-        {
-            public long iscreator;
-            public long ismanager;
-            public string nick;
-            public long uin;
-        }
-
+        private Dictionary<long, HashSet<long>> _uing = new Dictionary<long, HashSet<long>>();
         private List<QzoneFriend> _flist = new List<QzoneFriend>();
         private List<QunGroup> _glist = new List<QunGroup>();
         private QQ _qq;
+        private QunMemberManager _manager;
         public GlobalForm()
         {
             InitializeComponent();
@@ -120,12 +85,35 @@ namespace QQChat
                             uncare_flag = (string)item["uncare_flag"],
                             img = (string)item["img"]
                         };
+                        CheckUing(friend.uin, -1);
                         _flist.Add(friend);
                     }
                     _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
                 }
             }
             SetInfo("GetFriend OK:" + _flist.Count);
+        }
+
+        private void CheckUing(long uin, long qunid)
+        {
+            if(uin.ToString() == this._qq.User.QQNum)
+            {
+                return;
+            }
+            HashSet<long> h;
+            if(_uing.ContainsKey(uin))
+            {
+                h = _uing[uin];
+                if (!h.Contains(qunid))
+                {
+                    h.Add(qunid);
+                }
+            }
+            else
+            {
+                h = new HashSet<long>() { qunid };
+                _uing.Add(uin,h);
+            }
         }
 
         private void RefreshFriendUI()
@@ -139,7 +127,7 @@ namespace QQChat
             treeViewF.BeginUpdate();
             foreach (var f in _flist)
             {
-                treeViewF.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", f.name, f.uin)) { Tag = f });
+                treeViewF.Nodes.Add(new TreeNode(string.Format("{0}[{1}] - {2}", f.name, f.uin, _uing.ContainsKey(f.uin)?_uing[f.uin].Count:0)) { Tag = f });
             }
             treeViewF.EndUpdate();
         }
@@ -316,6 +304,7 @@ img:         {7}",
                             nick = (string)item["nick"],
                         };
                         gmlist.Add(member);
+                        CheckUing(member.uin, group.groupid);
                     }
                     gmlist.Sort((l, r) =>
                     {
@@ -356,7 +345,7 @@ img:         {7}",
             {
                 foreach (var gm in group.gmlist)
                 {
-                    treeViewm.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", gm.nick, gm.uin)) { Tag = gm });
+                    treeViewm.Nodes.Add(new TreeNode(string.Format("{0}[{1}] - {2}", gm.nick, gm.uin, _uing.ContainsKey(gm.uin) ? _uing[gm.uin].Count : 0)) { Tag = gm });
                 }
             }
             treeViewm.EndUpdate();
@@ -530,5 +519,53 @@ ismanager:   {3}",
             }
             richTextBox2.AppendText(DateTime.Now.ToString("HH:mm:ss:") + text + Environment.NewLine);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (_manager == null)
+            {
+                _manager = new QunMemberManager();
+            }
+            _manager.InitParas(this._flist,this._glist,this._uing);
+            _manager.Show();
+        }
     }
+
+    internal class QzoneFriend
+    {
+        public long uin;
+        public string name;
+        public long index;
+        public long chang_pos;
+        public long score;
+        public string special_flag;
+        public string uncare_flag;
+        public string img;
+    }
+    internal class QunGroup
+    {
+        public long auth;
+        public long flag;
+        public long groupid;
+        public string groupname;
+        public long alpha;
+        public long bbscount;
+        public long classvalue;
+        public long create_time;
+        public long filecount;
+        public string finger_memo;
+        public string group_memo;
+        public long level;
+        public long option;
+        public long total;
+        public List<QunGroupMember> gmlist;
+    }
+    internal class QunGroupMember
+    {
+        public long iscreator;
+        public long ismanager;
+        public string nick;
+        public long uin;
+    }
+
 }
