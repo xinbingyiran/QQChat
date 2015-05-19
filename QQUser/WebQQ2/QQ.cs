@@ -5,6 +5,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -2030,7 +2032,7 @@ namespace WebQQ2.WebQQ2
 
 
         public void AnylizeCookie(string cookie)
-        {            
+        {
             var cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
             foreach (var ck in cks)
             {
@@ -2046,8 +2048,74 @@ namespace WebQQ2.WebQQ2
                     {
                         _user.QQNum = kv[1];
                     }
+                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qq.com"));
+                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "ptlogin2.qq.com"));
                 }
             }
         }
+        public void AnylizeCookie()
+        {
+            var cookie = GetCookieString("http://www.qq.com/");
+            var cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
+            foreach (var ck in cks)
+            {
+                var kv = ck.Trim().Split(new[] { '=' }, StringSplitOptions.None);
+                if (kv.Length == 2)
+                {
+                    if (kv[0] == "skey")
+                    {
+                        _user.skey = kv[1];
+                        _user.GTK = QQHelper.getGTK(_user.skey);
+                    }
+                    else if (kv[0] == "ptui_loginuin")
+                    {
+                        _user.QQNum = kv[1];
+                    }
+                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qq.com"));
+                }
+            }
+            cookie = GetCookieString("http://ptlogin2.qq.com/");
+            cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
+            foreach (var ck in cks)
+            {
+                var kv = ck.Trim().Split(new[] { '=' }, StringSplitOptions.None);
+                if (kv.Length == 2)
+                {
+                    if (kv[0] == "skey")
+                    {
+                        _user.skey = kv[1];
+                        _user.GTK = QQHelper.getGTK(_user.skey);
+                    }
+                    else if (kv[0] == "ptui_loginuin")
+                    {
+                        _user.QQNum = kv[1];
+                    }
+                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "ptlogin2.qq.com"));
+                }
+            }
+        }
+
+        #region DLL Imports
+        [SuppressUnmanagedCodeSecurity, SecurityCritical, DllImport("wininet.dll", EntryPoint = "InternetGetCookieExW", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
+        internal static extern bool InternetGetCookieEx([In] string Url, [In] string cookieName, [Out] StringBuilder cookieData, [In, Out] ref uint pchCookieData, uint flags, IntPtr reserved);
+        #endregion
+        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref int pcchCookieData, int dwFlags, object lpReserved);
+        private static string GetCookieString(string url)
+        {
+            // Determine the size of the cookie      
+            uint datasize = 256;
+            StringBuilder cookieData = new StringBuilder((int)datasize);
+            if (!InternetGetCookieEx(url, null, cookieData, ref datasize, (uint)0x00002000, IntPtr.Zero))
+            {
+                if (datasize < 0)
+                    return null;
+                // Allocate stringbuilder large enough to hold the cookie      
+                cookieData = new StringBuilder((int)datasize);
+                if (!InternetGetCookieEx(url, null, cookieData, ref datasize, (uint)0x00002000, IntPtr.Zero))
+                    return null;
+            }
+            return cookieData.ToString();
+        }  
     }
 }

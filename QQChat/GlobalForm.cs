@@ -6,7 +6,9 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WebQQ2.Extends;
@@ -43,6 +45,7 @@ namespace QQChat
             public long level;
             public long option;
             public long total;
+            public List<QunGroupMember> gmlist;
         }
         class QunGroupMember
         {
@@ -54,9 +57,7 @@ namespace QQChat
 
         private List<QzoneFriend> _flist = new List<QzoneFriend>();
         private List<QunGroup> _glist = new List<QunGroup>();
-        private List<QunGroupMember> _gmlist = new List<QunGroupMember>();
         private QQ _qq;
-        private QunGroup _currentGroup;
         public GlobalForm()
         {
             InitializeComponent();
@@ -89,7 +90,11 @@ namespace QQChat
 
         private void buttonf_Click(object sender, EventArgs e)
         {
-            new Task(GetQzoneFriend).Start();
+            new Task(() =>
+            {
+                GetQzoneFriend();
+                RefreshFriendUI();
+            }).Start();
         }
 
         private void GetQzoneFriend()
@@ -120,7 +125,7 @@ namespace QQChat
                     _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
                 }
             }
-            RefreshFriendUI();
+            SetInfo("GetFriend OK:" + _flist.Count);
         }
 
         private void RefreshFriendUI()
@@ -148,7 +153,11 @@ namespace QQChat
             {
                 return;
             }
-            string filename = sfd.FileName;
+            ExportQFriend(sfd.FileName);
+        }
+
+        private void ExportQFriend(string filename)
+        {
             List<string> lines = new List<string>();
             lines.Add(string.Format("{0}[{1}] 好友列表：", _qq.User.QQName, _qq.User.QQNum));
             foreach (var f in _flist)
@@ -156,11 +165,16 @@ namespace QQChat
                 lines.Add(string.Format("\t{0}[{1}]", f.name, f.uin));
             }
             File.WriteAllLines(filename, lines);
+            SetInfo("ExportFriend OK:" + filename);
         }
 
         private void buttong_Click(object sender, EventArgs e)
         {
-            new Task(GetQunGroup).Start();
+            new Task(() =>
+            {
+                GetQunGroup();
+                RefreshGroupUI();
+            }).Start();
         }
 
         private void GetQunGroup()
@@ -187,7 +201,7 @@ namespace QQChat
                     _glist.Sort((l, r) => l.groupid.CompareTo(r.groupid));
                 }
             }
-            RefreshGroupUI();
+            SetInfo("GetGroup OK:" + _glist.Count);
         }
         private void RefreshGroupUI()
         {
@@ -215,6 +229,11 @@ namespace QQChat
                 return;
             }
             string filename = sfd.FileName;
+            ExportQGroup(filename);
+        }
+
+        private void ExportQGroup(string filename)
+        {
             List<string> lines = new List<string>();
             lines.Add(string.Format("{0}[{1}] 群列表：", _qq.User.QQName, _qq.User.QQNum));
             foreach (var g in _glist)
@@ -222,6 +241,7 @@ namespace QQChat
                 lines.Add(string.Format("\t{0}[{1}]", g.groupname, g.groupid));
             }
             File.WriteAllLines(filename, lines);
+            SetInfo("ExportGroup OK:" + filename);
         }
 
         private void treeViewF_AfterSelect(object sender, TreeViewEventArgs e)
@@ -245,37 +265,44 @@ img:         {7}",
             {
                 return;
             }
-            _currentGroup = group;
-            new Task(() => GetQunMember(_currentGroup.groupid.ToString())).Start();
+            RefreshGroupinfoUI(group);
+            RefreshMemberUI(group);
         }
 
         private void buttonmf_Click(object sender, EventArgs e)
         {
-            if (_currentGroup == null)
+            if (treeViewG.SelectedNode == null || treeViewG.SelectedNode.Tag as QunGroup == null)
             {
                 MessageBox.Show("请先选择群");
                 return;
             }
-            new Task(() => GetQunMember(_currentGroup.groupid.ToString())).Start();
+            var group = treeViewG.SelectedNode.Tag as QunGroup;
+            new Task(() =>
+            {
+                GetQunMember(group);
+                RefreshGroupinfoUI(group);
+                RefreshMemberUI(group);
+            }).Start();
         }
 
-        private void GetQunMember(string groupid)
+        private void GetQunMember(QunGroup group)
         {
-            var list = _qq.GetMemberInfoFromQun(groupid);
+            var list = _qq.GetMemberInfoFromQun(group.groupid.ToString());
             if ((int)list["code"] == 0 && (int)list["subcode"] == 0)
             {
                 var data = list["data"] as Dictionary<string, object>;
-                _currentGroup.alpha = Convert.ToInt64(data["alpha"]);
-                _currentGroup.bbscount = Convert.ToInt64(data["bbscount"]);
-                _currentGroup.classvalue = Convert.ToInt64(data["class"]);
-                _currentGroup.create_time = Convert.ToInt64(data["create_time"]);
-                _currentGroup.filecount = Convert.ToInt64(data["filecount"]);
-                _currentGroup.finger_memo = (string)data["finger_memo"];
-                _currentGroup.group_memo = (string)data["group_memo"];
-                _currentGroup.level = Convert.ToInt64(data["level"]);
-                _currentGroup.option = Convert.ToInt64(data["option"]);
-                _currentGroup.total = Convert.ToInt64(data["total"]);
-                _gmlist.Clear();
+                group.alpha = Convert.ToInt64(data["alpha"]);
+                group.bbscount = Convert.ToInt64(data["bbscount"]);
+                group.classvalue = Convert.ToInt64(data["class"]);
+                group.create_time = Convert.ToInt64(data["create_time"]);
+                group.filecount = Convert.ToInt64(data["filecount"]);
+                group.finger_memo = (string)data["finger_memo"];
+                group.group_memo = (string)data["group_memo"];
+                group.level = Convert.ToInt64(data["level"]);
+                group.option = Convert.ToInt64(data["option"]);
+                group.total = Convert.ToInt64(data["total"]);
+                List<QunGroupMember> gmlist = new List<QunGroupMember>();
+                gmlist.Clear();
                 var items = data["item"] as ArrayList;
                 if (items != null)
                 {
@@ -288,9 +315,9 @@ img:         {7}",
                             uin = Convert.ToInt64(item["uin"]),
                             nick = (string)item["nick"],
                         };
-                        _gmlist.Add(member);
+                        gmlist.Add(member);
                     }
-                    _gmlist.Sort((l, r) =>
+                    gmlist.Sort((l, r) =>
                     {
                         if (l == r)
                             return 0;
@@ -311,17 +338,37 @@ img:         {7}",
                         return l.uin.CompareTo(r.uin);
                     });
                 }
+                group.gmlist = gmlist;
             }
-            RefreshMemberUI();
+            SetInfo("GetGroupMember OK:" + group.gmlist.Count + "-" + group.groupname + "[" + group.groupid + "]");
         }
-        private void RefreshMemberUI()
+
+        private void RefreshMemberUI(QunGroup group)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(RefreshMemberUI));
+                BeginInvoke(new Action<QunGroup>(RefreshMemberUI), group);
                 return;
             }
-            var g = _currentGroup;
+            treeViewm.Nodes.Clear();
+            treeViewm.BeginUpdate();
+            if (group.gmlist != null)
+            {
+                foreach (var gm in group.gmlist)
+                {
+                    treeViewm.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", gm.nick, gm.uin)) { Tag = gm });
+                }
+            }
+            treeViewm.EndUpdate();
+        }
+
+        private void RefreshGroupinfoUI(QunGroup group)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<QunGroup>(RefreshGroupinfoUI), group);
+                return;
+            }
             richTextBox1.Text = string.Format(@"groupid:     {0}
 groupname:   {1}
 level:       {2}
@@ -330,57 +377,72 @@ create_time: {4}
 filecount:   {5}
 finger_memo: {6}
 group_memo:  {7}",
-                 g.groupid, g.groupname, g.level, g.total, QQHelper.ToTime(g.create_time).ToString("yyyy-MM-dd HH:mm:ss"), g.filecount, g.finger_memo, g.group_memo);
-            treeViewm.Nodes.Clear();
-            treeViewm.BeginUpdate();
-            foreach (var gm in _gmlist)
-            {
-                treeViewm.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", gm.nick, gm.uin)) { Tag = gm });
-            }
-            treeViewm.EndUpdate();
+                 group.groupid, group.groupname, group.level, group.total, QQHelper.ToTime(group.create_time).ToString("yyyy-MM-dd HH:mm:ss"), group.filecount, group.finger_memo, group.group_memo);
+
         }
         private void buttonmd_Click(object sender, EventArgs e)
         {
-            if (_currentGroup == null)
+            if (treeViewG.SelectedNode == null || treeViewG.SelectedNode.Tag as QunGroup == null)
+            {
+                MessageBox.Show("请先选择群");
+                return;
+            }
+            var group = treeViewG.SelectedNode.Tag as QunGroup;
+            if (group == null)
             {
                 MessageBox.Show("请先选择群");
             }
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "文本文件|*.txt|所有文件|*.*";
-            sfd.FileName = string.Format("Member_{0}[{1}]", _currentGroup.groupname, _currentGroup.groupid);
+            sfd.FileName = string.Format("Member_{0}[{1}]", GetFileName(group.groupname), group.groupid);
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
             }
             string filename = sfd.FileName;
+            ExportGroupMember(group, filename);
+        }
+
+        private string GetFileName(string filename)
+        {
+            Regex r = new Regex(@"[^a-zA-Z0-9\u4e00-\u9fa5\s+#]");
+            return r.Replace(filename, "");
+        }
+
+        private void ExportGroupMember(QunGroup group, string filename)
+        {
             List<string> lines = new List<string>();
-            lines.Add(string.Format("{0}[{1}] 群信息：", _currentGroup.groupname, _currentGroup.groupid));
-            lines.Add(string.Format("群介绍：{0}", _currentGroup.finger_memo));
-            lines.Add(string.Format("群公告：{0}", _currentGroup.group_memo));
+            lines.Add(string.Format("{0}[{1}] 群信息：", group.groupname, group.groupid));
+            lines.Add(string.Format("群介绍：{0}", group.finger_memo));
+            lines.Add(string.Format("群公告：{0}", group.group_memo));
             int tag = 0;
-            foreach (var gm in _gmlist)
+            if (group.gmlist != null)
             {
-                if (tag < 3)
+                foreach (var gm in group.gmlist)
                 {
-                    if (tag == 0)
+                    if (tag < 3)
                     {
-                        lines.Add("创建者:");
-                        tag = 1;
+                        if (tag == 0)
+                        {
+                            lines.Add("创建者:");
+                            tag = 1;
+                        }
+                        else if (tag == 1 && gm.ismanager != 0)
+                        {
+                            lines.Add("管理员:");
+                            tag = 2;
+                        }
+                        else if (gm.ismanager == 0)
+                        {
+                            lines.Add("成员:");
+                            tag = 3;
+                        }
                     }
-                    else if (tag == 1 && gm.ismanager != 0)
-                    {
-                        lines.Add("管理员:");
-                        tag = 2;
-                    }
-                    else if (gm.ismanager == 0)
-                    {
-                        lines.Add("成员:");
-                        tag = 3;
-                    }
+                    lines.Add(string.Format("\t{0}[{1}]", gm.nick, gm.uin));
                 }
-                lines.Add(string.Format("\t{0}[{1}]", gm.nick, gm.uin));
             }
             File.WriteAllLines(filename, lines);
+            SetInfo("ExportGroupMember OK:" + filename);
         }
 
         private void treeViewm_AfterSelect(object sender, TreeViewEventArgs e)
@@ -391,6 +453,82 @@ nick:        {1}
 iscreator:   {2}
 ismanager:   {3}",
                  f.uin, f.nick, f.iscreator, f.ismanager);
+        }
+
+        private void buttona_Click(object sender, EventArgs e)
+        {
+            new Task(() =>
+                {
+                    GetQzoneFriend();
+                    RefreshFriendUI();
+                    GetQunGroup();
+                    RefreshGroupUI();
+                    foreach (var group in _glist.ToArray())
+                    {
+                        GetQunMember(group);
+                    }
+                }).Start();
+        }
+
+        private void buttonad_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+            bool cancel = false;
+            var fname = fbd.SelectedPath + "\\QFriend_" + this.Text + ".txt";
+            if (CanSave(fname, ref cancel))
+            {
+                ExportQFriend(fname);
+            }
+            if (cancel) { return; }
+            var gname = fbd.SelectedPath + "\\QGroup_" + this.Text + ".txt";
+            if (CanSave(gname, ref cancel))
+            {
+                ExportQGroup(gname);
+            }
+            if (cancel) { return; }
+            foreach (var group in _glist)
+            {
+                var mname = fbd.SelectedPath + string.Format("\\Member_{0}[{1}].txt", GetFileName(group.groupname), group.groupid);
+                if (CanSave(mname, ref cancel))
+                {
+                    ExportGroupMember(group, mname);
+                }
+                if (cancel) { return; }
+            }
+        }
+
+        private bool CanSave(string name, ref bool cancel)
+        {
+            if (!File.Exists(name))
+            {
+                return true;
+            }
+            var result = MessageBox.Show("文件已存在：" + name + " 是否覆盖", "覆盖确认", MessageBoxButtons.YesNoCancel);
+            if (result == System.Windows.Forms.DialogResult.Cancel)
+            {
+                cancel = true;
+                return false;
+            }
+            return result == System.Windows.Forms.DialogResult.Yes;
+        }
+
+        private void buttonc_Click(object sender, EventArgs e)
+        {
+            richTextBox2.Clear();
+        }
+
+        private void SetInfo(string text)
+        {
+            if (InvokeRequired)
+            {
+                this.BeginInvoke((Action<string>)SetInfo, text);
+                return;
+            }
+            richTextBox2.AppendText(DateTime.Now.ToString("HH:mm:ss:") + text + Environment.NewLine);
         }
     }
 }

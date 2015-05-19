@@ -42,6 +42,10 @@
             this.buttonmd = new System.Windows.Forms.Button();
             this.buttonmf = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.buttona = new System.Windows.Forms.Button();
+            this.buttonad = new System.Windows.Forms.Button();
+            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.buttonc = new System.Windows.Forms.Button();
             this.tabControlF.SuspendLayout();
             this.tabPageF.SuspendLayout();
             this.tabPageG.SuspendLayout();
@@ -197,12 +201,57 @@
             this.richTextBox1.TabIndex = 3;
             this.richTextBox1.Text = "";
             // 
+            // buttona
+            // 
+            this.buttona.Location = new System.Drawing.Point(337, 12);
+            this.buttona.Name = "buttona";
+            this.buttona.Size = new System.Drawing.Size(50, 23);
+            this.buttona.TabIndex = 1;
+            this.buttona.Text = "刷新";
+            this.buttona.UseVisualStyleBackColor = true;
+            this.buttona.Click += new System.EventHandler(this.buttona_Click);
+            // 
+            // buttonad
+            // 
+            this.buttonad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonad.Location = new System.Drawing.Point(393, 12);
+            this.buttonad.Name = "buttonad";
+            this.buttonad.Size = new System.Drawing.Size(53, 23);
+            this.buttonad.TabIndex = 2;
+            this.buttonad.Text = "导出";
+            this.buttonad.UseVisualStyleBackColor = true;
+            this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
+            // 
+            // richTextBox2
+            // 
+            this.richTextBox2.Location = new System.Drawing.Point(12, 307);
+            this.richTextBox2.Name = "richTextBox2";
+            this.richTextBox2.ReadOnly = true;
+            this.richTextBox2.Size = new System.Drawing.Size(396, 61);
+            this.richTextBox2.TabIndex = 4;
+            this.richTextBox2.Text = "";
+            // 
+            // buttonc
+            // 
+            this.buttonc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonc.Location = new System.Drawing.Point(414, 307);
+            this.buttonc.Name = "buttonc";
+            this.buttonc.Size = new System.Drawing.Size(32, 61);
+            this.buttonc.TabIndex = 2;
+            this.buttonc.Text = "清空";
+            this.buttonc.UseVisualStyleBackColor = true;
+            this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
+            // 
             // GlobalForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(465, 313);
+            this.ClientSize = new System.Drawing.Size(465, 380);
+            this.Controls.Add(this.richTextBox2);
             this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.buttonc);
+            this.Controls.Add(this.buttonad);
+            this.Controls.Add(this.buttona);
             this.Controls.Add(this.tabControlF);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "GlobalForm";
@@ -234,5 +283,9 @@
         private System.Windows.Forms.TreeView treeViewm;
         private System.Windows.Forms.Button buttonmd;
         private System.Windows.Forms.Button buttonmf;
+        private System.Windows.Forms.Button buttona;
+        private System.Windows.Forms.Button buttonad;
+        private System.Windows.Forms.RichTextBox richTextBox2;
+        private System.Windows.Forms.Button buttonc;
     }
 }

@@ -66,34 +66,10 @@ namespace QQChat
             _plugin = new PluginForm();
             mainForm = this;
             _createlock = new object();
-            _fileName = Application.StartupPath + "\\QQUser.dat";
-            try
-            {
-                Paras = File.ReadAllLines(_fileName);
-                _settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(Paras[2]);
-            }
-            catch (Exception)
-            {
-            }
             if(_settings == null)
             {
                 this.GetSettings();
             }
-        }
-
-
-        public void SaveToFile()
-        {
-            try
-            {
-                Paras = new[] { 
-                    LoginForm.UserString,
-                    LoginForm.PassString,
-                    JsonConvert.SerializeObject(_settings)
-                };
-                File.WriteAllLines(_fileName, Paras);
-            }
-            catch (Exception) { }
         }
 
         private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1567,7 +1543,6 @@ Designed by XBYR", @"QQ聊天程序");
             }
             _groups.Clear();
             this.GetSettings();
-            this.SaveToFile();
             foreach (var p in Plugins)
             {
                 p.Value.OnExited();
