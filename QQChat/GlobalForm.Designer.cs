@@ -84,7 +84,6 @@
             this.treeViewF.Name = "treeViewF";
             this.treeViewF.Size = new System.Drawing.Size(188, 222);
             this.treeViewF.TabIndex = 3;
-            this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
             // 
             // buttonfd
             // 
@@ -95,7 +94,6 @@
             this.buttonfd.TabIndex = 2;
             this.buttonfd.Text = "导出";
             this.buttonfd.UseVisualStyleBackColor = true;
-            this.buttonfd.Click += new System.EventHandler(this.buttonfd_Click);
             // 
             // buttonf
             // 
@@ -105,7 +103,6 @@
             this.buttonf.TabIndex = 1;
             this.buttonf.Text = "刷新";
             this.buttonf.UseVisualStyleBackColor = true;
-            this.buttonf.Click += new System.EventHandler(this.buttonf_Click);
             // 
             // tabPageG
             // 
@@ -127,7 +124,6 @@
             this.treeViewG.Name = "treeViewG";
             this.treeViewG.Size = new System.Drawing.Size(188, 222);
             this.treeViewG.TabIndex = 4;
-            this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
             // 
             // buttongd
             // 
@@ -138,7 +134,6 @@
             this.buttongd.TabIndex = 3;
             this.buttongd.Text = "导出";
             this.buttongd.UseVisualStyleBackColor = true;
-            this.buttongd.Click += new System.EventHandler(this.buttongd_Click);
             // 
             // buttong
             // 
@@ -148,7 +143,6 @@
             this.buttong.TabIndex = 2;
             this.buttong.Text = "刷新";
             this.buttong.UseVisualStyleBackColor = true;
-            this.buttong.Click += new System.EventHandler(this.buttong_Click);
             // 
             // tabPageM
             // 
@@ -170,7 +164,6 @@
             this.treeViewm.Name = "treeViewm";
             this.treeViewm.Size = new System.Drawing.Size(188, 222);
             this.treeViewm.TabIndex = 7;
-            this.treeViewm.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewm_AfterSelect);
             // 
             // buttonmd
             // 
@@ -181,7 +174,6 @@
             this.buttonmd.TabIndex = 6;
             this.buttonmd.Text = "导出";
             this.buttonmd.UseVisualStyleBackColor = true;
-            this.buttonmd.Click += new System.EventHandler(this.buttonmd_Click);
             // 
             // buttonmf
             // 
@@ -191,7 +183,6 @@
             this.buttonmf.TabIndex = 5;
             this.buttonmf.Text = "刷新";
             this.buttonmf.UseVisualStyleBackColor = true;
-            this.buttonmf.Click += new System.EventHandler(this.buttonmf_Click);
             // 
             // richTextBox1
             // 
@@ -210,7 +201,6 @@
             this.buttona.TabIndex = 1;
             this.buttona.Text = "刷新";
             this.buttona.UseVisualStyleBackColor = true;
-            this.buttona.Click += new System.EventHandler(this.buttona_Click);
             // 
             // buttonad
             // 
@@ -221,7 +211,6 @@
             this.buttonad.TabIndex = 2;
             this.buttonad.Text = "导出";
             this.buttonad.UseVisualStyleBackColor = true;
-            this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
             // 
             // richTextBox2
             // 
@@ -241,7 +230,6 @@
             this.buttonc.TabIndex = 2;
             this.buttonc.Text = "清空";
             this.buttonc.UseVisualStyleBackColor = true;
-            this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
             // 
             // button1
             // 
@@ -251,7 +239,6 @@
             this.button1.TabIndex = 1;
             this.button1.Text = "高级";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // GlobalForm
             // 
@@ -268,9 +255,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "GlobalForm";
             this.Text = "GlobalForm";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GlobalForm_FormClosing);
-            this.Load += new System.EventHandler(this.GlobalForm_Load);
-            this.VisibleChanged += new System.EventHandler(this.GlobalForm_VisibleChanged);
             this.tabControlF.ResumeLayout(false);
             this.tabPageF.ResumeLayout(false);
             this.tabPageG.ResumeLayout(false);

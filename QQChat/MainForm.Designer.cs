@@ -36,7 +36,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(307, 283);
+            this.button2.Location = new System.Drawing.Point(334, 348);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(70, 21);
             this.button2.TabIndex = 8;
@@ -46,7 +46,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(383, 283);
+            this.button3.Location = new System.Drawing.Point(410, 348);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(65, 21);
             this.button3.TabIndex = 9;
@@ -59,29 +59,29 @@
             this.webBrowser1.Location = new System.Drawing.Point(12, 12);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(436, 265);
+            this.webBrowser1.Size = new System.Drawing.Size(463, 330);
             this.webBrowser1.TabIndex = 10;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.ForeColor = System.Drawing.Color.Red;
-            this.label4.Location = new System.Drawing.Point(12, 287);
+            this.label4.Location = new System.Drawing.Point(12, 352);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(0, 12);
             this.label4.TabIndex = 0;
             // 
-            // LoginForm
+            // MainForm
             // 
             this.AcceptButton = this.button2;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(460, 315);
+            this.ClientSize = new System.Drawing.Size(487, 381);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label4);
-            this.Name = "LoginForm";
+            this.Name = "MainForm";
             this.Text = "LoginForm";
             this.Load += new System.EventHandler(this.LoginForm_Load);
             this.Shown += new System.EventHandler(this.LoginForm_Shown);

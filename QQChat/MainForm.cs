@@ -35,7 +35,6 @@ namespace QQChat
         private void InitParas()
         {
             webBrowser1.Navigating += webBrowser1_Navigating;
-            QQ = new WebQQ2.WebQQ2.QQ();
         }
 
         private void webBrowser1_Navigating(object sender, WebBrowserNavigatingEventArgs e)
@@ -43,9 +42,10 @@ namespace QQChat
             System.Diagnostics.Trace.WriteLine(e.Url);
             if(e.Url.AbsoluteUri.StartsWith("http://qzs.qq.com"))
             {
-                QQ.AnylizeCookie(webBrowser1.Document.Cookie);
+                this.QQ.AnylizeCookie(webBrowser1.Document.Cookie);
                 webBrowser1.Navigate("about:blank");
-                SetInfo(QQ.User.QQNum + "登录成功");
+                SetInfo(this.QQ.User.QQNum + "登录成功"); 
+                ShowGlobalForm();
             }
         }
 
@@ -85,23 +85,39 @@ namespace QQChat
 
         private void TraceToLoginForm()
         {
+            QQ = new WebQQ2.WebQQ2.QQ();
+            if (GlobalForm != null)
+            {
+                GlobalForm.Close();
+            }
             SetInfo("请登录");
             webBrowser1.Navigate("http://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=549000912&s_url=http%3A//qzs.qq.com/&style=22");
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (!QQ.IsPreLoged)
+            ShowGlobalForm();
+        }
+
+        private void ShowGlobalForm()
+        {
+
+            if (QQ == null || !QQ.IsPreLoged)
             {
                 SetInfo("请先登录...");
                 return;
             }
-            if(GlobalForm == null)
+            if (GlobalForm == null)
             {
                 GlobalForm = new GlobalForm();
             }
             GlobalForm.InitQQ(this.QQ);
             GlobalForm.Show();
+            if (GlobalForm.WindowState == FormWindowState.Minimized)
+            {
+                GlobalForm.WindowState = FormWindowState.Normal;
+            }
+            GlobalForm.Activate();
         }
 
     }

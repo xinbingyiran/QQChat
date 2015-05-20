@@ -18,9 +18,24 @@ namespace QQChat
         public QunMemberManager()
         {
             InitializeComponent();
+            InitEvent();
+        }
+
+        private void InitEvent()
+        {
             this.FormClosing += QunMemberManager_FormClosing;
             this.buttonrefresh.Click += buttonrefresh_Click;
             this.listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
+            this.VisibleChanged += QunMemberManager_VisibleChanged;
+        }
+
+        void QunMemberManager_VisibleChanged(object sender, EventArgs e)
+        {
+            if (this.Visible)
+            {
+                listBox1.Items.Clear();
+                listBox2.Items.Clear();
+            }
         }
 
         void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -74,7 +89,7 @@ namespace QQChat
         private void buttonrefresh_Click(object sender, EventArgs e)
         {
             var items = _uing.Select(u => new kcv { Key = u.Key, Count = u.Value.Count, Value = u.Value }).OrderByDescending(u => u.Count).ThenBy(u=>u.Key);
-            listBox1.DataSource = items.ToList();
+            listBox1.Items.AddRange(items.ToArray());
         }
         internal void InitParas(List<QzoneFriend> flist, List<QunGroup> glist, Dictionary<long, HashSet<long>> gldict)
         {
@@ -83,8 +98,11 @@ namespace QQChat
             this._gmlist.Clear();
             foreach (var g in glist)
             {
-                this._glist.Add(g.groupid, g);
-                this._gmlist.Add(g.groupid, g.gmlist.ToDictionary(e => e.uin));
+                if (g.gmlist != null)
+                {
+                    this._glist.Add(g.groupid, g);
+                    this._gmlist.Add(g.groupid, g.gmlist.ToDictionary(e => e.uin));
+                }
             }
             this._uing = gldict;
         }

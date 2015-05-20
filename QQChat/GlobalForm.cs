@@ -26,6 +26,27 @@ namespace QQChat
         public GlobalForm()
         {
             InitializeComponent();
+            InitEvent();
+        }
+
+        private void InitEvent()
+        {
+            this.treeViewF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewF_AfterSelect);
+            this.buttonfd.Click += new System.EventHandler(this.buttonfd_Click);
+            this.buttonf.Click += new System.EventHandler(this.buttonf_Click);
+            this.treeViewG.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewG_AfterSelect);
+            this.buttongd.Click += new System.EventHandler(this.buttongd_Click);
+            this.buttong.Click += new System.EventHandler(this.buttong_Click);
+            this.treeViewm.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewm_AfterSelect);
+            this.buttonmd.Click += new System.EventHandler(this.buttonmd_Click);
+            this.buttonmf.Click += new System.EventHandler(this.buttonmf_Click);
+            this.buttona.Click += new System.EventHandler(this.buttona_Click);
+            this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
+            this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GlobalForm_FormClosing);
+            this.Load += new System.EventHandler(this.GlobalForm_Load);
+            this.VisibleChanged += new System.EventHandler(this.GlobalForm_VisibleChanged);
         }
 
         public void InitQQ(QQ qq)
@@ -40,6 +61,10 @@ namespace QQChat
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
+                if(this._manager != null)
+                {
+                    this._manager.Close();
+                }
                 e.Cancel = true;
                 this.Hide();
             }
@@ -50,6 +75,14 @@ namespace QQChat
             if (this.Visible)
             {
                 this.Text = string.Format("{0}[{1}]", _qq.User.QQName, _qq.User.QQNum);
+                this._uing.Clear();
+                this._glist.Clear();
+                this._flist.Clear();
+                treeViewF.Nodes.Clear();
+                treeViewG.Nodes.Clear();
+                treeViewm.Nodes.Clear();
+                richTextBox1.Clear();
+                richTextBox2.Clear();
             }
         }
 
@@ -59,6 +92,7 @@ namespace QQChat
             {
                 GetQzoneFriend();
                 RefreshFriendUI();
+                SetInfo("Refresh Friend OK!");
             }).Start();
         }
 
@@ -162,6 +196,11 @@ namespace QQChat
             {
                 GetQunGroup();
                 RefreshGroupUI();
+                foreach (var group in _glist.ToArray())
+                {
+                    GetQunMember(group);
+                }
+                SetInfo("Refresh Group OK!");
             }).Start();
         }
 
@@ -341,7 +380,7 @@ img:         {7}",
             }
             treeViewm.Nodes.Clear();
             treeViewm.BeginUpdate();
-            if (group.gmlist != null)
+            if (group!=null && group.gmlist != null)
             {
                 foreach (var gm in group.gmlist)
                 {
@@ -356,6 +395,11 @@ img:         {7}",
             if (InvokeRequired)
             {
                 BeginInvoke(new Action<QunGroup>(RefreshGroupinfoUI), group);
+                return;
+            }
+            if(group == null)
+            {
+                richTextBox1.Text = string.Empty;
                 return;
             }
             richTextBox1.Text = string.Format(@"groupid:     {0}
@@ -456,6 +500,7 @@ ismanager:   {3}",
                     {
                         GetQunMember(group);
                     }
+                    SetInfo("Refresh All OK!");
                 }).Start();
         }
 
@@ -526,8 +571,13 @@ ismanager:   {3}",
             {
                 _manager = new QunMemberManager();
             }
-            _manager.InitParas(this._flist,this._glist,this._uing);
+            _manager.InitParas(this._flist, this._glist, this._uing);
             _manager.Show();
+            if (_manager.WindowState == FormWindowState.Minimized)
+            {
+                _manager.WindowState = FormWindowState.Normal;
+            }
+            _manager.Activate();
         }
     }
 

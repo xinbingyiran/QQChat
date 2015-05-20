@@ -2048,6 +2048,22 @@ namespace WebQQ2.WebQQ2
                     {
                         _user.QQNum = kv[1];
                     }
+                    else if(kv[0] == "ptnick_" + _user.QQNum)
+                    {
+                        var utf8name = kv[1];
+                        if(!string.IsNullOrWhiteSpace(utf8name))
+                        {
+                            if(utf8name.Length %2 == 0)
+                            {
+                                var bytes = new byte[utf8name.Length / 2];
+                                for(int i = 0;i < utf8name.Length;i +=2)
+                                {
+                                    bytes[i / 2] = byte.Parse(utf8name.Substring(i, 2), System.Globalization.NumberStyles.HexNumber);
+                                }
+                                _user.QQName = Encoding.UTF8.GetString(bytes);
+                            }
+                        }
+                    }
                     _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qq.com"));
                     _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "ptlogin2.qq.com"));
                 }
