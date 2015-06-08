@@ -18,7 +18,6 @@ namespace QQChat
 {
     public partial class GlobalForm : Form
     {
-        private Dictionary<long, HashSet<long>> _uing = new Dictionary<long, HashSet<long>>();
         private List<QzoneFriend> _flist = new List<QzoneFriend>();
         private List<QunGroup> _glist = new List<QunGroup>();
         private QQ _qq;
@@ -75,7 +74,6 @@ namespace QQChat
             if (this.Visible)
             {
                 this.Text = string.Format("{0}[{1}]", _qq.User.QQName, _qq.User.QQNum);
-                this._uing.Clear();
                 this._glist.Clear();
                 this._flist.Clear();
                 treeViewF.Nodes.Clear();
@@ -119,7 +117,6 @@ namespace QQChat
                             uncare_flag = (string)item["uncare_flag"],
                             img = (string)item["img"]
                         };
-                        CheckUing(friend.uin, -1);
                         _flist.Add(friend);
                     }
                     _flist.Sort((l, r) => l.uin.CompareTo(r.uin));
@@ -127,29 +124,7 @@ namespace QQChat
             }
             SetInfo("GetFriend OK:" + _flist.Count);
         }
-
-        private void CheckUing(long uin, long qunid)
-        {
-            if(uin.ToString() == this._qq.User.QQNum)
-            {
-                return;
-            }
-            HashSet<long> h;
-            if(_uing.ContainsKey(uin))
-            {
-                h = _uing[uin];
-                if (!h.Contains(qunid))
-                {
-                    h.Add(qunid);
-                }
-            }
-            else
-            {
-                h = new HashSet<long>() { qunid };
-                _uing.Add(uin,h);
-            }
-        }
-
+        
         private void RefreshFriendUI()
         {
             if (InvokeRequired)
@@ -161,7 +136,7 @@ namespace QQChat
             treeViewF.BeginUpdate();
             foreach (var f in _flist)
             {
-                treeViewF.Nodes.Add(new TreeNode(string.Format("{0}[{1}] - {2}", f.name, f.uin, _uing.ContainsKey(f.uin)?_uing[f.uin].Count:0)) { Tag = f });
+                treeViewF.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", f.name, f.uin)) { Tag = f });
             }
             treeViewF.EndUpdate();
         }
@@ -343,7 +318,6 @@ img:         {7}",
                             nick = (string)item["nick"],
                         };
                         gmlist.Add(member);
-                        CheckUing(member.uin, group.groupid);
                     }
                     gmlist.Sort((l, r) =>
                     {
@@ -384,7 +358,7 @@ img:         {7}",
             {
                 foreach (var gm in group.gmlist)
                 {
-                    treeViewm.Nodes.Add(new TreeNode(string.Format("{0}[{1}] - {2}", gm.nick, gm.uin, _uing.ContainsKey(gm.uin) ? _uing[gm.uin].Count : 0)) { Tag = gm });
+                    treeViewm.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", gm.nick, gm.uin)) { Tag = gm });
                 }
             }
             treeViewm.EndUpdate();
@@ -571,13 +545,13 @@ ismanager:   {3}",
             {
                 _manager = new QunMemberManager();
             }
-            _manager.InitParas(this._flist, this._glist, this._uing);
             _manager.Show();
             if (_manager.WindowState == FormWindowState.Minimized)
             {
                 _manager.WindowState = FormWindowState.Normal;
             }
             _manager.Activate();
+            _manager.InitParas(this._flist, this._glist);
         }
     }
 
