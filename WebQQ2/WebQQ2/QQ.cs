@@ -2044,7 +2044,7 @@ namespace WebQQ2.WebQQ2
                         _user.skey = kv[1];
                         _user.GTK = QQHelper.getGTK(_user.skey);
                     }
-                    else if (kv[0] == "ptui_loginuin")
+                    else if (kv[0] == "clientuin")
                     {
                         _user.QQNum = kv[1];
                     }
