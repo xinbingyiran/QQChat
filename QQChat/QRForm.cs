@@ -57,32 +57,7 @@ namespace QQChat
         private void LoginOk()
         {
             SetInfo(QQ.User.QQNum + "登录成功");
-            Task.Factory.StartNew(() =>
-            {
-                QQ.MessageFriendReceived += QQ_MessageFriendReceived;
-                QQ.MessageGroupReceived += QQ_MessageGroupReceived;
-                QQ.GetUserList();
-                QQ.GetUserOnlineList();
-                QQ.GetGroupList();
-                foreach(var group in QQ.User.QQGroups.GroupList)
-                {
-                    QQ.RefreshGroupInfo(group.Value);
-                }
-                foreach(var msg in QQ.DoMessageLoop())
-                {
-
-                }
-            });
-        }
-
-        private void QQ_MessageGroupReceived(object sender, GroupEventArgs e)
-        {
-            System.Diagnostics.Trace.WriteLine(e.Group.LongName + ":" + e.Member.LongName +  ":" + e.MsgContent);
-        }
-
-        private void QQ_MessageFriendReceived(object sender, FriendEventArgs e)
-        {
-            System.Diagnostics.Trace.WriteLine(e.User.nick + ":" + e.MsgContent);
+            new ChatForm() { QQ = QQ }.Show();
         }
 
         private void SetInfo(string text)

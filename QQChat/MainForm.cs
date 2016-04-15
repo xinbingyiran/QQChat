@@ -31,6 +31,17 @@ namespace QQChat
         {
             webBrowser1.Navigating += webBrowser1_Navigating;
             TraceToLoginForm();
+            if (System.Environment.GetCommandLineArgs().Length == 2)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        this.Hide();
+                        new QRForm().Show();
+                    }));
+                });
+            }
         }
 
         private void webBrowser1_Navigating(object sender, WebBrowserNavigatingEventArgs e)
