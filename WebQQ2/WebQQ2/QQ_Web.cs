@@ -15,7 +15,7 @@ using WebQQ2.Extends;
 
 namespace WebQQ2.WebQQ2
 {
-    public class QQ
+    public class QQ_Web : QQ_Base
     {
 
         #region urldefine
@@ -69,10 +69,6 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_allow_added_request2 = "http://s.web2.qq.com/api/allow_added_request2";
         private static readonly string qq_allow_and_add2 = "http://s.web2.qq.com/api/allow_and_add2";
 
-        private static readonly string qq_zone_friend = "http://r.qzone.qq.com/cgi-bin/tfriend/friend_ship_manager.cgi?uin={0}&do=1&rd={2}&fupdate=1&clean=1&g_tk={1}";
-        private static readonly string qq_qun_group = "http://qun.qzone.qq.com/cgi-bin/get_group_list?groupcount=4&count=4&uin={0}&g_tk={1}&r={2}";
-        private static readonly string qq_qun_member = "http://qun.qzone.qq.com/cgi-bin/get_group_member?uin={0}&groupid={1}&neednum=1&g_tk={2}&r={3}";
-
 
         #endregion
 
@@ -122,7 +118,7 @@ namespace WebQQ2.WebQQ2
 
         private ArrayList qq_send_buddy_msg2_post_content_append = new ArrayList(){
                 "",
-                new ArrayList(){        
+                new ArrayList(){
                     "font",
                     new Dictionary<string, object>()
                     {
@@ -136,14 +132,14 @@ namespace WebQQ2.WebQQ2
         private Dictionary<string, object> qq_send_qun_msg2_post = new Dictionary<string, object>(){
             {"group_uin",0},
             {"content",""},
-            {"msg_id",49800001}, 
+            {"msg_id",49800001},
             {"clientid",""},
             {"psessionid",""}
          };
 
         private ArrayList qq_send_qun_msg2_post_content_append = new ArrayList(){
                 "",
-                new ArrayList(){        
+                new ArrayList(){
                     "font",
                     new Dictionary<string, object>()
                     {
@@ -205,41 +201,17 @@ namespace WebQQ2.WebQQ2
         #endregion
 
         #region paradefine
-
-        private Task _messageTask;
-        private CancellationTokenSource _messageTaskCts;
+        
         private int _qq_send_buddy_msg2_post_msg_id = 0;
-        private Random _random;
-        private CookieContainer _cookiecontainer;
-        private QQUser _user;
-
-        public QQUser User
-        {
-            get { return _user; }
-        }
 
         #endregion
 
         #region constructor
 
-        private void OnCreated()
+        protected override void OnInit()
         {
-            _random = new Random();
-            _cookiecontainer = new CookieContainer();
+            base.OnInit();
             _qq_send_buddy_msg2_post_msg_id = (_random.Next(3000) + 4000) * 10000 + 1;
-        }
-
-        public QQ()
-        {
-            _user = new QQUser();
-            OnCreated();
-
-        }
-
-        public QQ(string qqnum)
-        {
-            _user = new QQUser(qqnum);
-            OnCreated();
         }
 
         #endregion
@@ -271,12 +243,11 @@ namespace WebQQ2.WebQQ2
         public string GetCFaceUrl(string pic, string gid)
         {
             string url = string.Format(qq_cface, pic, gid, QQHelper.GetTime());
-            return GetFileTrueUrl(url);
+            return _helper.GetFileTrueUrl(url,qq_referurl);
         }
 
         public string GetCFace2Url(string msg_id, string filename, string guin)
         {
-            //"http://d.web2.qq.com/channel/get_cface2?lcid={0}&guid={1}&to={2}&count=5&time=1&clientid={3}&psessionid={4}";
             return string.Format(qq_cface2, msg_id, filename, guin, _user.ClientID, _user.PsessionID);
         }
 
@@ -310,7 +281,7 @@ namespace WebQQ2.WebQQ2
                     {
                         string uin = subresult[2].Trim().Trim('\'');
                         string[] newstr = uin.Split(new string[] { "\\x" }, StringSplitOptions.RemoveEmptyEntries);
-                        UInt64 uinnum = 0; 
+                        UInt64 uinnum = 0;
                         foreach (string str in newstr)
                         {
                             uinnum <<= 8;
@@ -341,9 +312,9 @@ namespace WebQQ2.WebQQ2
             return string.Format(qq_getimage, _random.NextDouble(), _user.QQNum);
         }
 
-        public string LoginQQ(string password, string vercode,bool needEncode)
+        public string LoginQQ(string password, string vercode, bool needEncode)
         {
-            string mpass = needEncode?QQHelper.GetPassword(_user.Uin, password, vercode):password;
+            string mpass = needEncode ? QQHelper.GetPassword(_user.Uin, password, vercode) : password;
             string url = string.Format(qq_loginnew2, _user.QQNum, mpass, vercode, string.IsNullOrWhiteSpace(_user.VerifySession) ? _cookiecontainer.GetCookies(new Uri("https://ssl.ptlogin2.qq.com"))["verifysession"].Value : _user.VerifySession);
             string result = GetUrlText(url);
             _user.PtWebQQ = null;
@@ -403,13 +374,6 @@ namespace WebQQ2.WebQQ2
             }
             return result;
         }
-        public bool IsPreLoged
-        {
-            get
-            {
-                return User != null && User.IsPreLoged;
-            }
-        }
 
         public string LoginQQ2(string logStatus)
         {
@@ -454,11 +418,6 @@ namespace WebQQ2.WebQQ2
         {
             try
             {
-                if (_messageTaskCts != null && !_messageTaskCts.IsCancellationRequested)
-                {
-                    _messageTaskCts.Cancel(false);
-                    _messageTaskCts = null;
-                }
                 if (!IsPreLoged)
                 {
                     return "尚未全局登录成功";
@@ -529,7 +488,6 @@ namespace WebQQ2.WebQQ2
         {
             try
             {
-                //tuin={0}&verifysession=&gid=0&code=&vfwebqq={1}&t={2}";
                 string url = string.Format(qq_get_stranger_info2, friend.uin, _user.VfWebQQ, QQHelper.GetTime());
                 string retstr = GetUrlText(url);
                 if (retstr != null && retstr.Length > 0)
@@ -579,7 +537,6 @@ namespace WebQQ2.WebQQ2
         {
             try
             {
-                //tuin={0}&verifysession=&gid=0&code=&vfwebqq={1}&t={2}";
                 string url = string.Format(qq_get_stranger_info2, member.uin, _user.VfWebQQ, QQHelper.GetTime());
                 string retstr = GetUrlText(url);
                 if (retstr != null && retstr.Length > 0)
@@ -738,22 +695,13 @@ namespace WebQQ2.WebQQ2
 
         public void StartGetMessage()
         {
-            _messageTask = new Task(() =>
-            {
-                if (_messageTaskCts == null)
-                {
-                    _messageTaskCts = new CancellationTokenSource();
-                }
-                GetMessage();
-            });
-            _messageTask.Start();
+            Task.Factory.StartNew(GetMessage); ;
         }
 
         public void GetMessage()
         {
             while (_user.Status != QQStatus.StatusOffline.StatusInternal)
             {
-                _messageTaskCts.Token.ThrowIfCancellationRequested();
                 GetMessageSub();
             }
         }
@@ -807,7 +755,6 @@ namespace WebQQ2.WebQQ2
                         {
                             case "buddies_status_change":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"buddies_status_change","value":{"uin":15130679,"status":"online","client_type":1}}]}
 
                                     string status = messagevalue["status"].ToString();
                                     QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]), true);
@@ -827,9 +774,6 @@ namespace WebQQ2.WebQQ2
 
                             case "message":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"message","value":
-                                    //{"msg_id":17964,"from_uin":1550833875,"to_uin":841473232,"msg_id2":802927,"msg_type":9,"reply_ip":178847978,"time":1336723235,"content":[["font",
-                                    //{"size":12,"color":"000080","style":[0,0,0],"name":"\u534E\u6587\u5B8B\u4F53"}],"\u6B66\u5A01  "]}}]}
                                     if (MessageFriendReceived != null)
                                     {
                                         QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
@@ -842,11 +786,6 @@ namespace WebQQ2.WebQQ2
                                 break;
                             case "sess_message":
                                 {
-                                    //{"poll_type":"sess_message",
-                                    //"msg_id":26835,"from_uin":3365751686,"to_uin":2221933016,"msg_id2":367496,"msg_type":140,"reply_ip":178849369,"time":1366004047,
-                                    //"id":1429244372,"ruin":841473232,"service_type":0,"flags":{"text":1,"pic":1,"file":1,"audio":1,"video":1},
-                                    //"content":[["font",{"size":12,"color":"391175","style":[0,0,0],"name":"宋体"}],
-                                    //["face",59]," "]}
                                     if (MessageFriendReceived != null)
                                     {
                                         QQFriend friend = _user.GetUserSess(Convert.ToInt64(messagevalue["from_uin"]));
@@ -862,9 +801,6 @@ namespace WebQQ2.WebQQ2
 
                             case "shake_message":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"shake_message","value":
-                                    //{"msg_id":26413,"from_uin":2867991890,"to_uin":374491485,"msg_id2":980317,
-                                    //"msg_type":9,"reply_ip":178849323}}]}
                                     if (MessageFriendReceived != null)
                                     {
                                         QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
@@ -875,10 +811,6 @@ namespace WebQQ2.WebQQ2
                                 break;
                             case "group_message":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"group_message","value":
-                                    //{"msg_id":13487,"from_uin":511623037,"to_uin":841473232,"msg_id2":839472,"msg_type":43,"reply_ip":176881873,"group_code":3407613792,
-                                    //"send_uin":455227435,"seq":104046,"time":1336781087,"info_seq":69054338,
-                                    //"content":[["font",{"size":17,"color":"ff0000","style":[1,1,0],"name":"仿宋_GB2312"}],["face",5]," "]}}]}
                                     if (MessageGroupReceived != null)
                                     {
                                         QQGroup group = _user.GetUserGroup(Convert.ToInt64(messagevalue["from_uin"]));
@@ -899,11 +831,6 @@ namespace WebQQ2.WebQQ2
                                 break;
                             case "group_web_message":
                                 {
-                                    //{"retcode":0,"result":[{""poll_type":"group_web_message","value":
-                                    //{"msg_id":11746,"from_uin":2607650969,"to_uin":344420262,"msg_id2":556231,"msg_type":45,"reply_ip":176752015,"group_code":1876212762,
-                                    //"group_type":1,"ver":1,"send_uin":1007665318,
-                                    //"xml":"\u003c?xml version=\"1.0\" encoding=\"utf-8\"?\u003e\u003cd\u003e\u003cn t=\"h\" u=\"979270988\" i=\"6\" s=\"1.url.cn/qun/feeds/img/server/g16.png\"/\u003e\u003cn t=\"t\" s=\"\u5728\u7FA4\u52A8\u6001\u4E2D\"/\u003e\u003cn t=\"b\"/\u003e\u003cn t=\"t\" s=\"\u5206\u4EAB1\u5F20\u56FE\u7247\"/\u003e\u003c/d\u003e"}}}]}
-
                                     if (MessageGroupReceived != null)
                                     {
                                         QQGroup group = _user.GetUserGroup(Convert.ToInt64(messagevalue["from_uin"]));
@@ -920,15 +847,6 @@ namespace WebQQ2.WebQQ2
                                 }
                                 break;
                             case "file_message":
-                                //{"retcode":0,"result":[{"poll_type":"file_message","value":
-                                //{"msg_id":6299,"mode":"recv","from_uin":2786090795,"to_uin":344420262,
-                                //"msg_id2":559004,"msg_type":9,"reply_ip":176621916,"type":101,
-                                //"name":"test.txt","time":1364865210,"session_id":19823,"inet_ip":2051695055}}]}
-
-                                //{"retcode":0,"result":[{"poll_type":"file_message","value":
-                                //{"msg_id":6301,"mode":"refuse","from_uin":2786090795,"to_uin":344420262,
-                                //"msg_id2":615845,"reply_ip":176621916,"type":101,
-                                //"session_id":19823,"cancel_type":1,"time":1364865264}}]}
                                 if (MessageFriendReceived != null)
                                 {
                                     QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
@@ -945,9 +863,6 @@ namespace WebQQ2.WebQQ2
                                 }
                                 break;
                             case "push_offfile":
-                                //{"retcode":0,"result":[{"poll_type":"push_offfile","value":
-                                //{"msg_id":10438,"rkey":"2c09344b4c531f458e9f0b89162e6979624ff73400585f72e2322d8da678f5f06bb2f61eee2682a6647428095d475757478a4fc78662e36d58d34f1f3146bbdb",
-                                //"ip":"101.226.77.168","port":80,"from_uin":2786090795,"size":235,"name":"test2.py","expire_time":1365470120,"time":1364865321}}]}
                                 if (MessageFriendReceived != null)
                                 {
                                     QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
@@ -982,9 +897,6 @@ namespace WebQQ2.WebQQ2
                                 break;
                             case "input_notify":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"input_notify","value":
-                                    //{"msg_id":52149,"from_uin":2786090795,"to_uin":344420262,"msg_id2":2553447584,"msg_type":121,"reply_ip":4294967295}}]}
-
                                     if (MessageFriendReceived != null)
                                     {
                                         QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
@@ -1019,18 +931,6 @@ namespace WebQQ2.WebQQ2
                                 break;
                             case "sys_g_message":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"sys_g_msg","value":
-                                    //{"msg_id":53435,"from_uin":4257273782,"to_uin":2221933016,
-                                    //"msg_id2":268651,"msg_type":33,"reply_ip":176498397,
-                                    //"type":"group_join","gcode":519756087,"t_gcode":70125956,
-                                    //"op_type":3,"new_member":2221933016,"t_new_member":"",
-                                    //"admin_uin":1793858042,"admin_nick":"\u521B\u5EFA\u8005"}}]}
-                                    //{"retcode":0,"result":[{"poll_type":"sys_g_msg","value":
-                                    //{"msg_id":803,"from_uin":4257273782,"to_uin":2221933016,
-                                    //"msg_id2":794855,"msg_type":34,"reply_ip":176722703,
-                                    //"type":"group_leave","gcode":519756087,"t_gcode":70125956,
-                                    //"op_type":3,"old_member":2221933016,"t_old_member":"",
-                                    //"admin_uin":1793858042,"t_admin_uin":"","admin_nick":"\u521B\u5EFA\u8005"}}]}
                                     if (MessageFriendReceived != null)
                                     {
                                         Dictionary<string, object> msgs = new Dictionary<string, object>
@@ -1047,10 +947,6 @@ namespace WebQQ2.WebQQ2
                                 break;
                             case "system_message":
                                 {
-                                    //{"retcode":0,"result":[{"poll_type":"system_message","value":
-                                    //{"seq":63433,"type":"verify_required","uiuin":"",
-                                    //"from_uin":4011979716,"account":841473232,
-                                    //"msg":"aaa","allow":1,"stat":10,"client_type":1}}]}
                                     if (MessageFriendReceived != null)
                                     {
                                         Dictionary<string, object> msgs = new Dictionary<string, object>
@@ -1179,7 +1075,6 @@ namespace WebQQ2.WebQQ2
             try
             {
                 var ret = false;
-                //"id={0}&to_uin={1}&service_type=0&clientid={2}&psessionid={3}&t={4}";
                 var url = string.Format(qq_get_c2cmsg_sig2, groupid, friend.uin, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
                 string resultStr = GetUrlText(url);
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
@@ -1469,9 +1364,9 @@ namespace WebQQ2.WebQQ2
                         else
                         {
                             group = new QQGroup()
-                             {
-                                 gid = Convert.ToInt64(item["gid"]),
-                             };
+                            {
+                                gid = Convert.ToInt64(item["gid"]),
+                            };
                         }
                         group.flag = Convert.ToInt64(item["flag"]);
                         group.code = Convert.ToInt64(item["code"]);
@@ -1484,12 +1379,12 @@ namespace WebQQ2.WebQQ2
             {
             }
             new Task(() =>
+            {
+                foreach (var g in _user.QQGroups.GroupList)
                 {
-                    foreach (var g in _user.QQGroups.GroupList)
-                    {
-                        RefreshGroupInfo(g.Value);
-                    }
-                }).Start();
+                    RefreshGroupInfo(g.Value);
+                }
+            }).Start();
             return _user.QQGroups;
         }
 
@@ -1500,8 +1395,6 @@ namespace WebQQ2.WebQQ2
 
         public void GetGroupInfo(QQGroup group, int timeout)
         {
-            //private static readonly string qq_get_group_info = "http://s.web2.qq.com/api/get_group_info?gcode=%5B{0}%5D&retainKey=memo&vfwebqq={1}&t={2}";
-
             try
             {
                 string url = string.Format(qq_get_group_info, group.code, _user.VfWebQQ, QQHelper.GetTime());
@@ -1554,7 +1447,6 @@ namespace WebQQ2.WebQQ2
                 qq_allow_added_request2_post["vfwebqq"] = _user.VfWebQQ;
                 string para = QQHelper.ToPostData(qq_allow_added_request2_post);
                 string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
-                //{"retcode":0,"result":{"result":0,"client_type":1,"account":841473232,"tuin":4011979716,"stat":10}}
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
                 if (root != null && root["retcode"] as int? == 0)
                 {
@@ -1583,7 +1475,6 @@ namespace WebQQ2.WebQQ2
                 qq_allow_and_add2_post["vfwebqq"] = _user.VfWebQQ;
                 string para = QQHelper.ToPostData(qq_allow_and_add2_post);
                 string resultStr = PostUrlText(url, Encoding.Default.GetBytes(para));
-                //{"retcode":0,"result":{"result1":0,"account":841473232,"tuin":4011979716,"stat":10}}
                 Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
                 if (root != null && root["retcode"] as int? == 0)
                 {
@@ -1603,14 +1494,6 @@ namespace WebQQ2.WebQQ2
 
         public void GetGroupMembers(QQGroup group, int timeout)
         {
-            //private static readonly string qq_get_group_info_ext2 = "http://s.web2.qq.com/api/get_group_info_ext2?gcode={0}&vfwebqq={1}&t={2}";
-            //{"retcode":0,"result":
-            //{"stats":[{"client_type":41,"uin":344420262,"stat":10}],
-            //"minfo":[{"nick":"心冰依然","province":"河北","gender":"male","uin":344420262,"country":"中国","city":"保定"}],
-            //"ginfo":{"face":3,"memo":".net开发交流\r（建设中...）","class":10048,"fingermemo":"","code":2546332710,"createtime":1190296107,"flag":17825793,"level":3,"name":".net编程","gid":1535437634,"owner":344420262,
-            //"members":[{"muin":344420262,"mflag":200}],"option":2},
-            //"cards":[{"muin":1740774180,"card":"[东莞]陈崖"}],
-            //"vipinfo":[{"vip_level":0,"u":344420262,"is_vip":0}]}}
             try
             {
                 string url = string.Format(qq_get_group_info_ext2, group.code, _user.VfWebQQ, QQHelper.GetTime());
@@ -1715,7 +1598,7 @@ namespace WebQQ2.WebQQ2
                             }
                         }
                     }
-                        #endregion
+                    #endregion
 
                     //#region minfo
 
@@ -1764,7 +1647,6 @@ namespace WebQQ2.WebQQ2
 
                     if (result.Keys.Contains("stats"))
                     {
-                        //{"stats":[{"client_type":41,"uin":344420262,"stat":10}],
                         var stats = result["stats"] as ArrayList;
                         foreach (Dictionary<string, object> stat in stats)
                         {
@@ -1810,328 +1692,28 @@ namespace WebQQ2.WebQQ2
 
         #endregion
 
-        #region QuickOperation
-
-        public Dictionary<string, object> GetFriendInfoFromZone()
-        {
-            var furl = string.Format(qq_zone_friend, _user.QQNum, _user.GTK, _random.NextDouble());
-            var fresult = GetUrlText(furl);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
-        }
-        public Dictionary<string, object> GetGroupInfoFromQun()
-        {
-            var furl = string.Format(qq_qun_group, _user.QQNum, _user.GTK, _random.NextDouble());
-            var fresult = GetUrlText(furl);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
-        }
-        public Dictionary<string, object> GetMemberInfoFromQun(string gid)
-        {
-            var furl = string.Format(qq_qun_member, _user.QQNum, gid, _user.GTK, _random.NextDouble());
-            var fresult = GetUrlText(furl);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
-        }
-        #endregion
-
         #region GetPost
 
         public string GetUrlText(string url, int timeout = 60000)
         {
-            try
-            {
-                HttpWebResponse myResponse = GetUrlResponse(url, timeout);
-                Stream newStream = myResponse.GetResponseStream();
-                if (newStream != null)
-                {
-                    StreamReader reader = new StreamReader(newStream, Encoding.GetEncoding(myResponse.CharacterSet));
-                    string result = reader.ReadToEnd();
-                    return result;
-                }
-            }
-            catch (Exception)
-            {
-            }
-            return null;
+            return _helper.GetUrlText(url, qq_referurl, timeout);
         }
 
         public string PostUrlText(string url, byte[] postData, int timeout = 60000)
         {
-            try
-            {
-                HttpWebResponse myResponse = GetPostResponse(url, postData, timeout);
-                Stream newStream = myResponse.GetResponseStream();
-                if (newStream != null)
-                {
-                    StreamReader reader = new StreamReader(newStream, Encoding.GetEncoding(myResponse.CharacterSet));
-                    string result = reader.ReadToEnd();
-                    return result;
-                }
-            }
-            catch (Exception)
-            {
-            }
-            return null;
+            return _helper.PostUrlText(url, postData, qq_referurl, timeout);
         }
 
         public Stream GetUrlStream(string url, int timeout = 60000)
         {
-            try
-            {
-                HttpWebResponse myResponse = GetUrlResponse(url, timeout);
-                Stream newStream = myResponse.GetResponseStream();
-                return newStream;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return _helper.GetUrlStream(url,qq_referurl,timeout);
         }
 
         public Stream GetPostStream(string url, byte[] postData, int timeout = 60000)
         {
-            try
-            {
-                HttpWebResponse myResponse = GetPostResponse(url, postData, timeout);
-                Stream newStream = myResponse.GetResponseStream();
-                return newStream;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return _helper.GetPostStream(url, postData,qq_referurl, timeout);
         }
-        private HttpWebResponse GetUrlResponse(string url, int timeout = 60000)
-        {
-            if (_messageTaskCts == null)
-            {
-                _messageTaskCts = new CancellationTokenSource();
-            }
-            _messageTaskCts.Token.ThrowIfCancellationRequested();
-            HttpWebResponse response = null;
-            Task task = new Task(() =>
-                {
-                    try
-                    {
-                        HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
-                        myRequest.Method = "GET";
-                        myRequest.Referer = qq_referurl;
-                        myRequest.CookieContainer = _cookiecontainer;
-                        myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                        myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
-                        myRequest.AllowAutoRedirect = true;
-                        myRequest.KeepAlive = true;
-                        _messageTaskCts.Token.ThrowIfCancellationRequested();
-                        response = (HttpWebResponse)myRequest.GetResponse();
-                    }
-                    catch (Exception) { }
-                });
-            task.Start();
-            bool wait = task.Wait(timeout, _messageTaskCts.Token);
-            if (wait)
-                return response;
-            throw new TimeoutException();
-        }
-
-        private HttpWebResponse GetPostResponse(string url, byte[] postData, int timeout = 60000)
-        {
-            if (_messageTaskCts == null)
-            {
-                _messageTaskCts = new CancellationTokenSource();
-            }
-            _messageTaskCts.Token.ThrowIfCancellationRequested();
-            HttpWebResponse response = null;
-            Task task = new Task(() =>
-            {
-                try
-                {
-                    HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
-                    myRequest.Method = "POST";
-                    myRequest.Referer = qq_referurl;
-                    myRequest.CookieContainer = _cookiecontainer;
-                    myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
-                    myRequest.ContentLength = postData.Length;
-                    _messageTaskCts.Token.ThrowIfCancellationRequested();
-                    using (var sw = myRequest.GetRequestStream())
-                    {
-                        sw.Write(postData, 0, postData.Length);
-                    }
-                    response = (HttpWebResponse)myRequest.GetResponse();
-                }
-                catch (Exception) { }
-            });
-            task.Start();
-            bool wait = task.Wait(timeout, _messageTaskCts.Token);
-            if (wait)
-                return response;
-            throw new TimeoutException();
-        }
-
-
-        public string GetFileTrueUrl(string url, int timeout = 60000)
-        {
-            if (_messageTaskCts == null)
-            {
-                _messageTaskCts = new CancellationTokenSource();
-            }
-            _messageTaskCts.Token.ThrowIfCancellationRequested();
-            String newUrl = null;
-            Task task = new Task(() =>
-            {
-
-                try
-                {
-                    HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
-                    myRequest.Method = "GET";
-                    myRequest.Referer = qq_referurl;
-                    myRequest.CookieContainer = _cookiecontainer;
-                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
-                    myRequest.AllowAutoRedirect = false;
-                    myRequest.KeepAlive = true;
-                    myRequest.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-                    myRequest.Headers.Add("Accept-Encoding", "gzip,deflate");
-                    myRequest.Headers.Add("Accept-Language", "zh-CN,zh;q=0.8");
-                    myRequest.Headers.Add("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3");
-                    _messageTaskCts.Token.ThrowIfCancellationRequested();
-                    HttpWebResponse myResponse = (HttpWebResponse)myRequest.GetResponse();//1
-                    WebHeaderCollection headers = myResponse.Headers;
-                    if ((myResponse.StatusCode == System.Net.HttpStatusCode.Found) ||
-                      (myResponse.StatusCode == System.Net.HttpStatusCode.Redirect) ||
-                      (myResponse.StatusCode == System.Net.HttpStatusCode.Moved) ||
-                      (myResponse.StatusCode == System.Net.HttpStatusCode.MovedPermanently))
-                    {
-                        newUrl = headers["Location"];
-                        newUrl = newUrl.Trim();
-                    }
-                    myResponse.Close();
-                }
-                catch (Exception)
-                {
-                    newUrl = null;
-                }
-            });
-            task.Start();
-            bool wait = task.Wait(timeout, _messageTaskCts.Token);
-            if (wait)
-                return newUrl;
-            throw new TimeoutException();
-        }
-
 
         #endregion
-
-        public void UpdateCookie(Uri uri,string cookie)
-        {
-            _cookiecontainer.SetCookies(uri, cookie);
-        }
-
-
-        public void AnylizeCookie(string cookie)
-        {
-            var cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
-            foreach (var ck in cks)
-            {
-                var kv = ck.Trim().Split(new[] { '=' }, StringSplitOptions.None);
-                if (kv.Length == 2)
-                {
-                    if (kv[0] == "skey")
-                    {
-                        _user.skey = kv[1];
-                        _user.GTK = QQHelper.getGTK(_user.skey);
-                    }
-                    else if (kv[0] == "clientuin")
-                    {
-                        _user.QQNum = kv[1];
-                    }
-                    else if(kv[0] == "ptnick_" + _user.QQNum)
-                    {
-                        var utf8name = kv[1];
-                        if(!string.IsNullOrWhiteSpace(utf8name))
-                        {
-                            if(utf8name.Length %2 == 0)
-                            {
-                                var bytes = new byte[utf8name.Length / 2];
-                                for(int i = 0;i < utf8name.Length;i +=2)
-                                {
-                                    bytes[i / 2] = byte.Parse(utf8name.Substring(i, 2), System.Globalization.NumberStyles.HexNumber);
-                                }
-                                _user.QQName = Encoding.UTF8.GetString(bytes);
-                            }
-                        }
-                    }
-                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qq.com"));
-                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "ptlogin2.qq.com"));
-                }
-            }
-        }
-        public void AnylizeCookie()
-        {
-            var cookie = GetCookieString("http://www.qq.com/");
-            var cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
-            foreach (var ck in cks)
-            {
-                var kv = ck.Trim().Split(new[] { '=' }, StringSplitOptions.None);
-                if (kv.Length == 2)
-                {
-                    if (kv[0] == "skey")
-                    {
-                        _user.skey = kv[1];
-                        _user.GTK = QQHelper.getGTK(_user.skey);
-                    }
-                    else if (kv[0] == "ptui_loginuin")
-                    {
-                        _user.QQNum = kv[1];
-                    }
-                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qq.com"));
-                }
-            }
-            cookie = GetCookieString("http://ptlogin2.qq.com/");
-            cks = cookie.Split(new[] { ';' }, StringSplitOptions.None);
-            foreach (var ck in cks)
-            {
-                var kv = ck.Trim().Split(new[] { '=' }, StringSplitOptions.None);
-                if (kv.Length == 2)
-                {
-                    if (kv[0] == "skey")
-                    {
-                        _user.skey = kv[1];
-                        _user.GTK = QQHelper.getGTK(_user.skey);
-                    }
-                    else if (kv[0] == "ptui_loginuin")
-                    {
-                        _user.QQNum = kv[1];
-                    }
-                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "ptlogin2.qq.com"));
-                }
-            }
-        }
-
-        #region DLL Imports
-        [SuppressUnmanagedCodeSecurity, SecurityCritical, DllImport("wininet.dll", EntryPoint = "InternetGetCookieExW", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
-        internal static extern bool InternetGetCookieEx([In] string Url, [In] string cookieName, [Out] StringBuilder cookieData, [In, Out] ref uint pchCookieData, uint flags, IntPtr reserved);
-        #endregion
-        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref int pcchCookieData, int dwFlags, object lpReserved);
-        private static string GetCookieString(string url)
-        {
-            // Determine the size of the cookie      
-            uint datasize = 256;
-            StringBuilder cookieData = new StringBuilder((int)datasize);
-            if (!InternetGetCookieEx(url, null, cookieData, ref datasize, (uint)0x00002000, IntPtr.Zero))
-            {
-                if (datasize < 0)
-                    return null;
-                // Allocate stringbuilder large enough to hold the cookie      
-                cookieData = new StringBuilder((int)datasize);
-                if (!InternetGetCookieEx(url, null, cookieData, ref datasize, (uint)0x00002000, IntPtr.Zero))
-                    return null;
-            }
-            return cookieData.ToString();
-        }  
     }
 }

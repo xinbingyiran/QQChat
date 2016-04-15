@@ -20,7 +20,7 @@ namespace QQChat
     {
         private List<QzoneFriend> _flist = new List<QzoneFriend>();
         private List<QunGroup> _glist = new List<QunGroup>();
-        private QQ _qq;
+        private QQ_Base _qq;
         private QunMemberManager _manager;
         public GlobalForm()
         {
@@ -48,7 +48,7 @@ namespace QQChat
             this.VisibleChanged += new System.EventHandler(this.GlobalForm_VisibleChanged);
         }
 
-        public void InitQQ(QQ qq)
+        public void InitQQ(QQ_Base qq)
         {
             _qq = qq;
         }

@@ -19,7 +19,7 @@ namespace WebQQ2.WebQQ2
     public class QQUser
     {
         public string Uin { get; internal set; }
-        public string ClientID { get; internal set; }
+        public long ClientID { get; internal set; }
         public string PtWebQQ { get; internal set; }
         public string VfWebQQ { get; internal set; }
         public string VerifySession { get; internal set; }
@@ -33,12 +33,17 @@ namespace WebQQ2.WebQQ2
         public string QQName { get; internal set; }
         public string Status { get; internal set; }
 
+        public string PtLoginSig { get; internal set; }
+        public string PtClientIp { get; internal set; }
+        public string PtServerIp { get; internal set; }
+        public string PtUiIdentifier { get; internal set; }
+
         public void OnCreated()
         {
             Status = "offline";
             QQFriends = new QQFriends();
             QQGroups = new QQGroups();
-            ClientID = GenerateClientID();
+            ClientID = 53999199;// GenerateClientID();
         }
 
         public QQUser()

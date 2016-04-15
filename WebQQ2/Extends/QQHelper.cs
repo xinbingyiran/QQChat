@@ -88,14 +88,18 @@ namespace WebQQ2.Extends
         public static string ToPostData(object input)
         {
             string str = ToJson(input);
-            return "r=" + HttpUtility.UrlEncode(str);
+            return "r=" + HttpUtility.UrlEncode(str)
+                        .Replace("%7b", "%7B")
+                        .Replace("%7d", "%7D")
+                        .Replace("%2c", "%2C")
+                        .Replace("%3a", "%3A");
         }
 
         public static string GetToken(QQUser user)
         {
             //http://web.qstatic.com/webqqpic/pubapps/0/50/eqq.all.js
             //P = function(b, j) {
-            return GetToken4(user.QQNum, user.PtWebQQ);
+            return GetToken3(user.QQNum, user.PtWebQQ);
         }
 
         public struct u

@@ -17,7 +17,7 @@ namespace QQChat
     public partial class MainForm : Form
     {
         private GlobalForm GlobalForm;
-        public QQ QQ
+        public QQ_Web QQ
         {
             get;
             private set;
@@ -29,24 +29,25 @@ namespace QQChat
 
         private void LoginForm_Load(object sender, EventArgs e)
         {
-            InitParas();
-        }
-
-        private void InitParas()
-        {
             webBrowser1.Navigating += webBrowser1_Navigating;
+            TraceToLoginForm();
         }
 
         private void webBrowser1_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
             System.Diagnostics.Trace.WriteLine(e.Url);
-            if(e.Url.AbsoluteUri.StartsWith("http://qzs.qq.com"))
+            if (e.Url.AbsoluteUri.StartsWith("http://qzs.qq.com"))
             {
                 this.QQ.AnylizeCookie(webBrowser1.Document.Cookie);
                 webBrowser1.Navigate("about:blank");
-                SetInfo(this.QQ.User.QQNum + "登录成功"); 
-                ShowGlobalForm();
+                LoginOk();
             }
+        }
+
+        private void LoginOk()
+        {
+            SetInfo(QQ.User.QQNum + "登录成功");
+            ShowGlobalForm();
         }
 
         private void SetInfo(string text)
@@ -58,7 +59,7 @@ namespace QQChat
             }
             label4.Text = DateTime.Now.ToString("HH:mm:ss:") + text;
         }
-        
+
         private void InitMainForm()
         {
             if (InvokeRequired)
@@ -70,14 +71,6 @@ namespace QQChat
             this.Close();
         }
 
-        private void LoginForm_Shown(object sender, EventArgs e)
-        {
-            if (this.Visible)
-            {
-                TraceToLoginForm();
-            }
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
             TraceToLoginForm();
@@ -85,7 +78,7 @@ namespace QQChat
 
         private void TraceToLoginForm()
         {
-            QQ = new WebQQ2.WebQQ2.QQ();
+            QQ = new QQ_Web();
             if (GlobalForm != null)
             {
                 GlobalForm.Close();
@@ -94,14 +87,8 @@ namespace QQChat
             webBrowser1.Navigate("http://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=549000912&s_url=http%3A//qzs.qq.com/&style=22");
         }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            ShowGlobalForm();
-        }
-
         private void ShowGlobalForm()
         {
-
             if (QQ == null || !QQ.IsPreLoged)
             {
                 SetInfo("请先登录...");
@@ -111,7 +98,7 @@ namespace QQChat
             {
                 GlobalForm = new GlobalForm();
             }
-            GlobalForm.InitQQ(this.QQ);
+            GlobalForm.InitQQ(QQ);
             GlobalForm.Show();
             if (GlobalForm.WindowState == FormWindowState.Minimized)
             {
