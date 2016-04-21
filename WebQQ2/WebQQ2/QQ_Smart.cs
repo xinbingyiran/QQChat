@@ -485,15 +485,20 @@ namespace WebQQ2.WebQQ2
                                         System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
                                         Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
                                         QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         if (member == null)
                                         {
                                             new Task(() =>
                                             {
                                                 RefreshGroupInfo(group);
+                                                member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                                MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
                                             }).Start();
                                         }
-                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
+                                        else
+                                        {
+                                            MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
+                                        }
                                     }
                                 }
                                 break;
@@ -505,12 +510,20 @@ namespace WebQQ2.WebQQ2
                                         string xml = messagevalue["xml"] as string;
                                         Dictionary<string, object> msgs = new Dictionary<string, object>() { { "xml", xml } };
                                         QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
                                         if (member == null)
                                         {
-                                            new Task(() => RefreshGroupInfo(group)).Start();
+                                            new Task(() =>
+                                            {
+                                                RefreshGroupInfo(group); member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                                member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                                MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
+                                            }).Start();
                                         }
-                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
+                                        else
+                                        {
+                                            MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
+                                        }
                                     }
                                 }
                                 break;

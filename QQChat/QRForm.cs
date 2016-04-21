@@ -57,7 +57,10 @@ namespace QQChat
         private void LoginOk()
         {
             SetInfo(QQ.User.QQNum + "登录成功");
-            new ChatForm() { QQ = QQ }.Show();
+            var cf = new ChatForm() { QQ = QQ };
+            cf.FormClosed += (s, e) => this.Show();
+            cf.Show();
+            this.Hide();
         }
 
         private void SetInfo(string text)

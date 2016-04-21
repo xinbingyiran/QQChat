@@ -30,7 +30,6 @@ namespace QQChat
         private void LoginForm_Load(object sender, EventArgs e)
         {
             webBrowser1.Navigating += webBrowser1_Navigating;
-            TraceToLoginForm();
             if (System.Environment.GetCommandLineArgs().Length == 2)
             {
                 Task.Factory.StartNew(() =>
@@ -38,9 +37,15 @@ namespace QQChat
                     this.BeginInvoke((Action)(() =>
                     {
                         this.Hide();
-                        new QRForm().Show();
+                        var f = new QRForm();
+                        f.FormClosed += (s, v) => this.Close();
+                        f.Show();
                     }));
                 });
+            }
+            else
+            {
+                TraceToLoginForm();
             }
         }
 

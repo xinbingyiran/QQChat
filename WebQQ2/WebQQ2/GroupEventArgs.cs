@@ -57,19 +57,12 @@ namespace WebQQ2.WebQQ2
                     ArrayList content = _msgs["content"] as ArrayList;
                     if (content == null)
                         return null;
-                    if (content.Count == 2)
+                    var contentList = new List<string>(content.Count - 1);
+                    for (int i = 1; i < content.Count; i++)
                     {
-                        return GetSimpleMsg(content[1]);
+                        contentList.Add(GetSimpleMsg(content[i]));
                     }
-                    else
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 1; i < content.Count; i++)
-                        {
-                            sb.Append(GetSimpleMsg(content[i]));
-                        }
-                        return sb.ToString();
-                    }
+                    return string.Join(System.Environment.NewLine, contentList);
                 }
                 return null;
             }

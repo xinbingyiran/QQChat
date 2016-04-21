@@ -53,6 +53,10 @@ namespace WebQQ2.WebQQ2
             {
                 return allMembers[uin];
             }
+            else if (allMembers.Count == 0)
+            {
+                return null;
+            }
             QQGroupMember member = new QQGroupMember() { uin = uin };
             allMembers.Add(uin, member);
             return member;

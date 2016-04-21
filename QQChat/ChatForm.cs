@@ -32,14 +32,16 @@ namespace QQChat
                 QQ.GetUserList();
                 QQ.GetUserOnlineList();
                 QQ.GetGroupList();
-                foreach (var group in QQ.User.QQGroups.GroupList)
+                Task.Factory.StartNew(() =>
                 {
-                    QQ.RefreshGroupInfo(group.Value);
-                }
+                    foreach (var group in QQ.User.QQGroups.GroupList.Values.ToArray())
+                    {
+                        QQ.RefreshGroupInfo(group);
+                    }
+                });
                 BeginInvoke((Action)RefreshList);
                 foreach (var msg in QQ.DoMessageLoop())
                 {
-
                 }
             });
         }
@@ -62,23 +64,27 @@ namespace QQChat
 
         private void QQ_MessageGroupReceived(object sender, GroupEventArgs e)
         {
-            this.AppendText(e.Group.LongName + ":" + e.Member.LongName + ":" + e.MsgContent);
+            this.AppendText(e.Group.ShortName + " -> " + e.Member.ShortName,e.MsgContent);
         }
 
         private void QQ_MessageFriendReceived(object sender, FriendEventArgs e)
         {
-            this.AppendText(e.User.nick + ":" + e.MsgContent);
+            this.AppendText(e.User.nick,e.MsgContent);
         }
 
-        private void AppendText(string text)
+        private void AppendText(string name,string text)
         {
             if(InvokeRequired)
             {
-                BeginInvoke((Action<string>)AppendText,text);
+                BeginInvoke((Action<string,string>)AppendText,name,text);
                 return;
             }
-            this.richTextBox1.AppendText(text);
-            this.richTextBox1.AppendText("\r\n");
+            this.richTextBox1.Select(this.richTextBox1.TextLength, 0);
+            this.richTextBox1.SelectionColor = Color.Blue;
+            this.richTextBox1.SelectedText = (name + System.Environment.NewLine);
+            this.richTextBox1.Select(this.richTextBox1.TextLength, 0);
+            this.richTextBox1.SelectionColor = Color.Black;
+            this.richTextBox1.SelectedText = (text + System.Environment.NewLine);
         }
 
         private void button1_Click(object sender, EventArgs e)
