@@ -26,7 +26,6 @@ namespace QQChat
         {
             this.flowLayoutPanel1.WrapContents = true;
             this.flowLayoutPanel1.AutoScroll = true;
-            this.flowLayoutPanel1.SizeChanged += FlowLayoutPanel1_SizeChanged;
             this.listBox1.Click += (s, v) => { item = 0; };
             this.listBox2.Click += (s, v) => { item = 1; };
             Task.Factory.StartNew(() =>
@@ -52,12 +51,7 @@ namespace QQChat
                     }
                 }
             });
-        }
-
-        private void FlowLayoutPanel1_SizeChanged(object sender, EventArgs e)
-        {
-            this.flowLayoutPanel1.Refresh();
-        }
+        }        
 
         private void RefreshList()
         {
@@ -119,16 +113,26 @@ namespace QQChat
                 catch (Exception) { }
             }
             this.flowLayoutPanel1.SuspendLayout();
-            while (this.flowLayoutPanel1.Controls.Count > 1000)
+            while (this.flowLayoutPanel1.Controls.Count > 100)
             {
+                var pc = this.flowLayoutPanel1.Controls[0];
                 this.flowLayoutPanel1.Controls.RemoveAt(0);
+                while( pc.Controls.Count > 0)
+                {
+                    var pcc = pc.Controls[0];
+                    pc.Controls.RemoveAt(0);
+                    pcc.Dispose();
+                }
+                pc.Dispose();
             }
             var now = DateTime.Now;
             var p = new FlowLayoutPanel()
             {
                 Margin = _fp,
                 AutoSize = true,
+                WrapContents = true,
             };
+            p.SuspendLayout();
             _lt = now;
             var s = new Label()
             {
@@ -136,6 +140,7 @@ namespace QQChat
                 Text = now.ToString(),
                 ForeColor = Color.DarkGray,
             };
+            p.SuspendLayout();
             p.Controls.Add(s);
             p.SetFlowBreak(s, true);
             var g = new Label()
@@ -196,10 +201,12 @@ namespace QQChat
             }
             this.flowLayoutPanel1.Controls.Add(p);
             p.SetFlowBreak(p, true);
-            this.flowLayoutPanel1.ResumeLayout();
+            p.ResumeLayout(false);
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             if (this.checkBox1.Checked)
             {
-                this.flowLayoutPanel1.VerticalScroll.Value = this.flowLayoutPanel1.VerticalScroll.Maximum;
+                this.flowLayoutPanel1.ScrollControlIntoView(p);
             }
         }
 
