@@ -105,7 +105,7 @@ namespace QQChat
                 return;
             }
             var line = richTextBox2.Lines.FirstOrDefault();
-            if(!string.IsNullOrWhiteSpace(line))
+            if (!string.IsNullOrWhiteSpace(line))
             {
                 try
                 {
@@ -119,87 +119,83 @@ namespace QQChat
                 catch (Exception) { }
             }
             this.flowLayoutPanel1.SuspendLayout();
-            while (this.flowLayoutPanel1.Controls.Count > 1000 * 3)
+            while (this.flowLayoutPanel1.Controls.Count > 1000)
             {
                 this.flowLayoutPanel1.Controls.RemoveAt(0);
-                while (this.flowLayoutPanel1.Controls[0].Margin != Padding.Empty)
-                {
-                    this.flowLayoutPanel1.Controls.RemoveAt(0);
-                }
             }
             var now = DateTime.Now;
-            if ((now - _lt).TotalMinutes > 1)
-            {
-                _lt = now;
-                var s = new Label()
-                {
-                    Margin = Padding.Empty,
-                    AutoSize = true,
-                    Text = now.ToString(),
-                    ForeColor = Color.DarkGray,
-                };
-                this.flowLayoutPanel1.Controls.Add(s);
-                this.flowLayoutPanel1.SetFlowBreak(s,true);
-            }
-            var g = new Label()
+            var p = new FlowLayoutPanel()
             {
                 Margin = _fp,
+                AutoSize = true,
+            };
+            _lt = now;
+            var s = new Label()
+            {
+                AutoSize = true,
+                Text = now.ToString(),
+                ForeColor = Color.DarkGray,
+            };
+            p.Controls.Add(s);
+            p.SetFlowBreak(s, true);
+            var g = new Label()
+            {
                 AutoSize = true,
                 Text = group,
                 ForeColor = Color.DarkRed,
             };
             g.Click += Label_Click;
-            this.flowLayoutPanel1.Controls.Add(g);
+            p.Controls.Add(g);
             if (!string.IsNullOrWhiteSpace(tag))
             {
                 var t = new Label()
                 {
-                    Margin = _fp,
                     AutoSize = true,
                     Text = tag,
                     ForeColor = Color.DarkGreen,
                 };
                 t.Click += Label_Click;
-                this.flowLayoutPanel1.Controls.Add(t);
+                p.Controls.Add(t);
             }
             var l = new Label()
             {
-                Margin = _fp,
                 AutoSize = true,
                 Text = name,
                 ForeColor = Color.DarkBlue,
             };
             l.Click += Label_Click;
-            this.flowLayoutPanel1.Controls.Add(l);
-            this.flowLayoutPanel1.SetFlowBreak(l, true);
+            p.Controls.Add(l);
+            p.SetFlowBreak(l, true);
             foreach (var content in contents)
             {
                 if (Uri.IsWellFormedUriString(content, UriKind.Absolute))
                 {
                     var ll = new LinkLabel()
                     {
-                        Margin = _cp,
                         AutoSize = true,
                         Text = content,
+                        ForeColor = Color.Black,
                     };
                     ll.Click += Label_Click;
                     ll.LinkClicked += Ll_LinkClicked;
-                    this.flowLayoutPanel1.Controls.Add(ll);
-                    this.flowLayoutPanel1.SetFlowBreak(ll, true);
+                    p.Controls.Add(ll);
+                    p.SetFlowBreak(ll, true);
                 }
                 else
                 {
                     var tl = new Label()
                     {
-                        Margin = _cp,
                         AutoSize = true,
                         Text = content,
+                        ForeColor = Color.Black,
                     };
                     tl.Click += Label_Click;
-                    this.flowLayoutPanel1.Controls.Add(tl);
-                    this.flowLayoutPanel1.SetFlowBreak(tl, true);
+                    p.Controls.Add(tl);
+                    p.SetFlowBreak(tl, true);
                 }
             }
+            this.flowLayoutPanel1.Controls.Add(p);
+            p.SetFlowBreak(p, true);
             this.flowLayoutPanel1.ResumeLayout();
             if (this.checkBox1.Checked)
             {
@@ -210,9 +206,19 @@ namespace QQChat
         private void Label_Click(object sender, EventArgs e)
         {
             var l = sender as Label;
-            if(l != null)
+            if (l != null)
             {
-                richTextBox2.AppendText(System.Environment.NewLine + l.Text);
+                var p = l.Parent;
+                if(p != null)
+                {
+                    foreach(Control c in p.Controls)
+                    {
+                        if (c.ForeColor == Color.Black)
+                        {
+                            this.richTextBox2.AppendText(System.Environment.NewLine + c.Text);
+                        }
+                    }
+                }
             }
         }
 

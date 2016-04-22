@@ -659,6 +659,7 @@ namespace WebQQ2.WebQQ2
                                 }
                                 break;
                         }
+                        yield return poll_type;
                     }
                 }
                 else
