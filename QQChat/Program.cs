@@ -15,8 +15,17 @@ namespace QQChat
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            var mainForm = new MainForm();
-            Application.Run(mainForm);
+
+            if (System.Environment.GetCommandLineArgs().Length == 2)
+            {
+                var qRForm = new QRForm();
+                Application.Run(qRForm);
+            }
+            else
+            {
+                var mainForm = new MainForm();
+                Application.Run(mainForm);
+            }
         }
     }
 }

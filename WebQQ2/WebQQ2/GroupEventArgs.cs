@@ -67,6 +67,24 @@ namespace WebQQ2.WebQQ2
                 return null;
             }
         }
+        public string[] MsgContents
+        {
+            get
+            {
+                var contentList = new List<string>();
+                if (_msgs.Count == 1 && _msgs.Keys.Contains("content"))
+                {
+                    ArrayList content = _msgs["content"] as ArrayList;
+                    if (content == null)
+                        return null;
+                    for (int i = 1; i < content.Count; i++)
+                    {
+                        contentList.Add(GetSimpleMsg(content[i]));
+                    }
+                }
+                return contentList.ToArray();
+            }
+        }
 
         private string GetSimpleMsg(object o)
         {
