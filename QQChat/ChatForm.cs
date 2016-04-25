@@ -51,7 +51,87 @@ namespace QQChat
                     }
                 }
             });
-        }        
+        }
+        private System.IO.FileStream _fs;
+        protected override void OnClosed(EventArgs e)
+        {
+            if (_fs != null)
+            {
+                try
+                {
+                    lock (_fs)
+                    {
+                        _fs.Flush();
+                        _fs.Close();
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            base.OnClosed(e);
+        }
+
+        private void WriteLog(string log)
+        {
+            if (_fs == null && this.QQ != null && this.QQ.User != null)
+            {
+                try
+                {
+                    _fs = System.IO.File.Open(this.QQ.User.QQNum + ".txt", System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+                    if (_fs.Length == 0)
+                    {
+                        lock (_fs)
+                        {
+                            _fs.Write(new byte[] { 0xff, 0xfe }, 0, 2);
+                            _fs.Flush();
+                        }
+                    }
+                    Task.Factory.StartNew((a) =>
+                    {
+                        try
+                        {
+                            var fs = a as System.IO.FileStream;
+                            if (fs == null || fs.CanWrite)
+                            {
+                                long ps = 0;
+                                while (fs.CanWrite)
+                                {
+                                    lock (fs)
+                                    {
+                                        var p = fs.Position;
+                                        if (p != ps)
+                                        {
+                                            ps = p;
+                                            fs.Flush();
+                                        }
+                                    }
+                                    System.Threading.Thread.Sleep(10000);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                    }, _fs);
+                }
+                catch { };
+            }
+            if (_fs != null)
+            {
+                try
+                {
+                    var bs = System.Text.Encoding.Unicode.GetBytes(log);
+                    lock (_fs)
+                    {
+                        _fs.Write(bs, 0, bs.Length);
+                    }
+                }
+                catch { }
+            }
+        }
 
         private void RefreshList()
         {
@@ -97,7 +177,9 @@ namespace QQChat
                 BeginInvoke((Action<string, string, string, string[]>)AppendText, group, name, tag, contents);
                 return;
             }
+            var now = DateTime.Now;
             var line = richTextBox2.Lines.FirstOrDefault();
+            StringBuilder sb = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(line))
             {
                 try
@@ -116,7 +198,7 @@ namespace QQChat
             {
                 var pc = this.flowLayoutPanel1.Controls[0];
                 this.flowLayoutPanel1.Controls.RemoveAt(0);
-                while( pc.Controls.Count > 0)
+                while (pc.Controls.Count > 0)
                 {
                     var pcc = pc.Controls[0];
                     pc.Controls.RemoveAt(0);
@@ -124,7 +206,6 @@ namespace QQChat
                 }
                 pc.Dispose();
             }
-            var now = DateTime.Now;
             var p = new FlowLayoutPanel()
             {
                 Margin = _fp,
@@ -138,6 +219,7 @@ namespace QQChat
                 Text = now.ToString(),
                 ForeColor = Color.DarkGray,
             };
+            sb.AppendLine(s.Text);
             p.Controls.Add(s);
             p.SetFlowBreak(s, true);
             var g = new Label()
@@ -147,6 +229,7 @@ namespace QQChat
                 ForeColor = Color.DarkRed,
             };
             g.Click += Label_Click;
+            sb.Append(g.Text);
             p.Controls.Add(g);
             if (!string.IsNullOrWhiteSpace(tag))
             {
@@ -157,6 +240,7 @@ namespace QQChat
                     ForeColor = Color.DarkGreen,
                 };
                 t.Click += Label_Click;
+                sb.Append(t.Text);
                 p.Controls.Add(t);
             }
             var l = new Label()
@@ -166,6 +250,7 @@ namespace QQChat
                 ForeColor = Color.DarkBlue,
             };
             l.Click += Label_Click;
+            sb.AppendLine(l.Text);
             p.Controls.Add(l);
             p.SetFlowBreak(l, true);
             foreach (var content in contents)
@@ -180,6 +265,7 @@ namespace QQChat
                     };
                     ll.Click += Label_Click;
                     ll.LinkClicked += Ll_LinkClicked;
+                    sb.AppendLine(ll.Text);
                     p.Controls.Add(ll);
                     p.SetFlowBreak(ll, true);
                 }
@@ -192,10 +278,12 @@ namespace QQChat
                         ForeColor = Color.Black,
                     };
                     tl.Click += Label_Click;
+                    sb.AppendLine(tl.Text);
                     p.Controls.Add(tl);
                     p.SetFlowBreak(tl, true);
                 }
             }
+            WriteLog(sb.ToString());
             this.flowLayoutPanel1.Controls.Add(p);
             p.SetFlowBreak(p, true);
             p.ResumeLayout(false);
@@ -213,9 +301,9 @@ namespace QQChat
             if (l != null)
             {
                 var p = l.Parent;
-                if(p != null)
+                if (p != null)
                 {
-                    foreach(Control c in p.Controls)
+                    foreach (Control c in p.Controls)
                     {
                         if (c.ForeColor == Color.Black)
                         {
