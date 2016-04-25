@@ -90,7 +90,6 @@ namespace QQChat
 
         private static Padding _fp = new Padding(0, 5, 0, 0);
         private static Padding _cp = new Padding(20, 0, 0, 0);
-        private DateTime _lt = DateTime.MinValue;
         private void AppendText(string group, string name, string tag, string[] contents)
         {
             if (InvokeRequired)
@@ -133,14 +132,12 @@ namespace QQChat
                 WrapContents = true,
             };
             p.SuspendLayout();
-            _lt = now;
             var s = new Label()
             {
                 AutoSize = true,
                 Text = now.ToString(),
                 ForeColor = Color.DarkGray,
             };
-            p.SuspendLayout();
             p.Controls.Add(s);
             p.SetFlowBreak(s, true);
             var g = new Label()
