@@ -33,11 +33,18 @@ namespace QQChat
             this.RefreshQRCode();
         }
 
+        private System.Threading.CancellationTokenSource _cts;
         private void RefreshQRCode()
         {
             var qq = new QQ_Smart();
             Task.Factory.StartNew(() =>
             {
+                if (_cts != null && !_cts.IsCancellationRequested)
+                {
+                    _cts.Cancel();
+                }
+                var cts = new System.Threading.CancellationTokenSource();
+                _cts = cts;
                 if (!qq.SmartPreLogin())
                 {
                     SetInfo("预登录失败");
@@ -45,9 +52,13 @@ namespace QQChat
                 }
                 var img = qq.GetQrImage();
                 this.Invoke((Action<Bitmap>)((bm) => this.pictureBox1.Image = bm), new object[] { img });
-                foreach (var str in qq.DoSmartLogin(true))
+                foreach (var str in qq.DoSmartLogin(true, cts))
                 {
                     SetInfo(str);
+                }
+                if(cts.IsCancellationRequested)
+                {
+                    return;
                 }
                 this.QQ = qq;
                 this.Invoke((Action)LoginOk);

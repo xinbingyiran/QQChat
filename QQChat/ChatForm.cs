@@ -50,6 +50,13 @@ namespace QQChat
                         return;
                     }
                 }
+                BeginInvoke((Action)(()=> {
+                    if (this.IsDisposed)
+                    {
+                        return;
+                    }
+                    this.Close();
+                }));
             });
         }
         private System.IO.FileStream _fs;
@@ -79,7 +86,9 @@ namespace QQChat
             {
                 try
                 {
-                    _fs = System.IO.File.Open(this.QQ.User.QQNum + ".txt", System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+                    var l = System.Reflection.Assembly.GetEntryAssembly().Location;
+                    var path = System.IO.Path.Combine(new System.IO.FileInfo(l).DirectoryName, this.QQ.User.QQNum + ".txt");
+                    _fs = System.IO.File.Open(path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
                     if (_fs.Length == 0)
                     {
                         lock (_fs)
@@ -193,7 +202,6 @@ namespace QQChat
                 }
                 catch (Exception) { }
             }
-            this.flowLayoutPanel1.SuspendLayout();
             while (this.flowLayoutPanel1.Controls.Count > 100)
             {
                 var pc = this.flowLayoutPanel1.Controls[0];
@@ -212,6 +220,7 @@ namespace QQChat
                 AutoSize = true,
                 WrapContents = true,
             };
+            this.flowLayoutPanel1.Controls.Add(p);
             p.SuspendLayout();
             var s = new Label()
             {
@@ -284,11 +293,8 @@ namespace QQChat
                 }
             }
             WriteLog(sb.ToString());
-            this.flowLayoutPanel1.Controls.Add(p);
             p.SetFlowBreak(p, true);
-            p.ResumeLayout(false);
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
+            p.ResumeLayout();
             if (this.checkBox1.Checked)
             {
                 this.flowLayoutPanel1.ScrollControlIntoView(p);

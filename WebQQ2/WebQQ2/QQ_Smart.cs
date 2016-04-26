@@ -215,11 +215,15 @@ namespace WebQQ2.WebQQ2
                 );
         }
 
-        public IEnumerable<string> DoSmartLogin(bool logClient = false)
+        public IEnumerable<string> DoSmartLogin(bool logClient = false,System.Threading.CancellationTokenSource cts = null)
         {
             int rnumber = 100;
             while (true)
             {
+                if(cts != null && cts.IsCancellationRequested)
+                {
+                    yield break;
+                }
                 Thread.Sleep(1000);
                 rnumber += _random.Next(2000 - 10, 2000 + 10);
                 string result = _helper.GetUrlText(
@@ -250,7 +254,6 @@ namespace WebQQ2.WebQQ2
                     yield break;
                 }
                 result = result.Replace(" ", "");
-                //"ptuiCB('66','0','','0','二维码未失效。(428870048)', '');"
                 result = result.Substring(ptuiCBStart.Length);
                 result = result.Substring(0, result.Length - ptuiCBEnd.Length);
                 var items = result.Split(new string[] { "','" }, StringSplitOptions.None);
@@ -259,120 +262,144 @@ namespace WebQQ2.WebQQ2
                     yield return "检查出错";
                     yield break;
                 }
-                if (items[0] != "0")
+                switch(items[0])
                 {
-                    yield return items[4];
-                }
-                else
-                {
-                    yield return "获取cookie";
-                    result = _helper.GetUrlText(items[2], qq_smart_referurl);
-
-                    var cookies = _cookiecontainer.GetCookies(new Uri("http://ui.ptlogin2.qq.com"));
-                    foreach (Cookie v in cookies)
-                    {
-                        if (string.Compare(v.Name, "ptwebqq") == 0)
+                    case "0":
                         {
-                            _user.PtWebQQ = v.Value;
-                        }
-                        else if (string.Compare(v.Name, "skey") == 0)
-                        {
-                            _user.skey = v.Value;
-                            _user.GTK = QQHelper.getGTK(_user.skey);
-                        }
-                        else if (string.Compare(v.Name, "uin") == 0)
-                        {
-                            _user.QQNum = v.Value.TrimStart('o').TrimStart('0');
-                        }
-                    }
-                    foreach (Cookie v in cookies)
-                    {
-                        if (v.Name == "ptnick_" + _user.QQNum)
-                        {
-                            var utf8name = v.Value;
-                            if (!string.IsNullOrWhiteSpace(utf8name))
+                            yield return "获取cookie";
+                            if (cts != null && cts.IsCancellationRequested)
                             {
-                                if (utf8name.Length % 2 == 0)
+                                yield break;
+                            }
+                            result = _helper.GetUrlText(items[2], qq_smart_referurl);
+
+                            var cookies = _cookiecontainer.GetCookies(new Uri("http://ui.ptlogin2.qq.com"));
+                            foreach (Cookie v in cookies)
+                            {
+                                if (string.Compare(v.Name, "ptwebqq") == 0)
                                 {
-                                    var bytes = new byte[utf8name.Length / 2];
-                                    for (int i = 0; i < utf8name.Length; i += 2)
-                                    {
-                                        bytes[i / 2] = byte.Parse(utf8name.Substring(i, 2), System.Globalization.NumberStyles.HexNumber);
-                                    }
-                                    _user.QQName = Encoding.UTF8.GetString(bytes);
+                                    _user.PtWebQQ = v.Value;
+                                }
+                                else if (string.Compare(v.Name, "skey") == 0)
+                                {
+                                    _user.skey = v.Value;
+                                    _user.GTK = QQHelper.getGTK(_user.skey);
+                                }
+                                else if (string.Compare(v.Name, "uin") == 0)
+                                {
+                                    _user.QQNum = v.Value.TrimStart('o').TrimStart('0');
                                 }
                             }
-                        }
-                    }
-                    if (!logClient)
-                    {
-                        yield break;
-                    }
-                    yield return "获取cookie2";
-
-                    result = _helper.GetUrlText(string.Format(qq_smart_getvfwebqq, _user.PtWebQQ, _user.ClientID, QQHelper.GetTime()), qq_smart_referurl);
-
-                    var obj = QQHelper.FromJson<Dictionary<string, object>>(result);
-                    if (!obj.ContainsKey("retcode") || !obj.ContainsKey("result"))
-                    {
-                        yield return "获取vfwebqq失败" + result;
-                        yield break;
-                    }
-                    if (obj["retcode"].ToString() != "0")
-                    {
-                        yield return "获取vfwebqq失败" + result;
-                        yield break;
-                    }
-
-                    var obj2 = obj["result"] as Dictionary<string, object>;
-                    if (obj2 == null)
-                    {
-                        yield return "获取vfwebqq失败" + result;
-                        yield break;
-                    }
-
-                    _user.VfWebQQ = obj2["vfwebqq"].ToString();
-
-                    yield return "获取vfwebqq";
-                    string url = qq_smart_login2;
-                    var postItem = new qq_smart_login2_post
-                    {
-                        status = "online",
-                        ptwebqq = _user.PtWebQQ,
-                        clientid = _user.ClientID,
-                    };
-                    string para = QQHelper.ToPostData(postItem);
-                    string retstr = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl);
-                    //_user.VfWebQQ = null;
-                    _user.PsessionID = null;
-                    _user.Status = "offline";
-
-                    if (retstr != null && retstr.Length > 0)
-                    {
-                        Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
-                        if (root["retcode"] as int? == 0)
-                        {
-                            Dictionary<string, object> rootresult = root["result"] as Dictionary<string, object>;
-                            //_user.VfWebQQ = rootresult["vfwebqq"] as string;
-                            _user.PsessionID = rootresult["psessionid"] as string;
-                            _user.Status = rootresult["status"] as string;
-                            _user.Uin = rootresult["uin"].ToString();
-                            if (_user.Status != "offline")
+                            foreach (Cookie v in cookies)
                             {
-                                _user.LoginTime = DateTime.Now;
+                                if (v.Name == "ptnick_" + _user.QQNum)
+                                {
+                                    var utf8name = v.Value;
+                                    if (!string.IsNullOrWhiteSpace(utf8name))
+                                    {
+                                        if (utf8name.Length % 2 == 0)
+                                        {
+                                            var bytes = new byte[utf8name.Length / 2];
+                                            for (int i = 0; i < utf8name.Length; i += 2)
+                                            {
+                                                bytes[i / 2] = byte.Parse(utf8name.Substring(i, 2), System.Globalization.NumberStyles.HexNumber);
+                                            }
+                                            _user.QQName = Encoding.UTF8.GetString(bytes);
+                                        }
+                                    }
+                                }
+                            }
+                            if (!logClient)
+                            {
+                                yield break;
+                            }
+                            yield return "获取cookie2";
+
+                            if (cts != null && cts.IsCancellationRequested)
+                            {
+                                yield break;
+                            }
+                            result = _helper.GetUrlText(string.Format(qq_smart_getvfwebqq, _user.PtWebQQ, _user.ClientID, QQHelper.GetTime()), qq_smart_referurl);
+
+                            var obj = QQHelper.FromJson<Dictionary<string, object>>(result);
+                            if (!obj.ContainsKey("retcode") || !obj.ContainsKey("result"))
+                            {
+                                yield return "获取vfwebqq失败" + result;
+                                yield break;
+                            }
+                            if (obj["retcode"].ToString() != "0")
+                            {
+                                yield return "获取vfwebqq失败" + result;
+                                yield break;
+                            }
+
+                            var obj2 = obj["result"] as Dictionary<string, object>;
+                            if (obj2 == null)
+                            {
+                                yield return "获取vfwebqq失败" + result;
+                                yield break;
+                            }
+
+                            _user.VfWebQQ = obj2["vfwebqq"].ToString();
+
+                            yield return "获取vfwebqq";
+                            string url = qq_smart_login2;
+                            var postItem = new qq_smart_login2_post
+                            {
+                                status = "online",
+                                ptwebqq = _user.PtWebQQ,
+                                clientid = _user.ClientID,
+                            };
+                            if (cts != null && cts.IsCancellationRequested)
+                            {
+                                yield break;
+                            }
+                            string para = QQHelper.ToPostData(postItem);
+                            string retstr = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl);
+                            //_user.VfWebQQ = null;
+                            _user.PsessionID = null;
+                            _user.Status = "offline";
+
+                            if (retstr != null && retstr.Length > 0)
+                            {
+                                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(retstr);
+                                if (root["retcode"] as int? == 0)
+                                {
+                                    Dictionary<string, object> rootresult = root["result"] as Dictionary<string, object>;
+                                    //_user.VfWebQQ = rootresult["vfwebqq"] as string;
+                                    _user.PsessionID = rootresult["psessionid"] as string;
+                                    _user.Status = rootresult["status"] as string;
+                                    _user.Uin = rootresult["uin"].ToString();
+                                    if (_user.Status != "offline")
+                                    {
+                                        _user.LoginTime = DateTime.Now;
+                                    }
+                                    yield break;
+                                }
+                                else
+                                {
+                                    yield return QQHelper.ToJson(root);
+                                }
+                            }
+                            else
+                            {
+                                yield return "登录失败";
                             }
                             yield break;
                         }
-                        else
-                        {
-                            yield return QQHelper.ToJson(root);
-                        }
-                    }
-                    else
-                    {
-                        yield return "登录失败";
-                    }
-                    yield break;
+                    //"ptuiCB('65','0','','0','二维码已失效。(428870048)', '');"
+                    case "65":
+                        yield return items[4];
+                        yield break;
+                    //"ptuiCB('66','0','','0','二维码未失效。(428870048)', '');"
+                    case "66":
+                    //"ptuiCB('67','0','','0','二维码认证中。(514878935)','');"
+                    case "67":
+                        yield return items[4];
+                        break;
+                    default:
+                        yield return items[4];
+                        yield break;
                 }
             }
         }
