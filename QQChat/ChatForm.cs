@@ -24,10 +24,14 @@ namespace QQChat
 
         private void ChatForm_Load(object sender, EventArgs e)
         {
-            this.flowLayoutPanel1.WrapContents = true;
+            this.flowLayoutPanel1.WrapContents = false;
+            this.flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
             this.flowLayoutPanel1.AutoScroll = true;
+            this.flowLayoutPanel1.AutoScrollMinSize = new Size(0, this.flowLayoutPanel1.Height + 1);
+            this.flowLayoutPanel1.SizeChanged += (s, v) => this.flowLayoutPanel1.AutoScrollMinSize = new Size(0, this.flowLayoutPanel1.Height + 1);
             this.listBox1.Click += (s, v) => { item = 0; };
             this.listBox2.Click += (s, v) => { item = 1; };
+            this.richTextBox2.LinkClicked += RichTextBox2_LinkClicked;
             Task.Factory.StartNew(() =>
             {
                 QQ.MessageFriendReceived += QQ_MessageFriendReceived;
@@ -50,7 +54,8 @@ namespace QQChat
                         return;
                     }
                 }
-                BeginInvoke((Action)(()=> {
+                BeginInvoke((Action)(() =>
+                {
                     if (this.IsDisposed)
                     {
                         return;
@@ -59,6 +64,12 @@ namespace QQChat
                 }));
             });
         }
+
+        private void RichTextBox2_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            OpenLink(e.LinkText);
+        }
+
         private System.IO.FileStream _fs;
         protected override void OnClosed(EventArgs e)
         {
@@ -202,25 +213,28 @@ namespace QQChat
                 }
                 catch (Exception) { }
             }
-            while (this.flowLayoutPanel1.Controls.Count > 100)
+            this.flowLayoutPanel1.SuspendLayout();
+            if (this.flowLayoutPanel1.Controls.Count > 100)
             {
-                var pc = this.flowLayoutPanel1.Controls[0];
-                this.flowLayoutPanel1.Controls.RemoveAt(0);
-                while (pc.Controls.Count > 0)
+                if (this.flowLayoutPanel1.Controls.Count > 80)
                 {
-                    var pcc = pc.Controls[0];
-                    pc.Controls.RemoveAt(0);
-                    pcc.Dispose();
+                    var pc = this.flowLayoutPanel1.Controls[0];
+                    this.flowLayoutPanel1.Controls.RemoveAt(0);
+                    while (pc.Controls.Count > 0)
+                    {
+                        var pcc = pc.Controls[0];
+                        pc.Controls.RemoveAt(0);
+                        pcc.Dispose();
+                    }
+                    pc.Dispose();
                 }
-                pc.Dispose();
             }
             var p = new FlowLayoutPanel()
             {
-                Margin = _fp,
                 AutoSize = true,
+                Margin = _fp,
                 WrapContents = true,
             };
-            this.flowLayoutPanel1.Controls.Add(p);
             p.SuspendLayout();
             var s = new Label()
             {
@@ -294,7 +308,10 @@ namespace QQChat
             }
             WriteLog(sb.ToString());
             p.SetFlowBreak(p, true);
-            p.ResumeLayout();
+            this.flowLayoutPanel1.Controls.Add(p);
+            p.ResumeLayout(false);
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             if (this.checkBox1.Checked)
             {
                 this.flowLayoutPanel1.ScrollControlIntoView(p);
@@ -322,7 +339,12 @@ namespace QQChat
 
         private void Ll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start((sender as LinkLabel).Text);
+            OpenLink((sender as LinkLabel).Text);
+        }
+
+        private static void OpenLink(string linkUrl)
+        {
+            System.Diagnostics.Process.Start(linkUrl);
         }
 
         private void button1_Click(object sender, EventArgs e)
