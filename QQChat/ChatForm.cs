@@ -21,14 +21,16 @@ namespace QQChat
 
         public QQ_Smart QQ { get; internal set; }
         private int item = 0;
+        private Size ss = Size.Empty;
 
         private void ChatForm_Load(object sender, EventArgs e)
         {
+            this.Resize += ChatForm_Resize;
+            ss = this.Size - this.flowLayoutPanel1.Size;
             this.flowLayoutPanel1.WrapContents = false;
             this.flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
             this.flowLayoutPanel1.AutoScroll = true;
-            this.flowLayoutPanel1.AutoScrollMinSize = new Size(0, this.flowLayoutPanel1.Height + 1);
-            this.flowLayoutPanel1.SizeChanged += (s, v) => this.flowLayoutPanel1.AutoScrollMinSize = new Size(0, this.flowLayoutPanel1.Height + 1);
+            this.flowLayoutPanel1.AutoScrollMinSize = new Size(0, this.flowLayoutPanel1.Height + 10);
             this.listBox1.Click += (s, v) => { item = 0; };
             this.listBox2.Click += (s, v) => { item = 1; };
             this.richTextBox2.LinkClicked += RichTextBox2_LinkClicked;
@@ -63,6 +65,25 @@ namespace QQChat
                     this.Close();
                 }));
             });
+        }
+
+        private void ChatForm_Resize(object sender, EventArgs e)
+        {
+            if(this.WindowState == FormWindowState.Minimized)
+            {
+                return;
+            }
+            var s = this.Size - ss;
+            if(s.Width < 0)
+            {
+                s.Width = 0;
+            }
+            if(s.Height < 0)
+            {
+                s.Height = 0;
+            }
+            this.flowLayoutPanel1.Size = s;
+            this.flowLayoutPanel1.AutoScrollMinSize = new Size(0, this.flowLayoutPanel1.Height + 10);
         }
 
         private void RichTextBox2_LinkClicked(object sender, LinkClickedEventArgs e)
@@ -200,15 +221,21 @@ namespace QQChat
             var now = DateTime.Now;
             var line = richTextBox2.Lines.FirstOrDefault();
             StringBuilder sb = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(line))
+            if (!string.IsNullOrWhiteSpace(line) && line.StartsWith("::"))
             {
                 try
                 {
-                    Regex r = new Regex(line);
-                    var str = string.Join(System.Environment.NewLine, contents);
-                    if (r.IsMatch(str))
+                    var reg = line.Substring(2);
+                    if (reg.Length > 0)
                     {
-                        richTextBox2.AppendText(System.Environment.NewLine + str);
+                        Regex r = new Regex(reg);
+                        var str = string.Join(System.Environment.NewLine, contents);
+                        if (r.IsMatch(str))
+                        {
+                            richTextBox2.AppendText(System.Environment.NewLine + now.ToString());
+                            richTextBox2.AppendText(System.Environment.NewLine + group + " " + tag + " " + name);
+                            richTextBox2.AppendText(System.Environment.NewLine + str);
+                        }
                     }
                 }
                 catch (Exception) { }
