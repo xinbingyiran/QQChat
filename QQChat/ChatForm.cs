@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -34,6 +35,7 @@ namespace QQChat
             this.listBox1.Click += (s, v) => { item = 0; };
             this.listBox2.Click += (s, v) => { item = 1; };
             this.richTextBox2.LinkClicked += RichTextBox2_LinkClicked;
+            this.richTextBox2.TextChanged += RichTextBox2_TextChanged;
             Task.Factory.StartNew(() =>
             {
                 QQ.MessageFriendReceived += QQ_MessageFriendReceived;
@@ -69,16 +71,16 @@ namespace QQChat
 
         private void ChatForm_Resize(object sender, EventArgs e)
         {
-            if(this.WindowState == FormWindowState.Minimized)
+            if (this.WindowState == FormWindowState.Minimized)
             {
                 return;
             }
             var s = this.Size - ss;
-            if(s.Width < 0)
+            if (s.Width < 0)
             {
                 s.Width = 0;
             }
-            if(s.Height < 0)
+            if (s.Height < 0)
             {
                 s.Height = 0;
             }
@@ -91,61 +93,72 @@ namespace QQChat
             OpenLink(e.LinkText);
         }
 
-        private System.IO.FileStream _fs;
+        private Dictionary<string, FileStream> _fsDict = new Dictionary<string, FileStream>();
         protected override void OnClosed(EventArgs e)
         {
-            if (_fs != null)
+            lock (_fsDict)
             {
-                try
+                foreach (var item in _fsDict)
                 {
-                    lock (_fs)
+                    lock (item.Value)
                     {
-                        _fs.Flush();
-                        _fs.Close();
+                        if (item.Value.CanWrite)
+                        {
+                            try
+                            {
+                                item.Value.Flush();
+                            }
+                            finally
+                            {
+                                item.Value.Close();
+                            }
+                        }
                     }
                 }
-                catch (Exception)
-                {
-
-                }
+                _fsDict.Clear();
             }
             base.OnClosed(e);
         }
 
-        private void WriteLog(string log)
+        private void WriteLog(string log, string logname)
         {
-            if (_fs == null && this.QQ != null && this.QQ.User != null)
+            FileStream fs = null;
+            lock (_fsDict)
+            {
+                if (_fsDict.ContainsKey(logname))
+                {
+                    fs = _fsDict[logname];
+                }
+            }
+            if (fs == null && this.QQ != null && this.QQ.User != null)
             {
                 try
                 {
                     var l = System.Reflection.Assembly.GetEntryAssembly().Location;
-                    var path = System.IO.Path.Combine(new System.IO.FileInfo(l).DirectoryName, this.QQ.User.QQNum + ".txt");
-                    _fs = System.IO.File.Open(path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
-                    if (_fs.Length == 0)
+                    var path = System.IO.Path.Combine(new System.IO.FileInfo(l).DirectoryName, this.QQ.User.QQNum + "_" + logname + ".txt");
+                    fs = System.IO.File.Open(path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+                    if (fs.Length == 0)
                     {
-                        lock (_fs)
-                        {
-                            _fs.Write(new byte[] { 0xff, 0xfe }, 0, 2);
-                            _fs.Flush();
-                        }
+                        fs.Write(new byte[] { 0xff, 0xfe }, 0, 2);
+                        fs.Flush();
                     }
                     Task.Factory.StartNew((a) =>
                     {
                         try
                         {
-                            var fs = a as System.IO.FileStream;
-                            if (fs == null || fs.CanWrite)
+                            var tfs = a as System.IO.FileStream;
+                            if (tfs == null || tfs.CanWrite)
                             {
                                 long ps = 0;
-                                while (fs.CanWrite)
+                                while (tfs.CanWrite)
                                 {
-                                    lock (fs)
+                                    lock (tfs)
                                     {
-                                        var p = fs.Position;
+                                        var p = tfs.Position;
                                         if (p != ps)
                                         {
                                             ps = p;
-                                            fs.Flush();
+                                            tfs.Flush();
                                         }
                                     }
                                     System.Threading.Thread.Sleep(10000);
@@ -156,18 +169,22 @@ namespace QQChat
                         {
                             return;
                         }
-                    }, _fs);
+                    }, fs);
+                    lock(_fsDict)
+                    {
+                        _fsDict.Add(logname, fs);
+                    }
                 }
                 catch { };
             }
-            if (_fs != null)
+            if (fs != null)
             {
                 try
                 {
                     var bs = System.Text.Encoding.Unicode.GetBytes(log);
-                    lock (_fs)
+                    lock (fs)
                     {
-                        _fs.Write(bs, 0, bs.Length);
+                        fs.Write(bs, 0, bs.Length);
                     }
                 }
                 catch { }
@@ -219,27 +236,7 @@ namespace QQChat
                 return;
             }
             var now = DateTime.Now;
-            var line = richTextBox2.Lines.FirstOrDefault();
             StringBuilder sb = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(line) && line.StartsWith("::"))
-            {
-                try
-                {
-                    var reg = line.Substring(2);
-                    if (reg.Length > 0)
-                    {
-                        Regex r = new Regex(reg);
-                        var str = string.Join(System.Environment.NewLine, contents);
-                        if (r.IsMatch(str))
-                        {
-                            richTextBox2.AppendText(System.Environment.NewLine + now.ToString());
-                            richTextBox2.AppendText(System.Environment.NewLine + group + " " + tag + " " + name);
-                            richTextBox2.AppendText(System.Environment.NewLine + str);
-                        }
-                    }
-                }
-                catch (Exception) { }
-            }
             this.flowLayoutPanel1.SuspendLayout();
             if (this.flowLayoutPanel1.Controls.Count > 100)
             {
@@ -309,6 +306,7 @@ namespace QQChat
                 {
                     var ll = new LinkLabel()
                     {
+                        Margin = _cp,
                         AutoSize = true,
                         Text = content,
                         ForeColor = Color.Black,
@@ -323,6 +321,7 @@ namespace QQChat
                 {
                     var tl = new Label()
                     {
+                        Margin = _cp,
                         AutoSize = true,
                         Text = content,
                         ForeColor = Color.Black,
@@ -333,15 +332,96 @@ namespace QQChat
                     p.SetFlowBreak(tl, true);
                 }
             }
-            WriteLog(sb.ToString());
+            WriteLog(sb.ToString(),"chat");
             p.SetFlowBreak(p, true);
             this.flowLayoutPanel1.Controls.Add(p);
             p.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
+            PickFilter(p, this.richTextBox2);
             if (this.checkBox1.Checked)
             {
                 this.flowLayoutPanel1.ScrollControlIntoView(p);
+            }
+        }
+
+        private string _filterString = null;
+        private Regex _filter = null;
+        private Regex _reg = new Regex("^#(.+)#$");
+
+        private void RichTextBox2_TextChanged(object sender, EventArgs e)
+        {
+            if (richTextBox2.Lines.Length == 0)
+            {
+                _filterString = null;
+                _filter = null;
+                return;
+            }
+            var line = richTextBox2.Lines[0];
+            var match = _reg.Match(line);
+            if (match.Success)
+            {
+                line = match.Groups[1].Value;
+                if (_filterString == line)
+                {
+                    return;
+                }
+                if (line.Length > 0)
+                {
+                    try
+                    {
+                        _filter = new Regex(line);
+                        _filterString = line;
+                    }
+                    catch (Exception)
+                    {
+                        _filterString = null;
+                        _filter = null;
+                    }
+                }
+                else
+                {
+                    _filterString = null;
+                    _filter = null;
+                }
+            }
+            else
+            {
+                _filterString = null;
+                _filter = null;
+            }
+        }
+
+        private void PickFilter(FlowLayoutPanel panel, RichTextBox box)
+        {
+            var filterString = this._filterString;
+            var filter = this._filter;
+            if (panel == null || box == null || filterString == null || filter == null)
+            {
+                return;
+            }
+            bool find = false;
+            foreach (Control c in panel.Controls)
+            {
+                if (c.Margin == _cp)
+                {
+                    try
+                    {
+                        if (filter.IsMatch(c.Text))
+                        {
+                            find = true;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+            if (find)
+            {
+                CopyPanelToRichTextBox(panel, box,"filter");
             }
         }
 
@@ -350,18 +430,39 @@ namespace QQChat
             var l = sender as Label;
             if (l != null)
             {
-                var p = l.Parent;
-                if (p != null)
+                CopyPanelToRichTextBox(l.Parent as FlowLayoutPanel, this.richTextBox2,"click");
+            }
+        }
+
+        private void CopyPanelToRichTextBox(FlowLayoutPanel panel, RichTextBox box,string logname)
+        {
+            if (panel == null || box == null)
+            {
+                return;
+            }
+            var lines = richTextBox2.Lines;
+            if (lines.Length > 500)
+            {
+                var start = richTextBox2.GetFirstCharIndexFromLine(1);
+                var end = richTextBox2.GetFirstCharIndexFromLine(lines.Length - 500 + 102);
+                richTextBox2.Select(start,end - start);
+                richTextBox2.SelectedText = "";
+            }
+            StringBuilder sb = new StringBuilder();
+            box.AppendText(System.Environment.NewLine);
+            sb.AppendLine();
+            foreach (Control c in panel.Controls)
+            {
+                box.SelectionColor = c.ForeColor;
+                box.AppendText(c.Text);
+                sb.Append(c.Text);
+                if (panel.GetFlowBreak(c))
                 {
-                    foreach (Control c in p.Controls)
-                    {
-                        if (c.ForeColor == Color.Black)
-                        {
-                            this.richTextBox2.AppendText(System.Environment.NewLine + c.Text);
-                        }
-                    }
+                    box.AppendText(System.Environment.NewLine);
+                    sb.AppendLine();
                 }
             }
+            WriteLog(sb.ToString(),logname);
         }
 
         private void Ll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

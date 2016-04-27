@@ -56,7 +56,7 @@ namespace QQChat
                 {
                     SetInfo(str);
                 }
-                if(cts.IsCancellationRequested)
+                if(!qq.IsPreLoged)
                 {
                     return;
                 }
