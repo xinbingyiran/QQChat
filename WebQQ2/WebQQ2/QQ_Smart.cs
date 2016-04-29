@@ -428,7 +428,7 @@ namespace WebQQ2.WebQQ2
                 var retcode = (root["retcode"] as int?).GetValueOrDefault(-1);
                 if (retcode == 102)
                 {
-                    //没信息
+                    yield return "没有收到消息";
                 }
                 else if (retcode == 103 || retcode == 121)
                 {

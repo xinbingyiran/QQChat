@@ -69,7 +69,14 @@ namespace QQChat
         {
             SetInfo(QQ.User.QQNum + "登录成功");
             var cf = new ChatForm() { QQ = QQ };
-            cf.FormClosed += (s, e) => { this.Show();this.RefreshQRCode(); };
+            cf.FormClosed += (s, e) => {
+                SetInfo("请稍候。。。。");
+                this.Invoke((Action)(() => this.pictureBox1.Image = null));
+                MainForm.Instance.HideGlobalForm();
+                this.Show();
+                this.BringToFront();
+                this.RefreshQRCode();
+            };
             cf.Show();
             this.Hide();
         }

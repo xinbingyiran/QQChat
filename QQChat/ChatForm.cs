@@ -43,6 +43,7 @@ namespace QQChat
                 QQ.GetUserList();
                 QQ.GetUserOnlineList();
                 QQ.GetGroupList();
+                BeginInvoke((Action)RefreshList);
                 Task.Factory.StartNew(() =>
                 {
                     foreach (var group in QQ.User.QQGroups.GroupList.Values.ToArray())
@@ -50,7 +51,6 @@ namespace QQChat
                         QQ.RefreshGroupInfo(group);
                     }
                 });
-                BeginInvoke((Action)RefreshList);
                 foreach (var msg in QQ.DoMessageLoop())
                 {
                     if (this.IsDisposed)
@@ -170,7 +170,7 @@ namespace QQChat
                             return;
                         }
                     }, fs);
-                    lock(_fsDict)
+                    lock (_fsDict)
                     {
                         _fsDict.Add(logname, fs);
                     }
@@ -332,7 +332,7 @@ namespace QQChat
                     p.SetFlowBreak(tl, true);
                 }
             }
-            WriteLog(sb.ToString(),"chat");
+            WriteLog(sb.ToString(), "chat");
             p.SetFlowBreak(p, true);
             this.flowLayoutPanel1.Controls.Add(p);
             p.ResumeLayout(false);
@@ -421,7 +421,7 @@ namespace QQChat
             }
             if (find)
             {
-                CopyPanelToRichTextBox(panel, box,"filter");
+                CopyPanelToRichTextBox(panel, box, "filter");
             }
         }
 
@@ -430,11 +430,11 @@ namespace QQChat
             var l = sender as Label;
             if (l != null)
             {
-                CopyPanelToRichTextBox(l.Parent as FlowLayoutPanel, this.richTextBox2,"click");
+                CopyPanelToRichTextBox(l.Parent as FlowLayoutPanel, this.richTextBox2, "click");
             }
         }
 
-        private void CopyPanelToRichTextBox(FlowLayoutPanel panel, RichTextBox box,string logname)
+        private void CopyPanelToRichTextBox(FlowLayoutPanel panel, RichTextBox box, string logname)
         {
             if (panel == null || box == null)
             {
@@ -445,7 +445,7 @@ namespace QQChat
             {
                 var start = richTextBox2.GetFirstCharIndexFromLine(1);
                 var end = richTextBox2.GetFirstCharIndexFromLine(lines.Length - 500 + 102);
-                richTextBox2.Select(start,end - start);
+                richTextBox2.Select(start, end - start);
                 richTextBox2.SelectedText = "";
             }
             StringBuilder sb = new StringBuilder();
@@ -462,7 +462,7 @@ namespace QQChat
                     sb.AppendLine();
                 }
             }
-            WriteLog(sb.ToString(),logname);
+            WriteLog(sb.ToString(), logname);
         }
 
         private void Ll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -504,6 +504,11 @@ namespace QQChat
                     }
                     break;
             }
+        }
+        
+        private void button2_Click(object sender, EventArgs e)
+        {
+            MainForm.Instance.ShowGlobalForm(QQ);
         }
     }
 }

@@ -43,9 +43,7 @@ namespace QQChat
             this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
             this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GlobalForm_FormClosing);
             this.Load += new System.EventHandler(this.GlobalForm_Load);
-            this.VisibleChanged += new System.EventHandler(this.GlobalForm_VisibleChanged);
         }
 
         public void InitQQ(QQ_Base qq)
@@ -55,33 +53,6 @@ namespace QQChat
 
         private void GlobalForm_Load(object sender, EventArgs e)
         {
-        }
-        private void GlobalForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                if(this._manager != null)
-                {
-                    this._manager.Close();
-                }
-                e.Cancel = true;
-                this.Hide();
-            }
-        }
-
-        private void GlobalForm_VisibleChanged(object sender, EventArgs e)
-        {
-            if (this.Visible)
-            {
-                this.Text = string.Format("{0}[{1}]", _qq.User.QQName, _qq.User.QQNum);
-                this._glist.Clear();
-                this._flist.Clear();
-                treeViewF.Nodes.Clear();
-                treeViewG.Nodes.Clear();
-                treeViewm.Nodes.Clear();
-                richTextBox1.Clear();
-                richTextBox2.Clear();
-            }
         }
 
         private void buttonf_Click(object sender, EventArgs e)
