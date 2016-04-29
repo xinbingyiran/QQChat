@@ -22,7 +22,6 @@ namespace QQChat
 
         private void InitEvent()
         {
-            this.FormClosing += QunMemberManager_FormClosing;
             this.buttonrefresh.Click += buttonrefresh_Click;
             this.listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
         }
@@ -63,15 +62,6 @@ namespace QQChat
                     var gm = gmdict[item.Key];
                     listBox2.Items.Add(string.Format("{0}[{1}] - {2}", g.groupname, g.groupid, gm.nick));
                 }
-            }
-        }
-
-        private void QunMemberManager_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true;
-                this.Hide();
             }
         }
 

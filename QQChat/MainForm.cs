@@ -21,19 +21,7 @@ namespace QQChat
             get;
             private set;
         }
-        private static MainForm _instance;
-        public static MainForm Instance
-        {
-            get
-            {
-                if(_instance == null)
-                {
-                    _instance = new MainForm();
-                }
-                return _instance;
-            }
-        }
-        private MainForm()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -58,7 +46,7 @@ namespace QQChat
         private void LoginOk()
         {
             SetInfo(QQ.User.QQNum + "登录成功");
-            ShowGlobalForm(QQ).FormClosing += _form_FormClosing;
+            MainForm.BindToParent(ShowGlobalForm(QQ), this);
             this.Hide();
         }
 
@@ -94,68 +82,40 @@ namespace QQChat
             SetInfo("请登录");
             webBrowser1.Navigate("http://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=549000912&s_url=http%3A//qzs.qq.com/&style=22");
         }
-
-        private GlobalForm _form = null;
-        public Form ShowGlobalForm(QQ_Base qq)
+        
+        public static Form ShowGlobalForm(QQ_Base qq)
         {
-            if (qq == null || !qq.IsPreLoged)
-            {
-                return _form;
-            }
-            if (_form == null)
-            {
-                _form = new GlobalForm();
-                _form.InitQQ(qq);
-            }
-            _form.Show();
-            _form.BringToFront();
-            return _form;
+            var form = new GlobalForm();
+            form.InitQQ(qq);
+            form.Show();
+            return form;
         }
 
-        private void _form_FormClosing(object sender, FormClosingEventArgs e)
+        public static void BindToParent(Form form, Form parent)
         {
-            if(e.CloseReason == CloseReason.UserClosing)
+            form.FormClosed += (s, e) =>
             {
-                e.Cancel = true;
-                this.HideGlobalForm();
-                this.HideQrForm();
-                this.Show();
-                this.BringToFront();
-                this.TraceToLoginForm();
-            }
+                if (parent != null && !parent.IsDisposed)
+                {
+                    parent.Show();
+                }
+            };
+            parent.FormClosed += (s, e) =>
+            {
+                form.Close();
+            };
         }
 
-        public void HideQrForm()
+        public static Form ShowQRForm()
         {
-            if(_qrform != null)
-            {
-                _qrform.Hide();
-            }
-        }
-
-        public void HideGlobalForm()
-        {
-            if (_form != null)
-            {
-                _form.Hide();
-            }
-        }
-
-        private QRForm _qrform = null;
-        public Form ShowQRForm()
-        {
-            if (_qrform == null)
-            {
-                _qrform = new QRForm();
-            }
-            _qrform.Show();
-            _qrform.BringToFront();
-            return _qrform;
+            var form = new QRForm();
+            form.Show();
+            return form;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            ShowQRForm().FormClosing += _form_FormClosing;
+            MainForm.BindToParent(ShowQRForm(), this);
             this.Hide();
         }
     }

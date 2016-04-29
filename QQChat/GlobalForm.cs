@@ -21,7 +21,6 @@ namespace QQChat
         private List<QzoneFriend> _flist = new List<QzoneFriend>();
         private List<QunGroup> _glist = new List<QunGroup>();
         private QQ_Base _qq;
-        private QunMemberManager _manager;
         public GlobalForm()
         {
             InitializeComponent();
@@ -512,17 +511,10 @@ ismanager:   {3}",
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (_manager == null)
-            {
-                _manager = new QunMemberManager();
-            }
-            _manager.Show();
-            if (_manager.WindowState == FormWindowState.Minimized)
-            {
-                _manager.WindowState = FormWindowState.Normal;
-            }
-            _manager.Activate();
-            _manager.InitParas(this._flist, this._glist);
+            var manager = new QunMemberManager();
+            MainForm.BindToParent(manager,this);
+            manager.Show();
+            manager.InitParas(this._flist, this._glist);
         }
     }
 

@@ -72,11 +72,10 @@ namespace QQChat
             cf.FormClosed += (s, e) => {
                 SetInfo("请稍候。。。。");
                 this.Invoke((Action)(() => this.pictureBox1.Image = null));
-                MainForm.Instance.HideGlobalForm();
-                this.Show();
                 this.BringToFront();
                 this.RefreshQRCode();
             };
+            MainForm.BindToParent(cf, this);
             cf.Show();
             this.Hide();
         }
