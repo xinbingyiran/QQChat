@@ -53,11 +53,14 @@ namespace QQChat
                 });
                 foreach (var msg in QQ.DoMessageLoop())
                 {
+                    WriteLog(msg,"log");
                     if (this.IsDisposed)
                     {
+                        WriteLog("disposed", "log");
                         return;
                     }
                 }
+                WriteLog("exit", "log");
                 BeginInvoke((Action)(() =>
                 {
                     if (this.IsDisposed)
