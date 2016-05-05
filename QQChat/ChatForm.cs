@@ -53,7 +53,10 @@ namespace QQChat
                 });
                 foreach (var msg in QQ.DoMessageLoop())
                 {
-                    WriteLog(msg,"log");
+                    if(!string.IsNullOrWhiteSpace(msg))
+                    {
+                        WriteLog(msg + Environment.NewLine, "log");
+                    }
                     if (this.IsDisposed)
                     {
                         WriteLog("disposed", "log");
