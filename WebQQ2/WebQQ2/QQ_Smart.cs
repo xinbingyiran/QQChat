@@ -445,6 +445,19 @@ namespace WebQQ2.WebQQ2
                 }
                 else if (retcode == 0)
                 {
+                    //{"errmsg":"","retcode":0}
+                    if (!root.ContainsKey("result"))
+                    {
+                        if(root.ContainsKey("errmsg"))
+                        {
+                            yield return QQHelper.ToJson(root["errmsg"]);
+                        }
+                        else
+                        {
+                            yield return str;
+                        }
+                        continue;
+                    }
                     System.Collections.ArrayList list = root["result"] as System.Collections.ArrayList;
                     for (int i = list.Count - 1; i >= 0; i--)//倒序
                     {
