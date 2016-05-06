@@ -26,6 +26,7 @@ namespace QQChat
 
         private void ChatForm_Load(object sender, EventArgs e)
         {
+            this.Text = QQ.User.QQName + "[" + QQ.User.QQNum + "]";
             this.Resize += ChatForm_Resize;
             ss = this.Size - this.flowLayoutPanel1.Size;
             this.flowLayoutPanel1.WrapContents = false;
@@ -51,17 +52,42 @@ namespace QQChat
                         QQ.RefreshGroupInfo(group);
                     }
                 });
-                foreach (var msg in QQ.DoMessageLoop())
+                while (QQ.IsLoged)
                 {
-                    if(!string.IsNullOrWhiteSpace(msg))
+                    foreach (var msg in QQ.DoMessageLoop())
                     {
-                        WriteLog(msg + Environment.NewLine, "log");
+                        if (!string.IsNullOrWhiteSpace(msg))
+                        {
+                            WriteLog(msg + Environment.NewLine, "log");
+                        }
+                        if (this.IsDisposed)
+                        {
+                            WriteLog("disposed", "log");
+                            return;
+                        }
                     }
-                    if (this.IsDisposed)
+                    WriteLog("relogin", "log");
+                    foreach (var str in QQ.LoginClient())
                     {
-                        WriteLog("disposed", "log");
-                        return;
+                        if (QQ.IsLoged)
+                        {
+                            break;
+                        }
                     }
+                }
+            }).ContinueWith(t =>
+            {
+                if (t.IsFaulted || t.Exception != null)
+                {
+                    Exception exception = t.Exception;
+                    if (exception.InnerException != null)
+                    {
+                        exception = exception.InnerException;
+                    }
+                    WriteLog(
+                        QQ.LastStr
+                        + Environment.NewLine +
+                        exception.Message + Environment.NewLine + exception.StackTrace, "log");
                 }
                 WriteLog("exit", "log");
                 BeginInvoke((Action)(() =>
@@ -187,7 +213,7 @@ namespace QQChat
             {
                 try
                 {
-                    var bs = System.Text.Encoding.Unicode.GetBytes(log);
+                    var bs = System.Text.Encoding.Unicode.GetBytes(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine + log + Environment.NewLine);
                     lock (fs)
                     {
                         fs.Write(bs, 0, bs.Length);
@@ -511,10 +537,10 @@ namespace QQChat
                     break;
             }
         }
-        
+
         private void button2_Click(object sender, EventArgs e)
         {
-            MainForm.BindToParent(MainForm.ShowGlobalForm(QQ),this);
+            MainForm.BindToParent(MainForm.ShowGlobalForm(QQ), this);
         }
     }
 }

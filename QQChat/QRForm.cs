@@ -52,11 +52,19 @@ namespace QQChat
                 }
                 var img = qq.GetQrImage();
                 this.Invoke((Action<Bitmap>)((bm) => this.pictureBox1.Image = bm), new object[] { img });
-                foreach (var str in qq.DoSmartLogin(true, cts))
+                foreach (var str in qq.DoSmartLogin(cts))
                 {
                     SetInfo(str);
                 }
                 if(!qq.IsPreLoged)
+                {
+                    return;
+                }
+                foreach (var str in qq.LoginClient(cts))
+                {
+                    SetInfo(str);
+                }
+                if (!qq.IsLoged)
                 {
                     return;
                 }

@@ -65,6 +65,13 @@ namespace WebQQ2.WebQQ2
                 return (GTK != null && GTK.Length > 0);
             }
         }
+        public bool IsLoged
+        {
+            get
+            {
+                return (PsessionID != null && PsessionID.Length > 0);
+            }
+        }
 
         private static string GenerateClientID()
         {

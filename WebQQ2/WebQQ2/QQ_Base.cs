@@ -43,6 +43,13 @@ namespace WebQQ2.WebQQ2
                 return this._user != null && this._user.IsPreLoged;
             }
         }
+        public bool IsLoged
+        {
+            get
+            {
+                return this._user != null && this._user.IsLoged;
+            }
+        }
 
 
 
