@@ -221,7 +221,7 @@ namespace WebQQ2.WebQQ2
             int rnumber = 100;
             while (true)
             {
-                if(cts != null && cts.IsCancellationRequested)
+                if (cts != null && cts.IsCancellationRequested)
                 {
                     yield break;
                 }
@@ -263,7 +263,7 @@ namespace WebQQ2.WebQQ2
                     yield return "检查出错";
                     yield break;
                 }
-                switch(items[0])
+                switch (items[0])
                 {
                     case "0":
                         {
@@ -432,298 +432,321 @@ namespace WebQQ2.WebQQ2
                     }
                 }
                 tick = 0;
-                Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(str);
-                var retcode = (root["retcode"] as int?).GetValueOrDefault(-1);
-                if (retcode == 102)
+                bool bk = false;
+                var ret = string.Empty;
+                try
                 {
-                    yield return string.Empty;
+                    ret = DealMessage(str, out bk);
                 }
-                else if (retcode == 103 || retcode == 121)
+                catch (Exception ex)
                 {
-                    yield return "掉线";
-                    yield break;
-                }
-                else if (retcode == 0)
-                {
-                    //{"errmsg":"","retcode":0}
-                    if (!root.ContainsKey("result"))
+                    if (ex is NullReferenceException)
                     {
-                        if(root.ContainsKey("errmsg"))
-                        {
-                            yield return QQHelper.ToJson(root["errmsg"]);
-                        }
-                        else
-                        {
-                            yield return str;
-                        }
-                        continue;
+                        RefreshBaseInfo();
+                        ret = DealMessage(str, out bk);
                     }
-                    System.Collections.ArrayList list = root["result"] as System.Collections.ArrayList;
-                    for (int i = list.Count - 1; i >= 0; i--)//倒序
+                    else
                     {
-                        Dictionary<string, object> ele = list[i] as Dictionary<string, object>;
-                        if (ele == null) continue;
-                        StringBuilder sb = new StringBuilder();
-                        string poll_type = ele["poll_type"] as string;
-                        Dictionary<string, object> messagevalue = ele["value"] as Dictionary<string, object>;
-                        //sb.AppendFormat("poll_type:{0}\r\n", poll_type);
-                        var ret = string.Empty;
-                        try
-                        {
-                            switch (poll_type)
-                            {
-                                case "buddies_status_change":
-                                    {
-
-                                        string status = messagevalue["status"].ToString();
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]), true);
-                                        if (friend != null)
-                                        {
-                                            if (friend.status != status)
-                                            {
-                                                friend.status = status;
-                                                if (MessageFriendReceived != null)
-                                                {
-                                                    MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_STATUS, status));
-                                                }
-                                            }
-                                        }
-                                    }
-                                    break;
-
-                                case "message":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
-                                            long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                            System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
-                                            MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
-                                        }
-                                    }
-                                    break;
-                                case "sess_message":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            QQFriend friend = _user.GetUserSess(Convert.ToInt64(messagevalue["from_uin"]));
-                                            friend.num = Convert.ToInt64(messagevalue["ruin"]);
-                                            friend.id = Convert.ToInt64(messagevalue["id"]);
-                                            long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                            System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
-                                            MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_SESS, msgs));
-                                        }
-                                    }
-                                    break;
-
-                                case "shake_message":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
-                                            long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                            MessageFriendReceived(this, new FriendEventArgs(friend, msgid, DateTime.Now, MessageEventType.MESSAGE_SHAKE));
-                                        }
-                                    }
-                                    break;
-                                case "group_message":
-                                    {
-                                        if (MessageGroupReceived != null)
-                                        {
-                                            QQGroup group = _user.GetUserGroup(Convert.ToInt64(messagevalue["from_uin"]));
-                                            System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
-                                            QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
-                                            long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                            if (member == null)
-                                            {
-                                                new Task(() =>
-                                                {
-                                                    RefreshGroupInfo(group);
-                                                    member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
-                                                    MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
-                                                }).Start();
-                                            }
-                                            else
-                                            {
-                                                MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case "group_web_message":
-                                    {
-                                        if (MessageGroupReceived != null)
-                                        {
-                                            QQGroup group = _user.GetUserGroup(Convert.ToInt64(messagevalue["from_uin"]));
-                                            string xml = messagevalue["xml"] as string;
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>() { { "xml", xml } };
-                                            QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
-                                            long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                            if (member == null)
-                                            {
-                                                new Task(() =>
-                                                {
-                                                    RefreshGroupInfo(group); member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
-                                                    member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
-                                                    MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
-                                                }).Start();
-                                            }
-                                            else
-                                            {
-                                                MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case "file_message":
-                                    if (MessageFriendReceived != null)
-                                    {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>
-                                        {
-                                            {"poll_type", poll_type}
-                                        };
-                                        foreach (string key in messagevalue.Keys)
-                                        {
-                                            msgs.Add(key, messagevalue[key]);
-                                        }
-                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                        MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_FILE, msgs));
-                                    }
-                                    break;
-                                case "push_offfile":
-                                    if (MessageFriendReceived != null)
-                                    {
-                                        QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
-                                        Dictionary<string, object> msgs = new Dictionary<string, object>
-                                        {
-                                            {"poll_type", poll_type}
-                                        };
-                                        foreach (string key in messagevalue.Keys)
-                                        {
-                                            msgs.Add(key, messagevalue[key]);
-                                        }
-                                        long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                        MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_OFFLINE, msgs));
-                                    }
-                                    break;
-                                case "kick_message":
-                                    {
-                                        _user.Status = "offline";
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>
-                                            {
-                                                {"poll_type", poll_type}
-                                            };
-                                            foreach (string key in messagevalue.Keys)
-                                            {
-                                                msgs.Add(key, messagevalue[key]);
-                                            }
-                                            MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_KICK, msgs));
-                                        }
-                                    }
-                                    break;
-                                case "input_notify":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>
-                                            {
-                                                {"poll_type", poll_type}
-                                            };
-                                            long msgid = Convert.ToInt64(messagevalue["msg_id"]);
-                                            foreach (string key in messagevalue.Keys)
-                                            {
-                                                msgs.Add(key, messagevalue[key]);
-                                            }
-                                            MessageFriendReceived(this, new FriendEventArgs(friend, msgid, DateTime.Now, MessageEventType.MESSAGE_INPUT, msgs));
-                                        }
-                                    }
-                                    break;
-                                case "tips":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>
-                                            {
-                                                {"poll_type", poll_type}
-                                            };
-                                            foreach (string key in messagevalue.Keys)
-                                            {
-                                                msgs.Add(key, messagevalue[key]);
-                                            }
-                                            MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
-                                        }
-                                    }
-                                    break;
-                                case "sys_g_message":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>
-                                            {
-                                                {"poll_type", poll_type}
-                                            };
-                                            foreach (string key in messagevalue.Keys)
-                                            {
-                                                msgs.Add(key, messagevalue[key]);
-                                            }
-                                            MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
-                                        }
-                                    }
-                                    break;
-                                case "system_message":
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>
-                                            {
-                                                {"poll_type", poll_type}
-                                            };
-                                            foreach (string key in messagevalue.Keys)
-                                            {
-                                                msgs.Add(key, messagevalue[key]);
-                                            }
-                                            MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
-                                        }
-                                    }
-                                    break;
-                                default:
-                                    {
-                                        if (MessageFriendReceived != null)
-                                        {
-                                            Dictionary<string, object> msgs = new Dictionary<string, object>
-                                            {
-                                                {"poll_type", poll_type}
-                                            };
-                                            foreach (string key in messagevalue.Keys)
-                                            {
-                                                msgs.Add(key, messagevalue[key]);
-                                            }
-                                            MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_UNKNOW, msgs));
-                                        }
-                                    }
-                                    break;
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            ret = str + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace;
-                        }
-                        yield return ret;
+                        ret = str;
                     }
                 }
-                else
+                yield return ret;
+                if (bk)
                 {
-                    yield return str;
                     yield break;
                 }
             }
+        }
+
+        public void RefreshBaseInfo()
+        {
+            GetUserList();
+            GetUserOnlineList();
+            GetGroupList();
+        }
+
+        private string DealMessage(string str, out bool bk)
+        {
+            bk = false;
+            Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(str);
+            var retcode = (root["retcode"] as int?).GetValueOrDefault(-1);
+            if (retcode == 102)
+            {
+                return string.Empty;
+            }
+            else if (retcode == 103 || retcode == 121)
+            {
+                bk = true;
+                return "掉线";
+            }
+            else if (retcode == 0)
+            {
+                //{"errmsg":"","retcode":0}
+                if (!root.ContainsKey("result"))
+                {
+                    if (root.ContainsKey("errmsg"))
+                    {
+                        return root["errmsg"] as string ?? Convert.ToString(root["errmsg"]);
+                    }
+                    else
+                    {
+                        return str;
+                    }
+                }
+                System.Collections.ArrayList list = root["result"] as System.Collections.ArrayList;
+                for (int i = list.Count - 1; i >= 0; i--)//倒序
+                {
+                    Dictionary<string, object> ele = list[i] as Dictionary<string, object>;
+                    if (ele == null) continue;
+                    StringBuilder sb = new StringBuilder();
+                    string poll_type = ele["poll_type"] as string;
+                    Dictionary<string, object> messagevalue = ele["value"] as Dictionary<string, object>;
+                    //sb.AppendFormat("poll_type:{0}\r\n", poll_type);
+                    switch (poll_type)
+                    {
+                        case "buddies_status_change":
+                            {
+
+                                string status = messagevalue["status"].ToString();
+                                QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["uin"]), true);
+                                if (friend != null)
+                                {
+                                    if (friend.status != status)
+                                    {
+                                        friend.status = status;
+                                        if (MessageFriendReceived != null)
+                                        {
+                                            MessageFriendReceived(this, new FriendEventArgs(friend, 0, DateTime.Now, MessageEventType.MESSAGE_STATUS, status));
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "message":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                    long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                    System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
+                                    MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
+                                }
+                            }
+                            break;
+                        case "sess_message":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    QQFriend friend = _user.GetUserSess(Convert.ToInt64(messagevalue["from_uin"]));
+                                    friend.num = Convert.ToInt64(messagevalue["ruin"]);
+                                    friend.id = Convert.ToInt64(messagevalue["id"]);
+                                    long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                    System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
+                                    MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_SESS, msgs));
+                                }
+                            }
+                            break;
+
+                        case "shake_message":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                    long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                    MessageFriendReceived(this, new FriendEventArgs(friend, msgid, DateTime.Now, MessageEventType.MESSAGE_SHAKE));
+                                }
+                            }
+                            break;
+                        case "group_message":
+                            {
+                                if (MessageGroupReceived != null)
+                                {
+                                    QQGroup group = _user.GetUserGroup(Convert.ToInt64(messagevalue["from_uin"]));
+                                    System.Collections.ArrayList array = new ArrayList(messagevalue["content"] as System.Collections.ArrayList);
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>() { { "content", array } };
+                                    QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                    long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                    if (member == null)
+                                    {
+                                        new Task(() =>
+                                        {
+                                            RefreshGroupInfo(group);
+                                            member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                            MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
+                                        }).Start();
+                                    }
+                                    else
+                                    {
+                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_COMMON, msgs));
+                                    }
+                                }
+                            }
+                            break;
+                        case "group_web_message":
+                            {
+                                if (MessageGroupReceived != null)
+                                {
+                                    QQGroup group = _user.GetUserGroup(Convert.ToInt64(messagevalue["from_uin"]));
+                                    string xml = messagevalue["xml"] as string;
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>() { { "xml", xml } };
+                                    QQGroupMember member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                    long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                    if (member == null)
+                                    {
+                                        new Task(() =>
+                                        {
+                                            RefreshGroupInfo(group); member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                            member = group.GetGroupMember(Convert.ToInt64(messagevalue["send_uin"]));
+                                            MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
+                                        }).Start();
+                                    }
+                                    else
+                                    {
+                                        MessageGroupReceived(this, new GroupEventArgs(group, member, msgid, DateTime.Now, MessageEventType.MESSAGE_COMMON, msgs));
+                                    }
+                                }
+                            }
+                            break;
+                        case "file_message":
+                            if (MessageFriendReceived != null)
+                            {
+                                QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                Dictionary<string, object> msgs = new Dictionary<string, object>
+                                        {
+                                            {"poll_type", poll_type}
+                                        };
+                                foreach (string key in messagevalue.Keys)
+                                {
+                                    msgs.Add(key, messagevalue[key]);
+                                }
+                                long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_FILE, msgs));
+                            }
+                            break;
+                        case "push_offfile":
+                            if (MessageFriendReceived != null)
+                            {
+                                QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                Dictionary<string, object> msgs = new Dictionary<string, object>
+                                        {
+                                            {"poll_type", poll_type}
+                                        };
+                                foreach (string key in messagevalue.Keys)
+                                {
+                                    msgs.Add(key, messagevalue[key]);
+                                }
+                                long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                MessageFriendReceived(this, new FriendEventArgs(friend, msgid, QQHelper.ToTime(Convert.ToInt64(messagevalue["time"])), MessageEventType.MESSAGE_OFFLINE, msgs));
+                            }
+                            break;
+                        case "kick_message":
+                            {
+                                _user.Status = "offline";
+                                if (MessageFriendReceived != null)
+                                {
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
+                                    foreach (string key in messagevalue.Keys)
+                                    {
+                                        msgs.Add(key, messagevalue[key]);
+                                    }
+                                    MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_KICK, msgs));
+                                }
+                            }
+                            break;
+                        case "input_notify":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    QQFriend friend = _user.GetUserFriend(Convert.ToInt64(messagevalue["from_uin"]), true);
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
+                                    long msgid = Convert.ToInt64(messagevalue["msg_id"]);
+                                    foreach (string key in messagevalue.Keys)
+                                    {
+                                        msgs.Add(key, messagevalue[key]);
+                                    }
+                                    MessageFriendReceived(this, new FriendEventArgs(friend, msgid, DateTime.Now, MessageEventType.MESSAGE_INPUT, msgs));
+                                }
+                            }
+                            break;
+                        case "tips":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
+                                    foreach (string key in messagevalue.Keys)
+                                    {
+                                        msgs.Add(key, messagevalue[key]);
+                                    }
+                                    MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
+                                }
+                            }
+                            break;
+                        case "sys_g_message":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
+                                    foreach (string key in messagevalue.Keys)
+                                    {
+                                        msgs.Add(key, messagevalue[key]);
+                                    }
+                                    MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
+                                }
+                            }
+                            break;
+                        case "system_message":
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
+                                    foreach (string key in messagevalue.Keys)
+                                    {
+                                        msgs.Add(key, messagevalue[key]);
+                                    }
+                                    MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_SYSTEM, msgs));
+                                }
+                            }
+                            break;
+                        default:
+                            {
+                                if (MessageFriendReceived != null)
+                                {
+                                    Dictionary<string, object> msgs = new Dictionary<string, object>
+                                            {
+                                                {"poll_type", poll_type}
+                                            };
+                                    foreach (string key in messagevalue.Keys)
+                                    {
+                                        msgs.Add(key, messagevalue[key]);
+                                    }
+                                    MessageFriendReceived(this, new FriendEventArgs(null, 0, DateTime.Now, MessageEventType.MESSAGE_UNKNOW, msgs));
+                                }
+                            }
+                            break;
+                    }
+                    return string.Empty;
+                }
+            }
+            bk = true;
+            return str;
         }
 
         public void RefreshGroupInfo(QQGroup group, int timeout = 60000)
@@ -734,7 +757,7 @@ namespace WebQQ2.WebQQ2
         public void GetGroupMembers(QQGroup group, int timeout = 60000)
         {
             string url = string.Format(qq_smart_get_group_info_ext2, group.code, _user.VfWebQQ, QQHelper.GetTime());
-            string resultStr = _helper.GetUrlText(url,qq_smart_referurl,timeout);
+            string resultStr = _helper.GetUrlText(url, qq_smart_referurl, timeout);
             Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
             if (root != null && root["retcode"] as int? == 0)
             {
@@ -1044,7 +1067,7 @@ namespace WebQQ2.WebQQ2
 
         public void GetUserOnlineList()
         {
-            string url = string.Format(qq_smart_get_online_buddies2,_user.VfWebQQ,_user.ClientID,_user.PsessionID,QQHelper.GetTime());
+            string url = string.Format(qq_smart_get_online_buddies2, _user.VfWebQQ, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
             string resultStr = _helper.GetUrlText(url, qq_smart_referurl, int.MaxValue);
             Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
             if (root != null && root["retcode"] as int? == 0)
@@ -1124,8 +1147,8 @@ namespace WebQQ2.WebQQ2
             {
                 return false;
             }
-            var dict = QQHelper.FromJson<Dictionary<string,object>>(result);
-            if(dict.ContainsKey("errCode") && dict["errCode"].ToString() == "0")
+            var dict = QQHelper.FromJson<Dictionary<string, object>>(result);
+            if (dict.ContainsKey("errCode") && dict["errCode"].ToString() == "0")
             {
                 return true;
             }

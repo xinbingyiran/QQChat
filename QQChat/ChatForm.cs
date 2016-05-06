@@ -41,37 +41,53 @@ namespace QQChat
             {
                 QQ.MessageFriendReceived += QQ_MessageFriendReceived;
                 QQ.MessageGroupReceived += QQ_MessageGroupReceived;
-                QQ.GetUserList();
-                QQ.GetUserOnlineList();
-                QQ.GetGroupList();
-                BeginInvoke((Action)RefreshList);
-                Task.Factory.StartNew(() =>
-                {
-                    foreach (var group in QQ.User.QQGroups.GroupList.Values.ToArray())
-                    {
-                        QQ.RefreshGroupInfo(group);
-                    }
-                });
                 while (QQ.IsLoged)
                 {
-                    foreach (var msg in QQ.DoMessageLoop())
+                    QQ.RefreshBaseInfo();
+                    Invoke((Action)RefreshList);
+                    Task.Factory.StartNew(() =>
                     {
-                        if (!string.IsNullOrWhiteSpace(msg))
+                        foreach (var group in QQ.User.QQGroups.GroupList.Values.ToArray())
                         {
-                            WriteLog(msg + Environment.NewLine, "log");
+                            QQ.RefreshGroupInfo(group);
                         }
-                        if (this.IsDisposed)
+                    });
+                    try
+                    {
+                        foreach (var msg in QQ.DoMessageLoop())
                         {
-                            WriteLog("disposed", "log");
-                            return;
+                            if (!string.IsNullOrWhiteSpace(msg))
+                            {
+                                WriteLog(msg + Environment.NewLine, "log");
+                            }
+                            if (this.IsDisposed)
+                            {
+                                WriteLog("disposed", "log");
+                                return;
+                            }
                         }
                     }
-                    WriteLog("relogin", "log");
-                    foreach (var str in QQ.LoginClient())
+                    catch(Exception ex)
                     {
-                        if (QQ.IsLoged)
+                        Exception exception = ex;
+                        if (exception.InnerException != null)
                         {
-                            break;
+                            exception = exception.InnerException;
+                        }
+                        WriteLog(
+                            QQ.LastStr
+                            + Environment.NewLine +
+                            exception.Message + Environment.NewLine + exception.StackTrace, "log");
+                    }
+                    if (QQ.IsPreLoged)
+                    {
+                        WriteLog("relogin", "log");
+                        foreach (var str in QQ.LoginClient())
+                        {
+                            if (QQ.IsLoged)
+                            {
+                                break;
+                            }
                         }
                     }
                 }

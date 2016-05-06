@@ -47,7 +47,7 @@ namespace WebQQ2.WebQQ2
         {
             get
             {
-                return this._user != null && this._user.IsLoged;
+                return this.IsPreLoged && this._user != null && this._user.IsLoged;
             }
         }
 
