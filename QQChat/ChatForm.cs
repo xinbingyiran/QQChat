@@ -67,7 +67,7 @@ namespace QQChat
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Exception exception = ex;
                         if (exception.InnerException != null)
@@ -488,11 +488,68 @@ namespace QQChat
             {
                 return;
             }
-            var lines = richTextBox2.Lines;
-            if (lines.Length > 500)
+            var text = richTextBox2.Text;
+            var length = text.Length;
+            if (length > 5000)
             {
-                var start = richTextBox2.GetFirstCharIndexFromLine(1);
-                var end = richTextBox2.GetFirstCharIndexFromLine(lines.Length - 500 + 102);
+                int end = 0;
+                char ch = '\0';
+                while (end < length)
+                {
+                    ch = text[end];
+                    if ((ch == '\r') || (ch == '\n'))
+                    {
+                        break;
+                    }
+                    end++;
+                }
+                if ((end < length) && (text[end] == '\r'))
+                {
+                    end++;
+                }
+                if ((end < length) && (text[end] == '\n'))
+                {
+                    end++;
+                }
+                var start = end;
+                if (end < 1000)
+                {
+                    end = 1000;
+                }
+                while (end < length)
+                {
+                    while (end < length)
+                    {
+                        ch = text[end];
+                        if ((ch == '\r') || (ch == '\n'))
+                        {
+                            break;
+                        }
+                        end++;
+                    }
+                    if ((end < length) && (text[end] == '\r'))
+                    {
+                        end++;
+                    }
+                    if ((end < length) && (text[end] == '\n'))
+                    {
+                        end++;
+                    }
+                    ch = text[end];
+                    if ((ch == '\r') || (ch == '\n'))
+                    {
+                        break;
+                    }
+                    end++;
+                }
+                if ((end < length) && (text[end] == '\r'))
+                {
+                    end++;
+                }
+                if ((end < length) && (text[end] == '\n'))
+                {
+                    end++;
+                }
                 richTextBox2.Select(start, end - start);
                 richTextBox2.SelectedText = "";
             }
