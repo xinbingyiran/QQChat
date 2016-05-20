@@ -115,7 +115,7 @@ namespace QQChat
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "文本文件|*.txt|所有文件|*.*";
-            sfd.FileName = "QFriend_" + this.Text;
+            sfd.FileName = "QFriend_" + _qq.User.QQNum;
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -195,7 +195,7 @@ namespace QQChat
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "文本文件|*.txt|所有文件|*.*";
-            sfd.FileName = "QGroup_" + this.Text;
+            sfd.FileName = "QGroup_" + _qq.User.QQNum;
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -456,13 +456,13 @@ ismanager:   {3}",
                 return;
             }
             bool cancel = false;
-            var fname = fbd.SelectedPath + "\\QFriend_" + this.Text + ".txt";
+            var fname = fbd.SelectedPath + "\\QFriend_" + _qq.User.QQNum + ".txt";
             if (CanSave(fname, ref cancel))
             {
                 ExportQFriend(fname);
             }
             if (cancel) { return; }
-            var gname = fbd.SelectedPath + "\\QGroup_" + this.Text + ".txt";
+            var gname = fbd.SelectedPath + "\\QGroup_" + _qq.User.QQNum + ".txt";
             if (CanSave(gname, ref cancel))
             {
                 ExportQGroup(gname);

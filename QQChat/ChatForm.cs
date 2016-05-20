@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WebQQ2.WebQQ2;
@@ -23,9 +24,12 @@ namespace QQChat
         public QQ_Smart QQ { get; internal set; }
         private int item = 0;
         private Size ss = Size.Empty;
+        private CancellationTokenSource _fsCts = null;
 
         private void ChatForm_Load(object sender, EventArgs e)
         {
+            var cts = new CancellationTokenSource();
+            this._fsCts = cts;
             this.Text = QQ.User.QQName + "[" + QQ.User.QQNum + "]";
             this.Resize += ChatForm_Resize;
             ss = this.Size - this.flowLayoutPanel1.Size;
@@ -60,9 +64,8 @@ namespace QQChat
                             {
                                 WriteLog(msg + Environment.NewLine, "log");
                             }
-                            if (this.IsDisposed)
+                            if (cts.IsCancellationRequested)
                             {
-                                WriteLog("disposed", "log");
                                 return;
                             }
                         }
@@ -105,7 +108,6 @@ namespace QQChat
                         + Environment.NewLine +
                         exception.Message + Environment.NewLine + exception.StackTrace, "log");
                 }
-                WriteLog("exit", "log");
                 BeginInvoke((Action)(() =>
                 {
                     if (this.IsDisposed)
@@ -142,30 +144,26 @@ namespace QQChat
         }
 
         private Dictionary<string, FileStream> _fsDict = new Dictionary<string, FileStream>();
-        protected override void OnClosed(EventArgs e)
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            lock (_fsDict)
+            if (e.CloseReason == CloseReason.UserClosing && MessageBox.Show("确认退出？", "退出提示", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
             {
-                foreach (var item in _fsDict)
-                {
-                    lock (item.Value)
-                    {
-                        if (item.Value.CanWrite)
-                        {
-                            try
-                            {
-                                item.Value.Flush();
-                            }
-                            finally
-                            {
-                                item.Value.Close();
-                            }
-                        }
-                    }
-                }
-                _fsDict.Clear();
+                e.Cancel = true;
             }
-            base.OnClosed(e);
+            else
+            {
+                base.OnFormClosing(e);
+            }
+        }
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            var cts = this._fsCts;
+            if(cts != null && !cts.IsCancellationRequested)
+            {
+                cts.Cancel();
+            }
+            base.OnFormClosed(e);
         }
 
         private void WriteLog(string log, string logname)
@@ -183,8 +181,17 @@ namespace QQChat
                 try
                 {
                     var l = System.Reflection.Assembly.GetEntryAssembly().Location;
-                    var path = System.IO.Path.Combine(new System.IO.FileInfo(l).DirectoryName, this.QQ.User.QQNum + "_" + logname + ".txt");
-                    fs = System.IO.File.Open(path, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+                    var path = System.IO.Path.Combine(new System.IO.FileInfo(l).DirectoryName, this.QQ.User.QQNum, logname + ".txt");
+                    var fi = new FileInfo(path);
+                    if(!fi.Directory.Exists)
+                    {
+                        fi.Directory.Create();
+                    }
+                    fs = fi.Open(System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+                    lock (_fsDict)
+                    {
+                        _fsDict.Add(logname, fs);
+                    }
                     if (fs.Length == 0)
                     {
                         fs.Write(new byte[] { 0xff, 0xfe }, 0, 2);
@@ -194,7 +201,14 @@ namespace QQChat
                     {
                         try
                         {
-                            var tfs = a as System.IO.FileStream;
+                            var t = a as Tuple<FileStream, CancellationTokenSource>;
+                            if (t == null) { return; }
+                            var tfs = t.Item1;
+                            var cts = t.Item2;
+                            if(tfs == null)
+                            {
+                                return;
+                            }
                             if (tfs == null || tfs.CanWrite)
                             {
                                 long ps = 0;
@@ -209,7 +223,11 @@ namespace QQChat
                                             tfs.Flush();
                                         }
                                     }
-                                    System.Threading.Thread.Sleep(10000);
+                                    if(cts.Token.WaitHandle.WaitOne(10000))
+                                    {
+                                        tfs.Flush();
+                                        tfs.Close();
+                                    }
                                 }
                             }
                         }
@@ -217,11 +235,17 @@ namespace QQChat
                         {
                             return;
                         }
-                    }, fs);
-                    lock (_fsDict)
-                    {
-                        _fsDict.Add(logname, fs);
-                    }
+                        finally
+                        {
+                            lock (_fsDict)
+                            {
+                                if(_fsDict.ContainsKey(logname))
+                                {
+                                    _fsDict.Remove(logname);
+                                }
+                            }
+                        }
+                    }, new Tuple<FileStream,CancellationTokenSource>(fs,this._fsCts));
                 }
                 catch { };
             }
