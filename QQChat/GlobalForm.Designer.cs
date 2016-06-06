@@ -47,6 +47,7 @@
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.buttonc = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.tabControlF.SuspendLayout();
             this.tabPageF.SuspendLayout();
             this.tabPageG.SuspendLayout();
@@ -107,6 +108,7 @@
             // tabPageG
             // 
             this.tabPageG.Controls.Add(this.treeViewG);
+            this.tabPageG.Controls.Add(this.button2);
             this.tabPageG.Controls.Add(this.buttongd);
             this.tabPageG.Controls.Add(this.buttong);
             this.tabPageG.Location = new System.Drawing.Point(4, 22);
@@ -240,6 +242,16 @@
             this.button1.Text = "高级";
             this.button1.UseVisualStyleBackColor = true;
             // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(63, 6);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(57, 23);
+            this.button2.TabIndex = 3;
+            this.button2.Text = "签到";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
             // GlobalForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -284,5 +296,6 @@
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.Button buttonc;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
     }
 }

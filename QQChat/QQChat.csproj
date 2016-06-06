@@ -80,6 +80,12 @@
     <Compile Include="QunMemberManager.Designer.cs">
       <DependentUpon>QunMemberManager.cs</DependentUpon>
     </Compile>
+    <Compile Include="SignForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SignForm.Designer.cs">
+      <DependentUpon>SignForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -94,6 +100,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="QunMemberManager.resx">
       <DependentUpon>QunMemberManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SignForm.resx">
+      <DependentUpon>SignForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -23,6 +23,7 @@ namespace WebQQ2.WebQQ2
         private static readonly string qq_qun_group = "http://qun.qzone.qq.com/cgi-bin/get_group_list?groupcount=4&count=4&uin={0}&g_tk={1}&r={2}";
         private static readonly string qq_qun_member = "http://qun.qzone.qq.com/cgi-bin/get_group_member?uin={0}&groupid={1}&neednum=1&g_tk={2}&r={3}";
 
+        public static readonly string qq_qun_sign = "http://qiandao.qun.qq.com/cgi-bin/sign";
 
         protected virtual void OnInit()
         {
@@ -85,6 +86,14 @@ namespace WebQQ2.WebQQ2
         public void UpdateCookie(Uri uri, string cookie)
         {
             _cookiecontainer.SetCookies(uri, cookie);
+        }
+
+        public Dictionary<string, object> QunSign(string groupUin, bool doSign = false)
+        {
+            var furl = string.Format(qq_qun_sign, _user.QQNum, _user.GTK, _random.NextDouble());
+            string para = string.Format("&gc={0}&is_sign={1}&bkn={2}", groupUin, doSign ? 0 : 1, _user.GTK);
+            var fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
 
 

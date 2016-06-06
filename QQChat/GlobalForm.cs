@@ -42,7 +42,16 @@ namespace QQChat
             this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
             this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             this.Load += new System.EventHandler(this.GlobalForm_Load);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var manager = new SignForm();
+            MainForm.BindToParent(manager, this);
+            manager.Show();
+            manager.InitParas(this._qq,this._glist);
         }
 
         public void InitQQ(QQ_Base qq)
