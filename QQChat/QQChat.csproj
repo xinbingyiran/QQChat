@@ -118,6 +118,8 @@
     <ProjectReference Include="..\WebQQ2\WebQQ2.csproj">
       <Project>{4cbd09cc-4ada-47f9-b556-814eaae2d9e8}</Project>
       <Name>WebQQ2</Name>
+      <Private>True</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
