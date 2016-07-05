@@ -30,7 +30,7 @@ namespace QQChat
 
         private void SignForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if(this._cts != null && !this._cts.IsCancellationRequested)
+            if (this._cts != null && !this._cts.IsCancellationRequested)
             {
                 this._cts.Cancel();
             }
@@ -188,9 +188,7 @@ namespace QQChat
                 if (dc != null && dc.ContainsKey("ec") && dc["ec"].ToString() == "0")
                 {
                     var is_sign = dc["is_sign"].ToString();
-                    if(is_sign != "0")
-                    {
-                        this.UpdateListViewItem(item, new string[] {
+                    this.UpdateListViewItem(item, new string[] {
                         item.SubItems[0].Text,
                         item.SubItems[1].Text,
                         dc["today_count"].ToString(),
@@ -200,6 +198,8 @@ namespace QQChat
                         is_sign == "0" ? "-" : QQHelper.ToTime(long.Parse(dc["sign_time"].ToString())).ToLongTimeString(),
                         DateTime.Now.ToLongTimeString()
                         });
+                    if (is_sign != "0")
+                    {
                         break;
                     }
                     if (!int.TryParse(dc["today_count"].ToString(), out qd))
@@ -208,22 +208,12 @@ namespace QQChat
                     }
                     if (qd < number - 1)
                     {
-                        this.UpdateListViewItem(item, new string[] {
-                        item.SubItems[0].Text,
-                        item.SubItems[1].Text,
-                        dc["today_count"].ToString(),
-                        dc["total_count"].ToString(),
-                        dc["conti_count"].ToString(),
-                        is_sign == "0" ? "-" : dc["rank"].ToString(),
-                        is_sign == "0" ? "-" : QQHelper.ToTime(long.Parse(dc["sign_time"].ToString())).ToLongTimeString(),
-                        DateTime.Now.ToLongTimeString()
-                        });
                         if (cts == null || cts.IsCancellationRequested)
                         {
                             return;
                         }
                         var waittime = 10;
-                        if(lastqd == qd)
+                        if (lastqd == qd)
                         {
                             waittime = (number - 1 - qd) * 500;
                             if (waittime > 3000)
@@ -244,16 +234,6 @@ namespace QQChat
                     }
                     else if (qd > number - 1)
                     {
-                        this.UpdateListViewItem(item, new string[] {
-                        item.SubItems[0].Text,
-                        item.SubItems[1].Text,
-                        dc["today_count"].ToString(),
-                        dc["total_count"].ToString(),
-                        dc["conti_count"].ToString(),
-                        is_sign == "0" ? "-" : dc["rank"].ToString(),
-                        is_sign == "0" ? "-" : QQHelper.ToTime(long.Parse(dc["sign_time"].ToString())).ToLongTimeString(),
-                        DateTime.Now.ToLongTimeString()
-                        });
                         break;
                     }
                     else
@@ -262,23 +242,16 @@ namespace QQChat
                         if (dc != null && dc.ContainsKey("ec") && dc["ec"].ToString() == "0")
                         {
                             is_sign = dc["is_sign"].ToString();
-                            if (!int.TryParse(dc["today_count"].ToString(), out qd))
-                            {
-                                break;
-                            }
-                            if (qd < number - 1)
-                            {
-                                this.UpdateListViewItem(item, new string[] {
-                                item.SubItems[0].Text,
-                                item.SubItems[1].Text,
-                                dc["today_count"].ToString(),
-                                dc["total_count"].ToString(),
-                                dc["conti_count"].ToString(),
-                                is_sign == "0" ? "-" : dc["rank"].ToString(),
-                                is_sign == "0" ? "-" : QQHelper.ToTime(long.Parse(dc["sign_time"].ToString())).ToLongTimeString(),
-                                DateTime.Now.ToLongTimeString()
-                                });
-                            }
+                            this.UpdateListViewItem(item, new string[] {
+                            item.SubItems[0].Text,
+                            item.SubItems[1].Text,
+                            dc["today_count"].ToString(),
+                            dc["total_count"].ToString(),
+                            dc["conti_count"].ToString(),
+                            is_sign == "0" ? "-" : dc["rank"].ToString(),
+                            is_sign == "0" ? "-" : QQHelper.ToTime(long.Parse(dc["sign_time"].ToString())).ToLongTimeString(),
+                            DateTime.Now.ToLongTimeString()
+                            });
                         }
                         break;
                     }
@@ -301,7 +274,7 @@ namespace QQChat
                 this.BeginInvoke((Action<ListViewItem, String[]>)UpdateListViewItem, new object[] { item, texts });
                 return;
             }
-            if(this.IsDisposed)
+            if (this.IsDisposed)
             {
                 return;
             }
