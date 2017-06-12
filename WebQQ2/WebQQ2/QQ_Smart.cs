@@ -34,8 +34,9 @@ namespace WebQQ2.WebQQ2
 
         private static readonly string qq_smart_ptlogin2sslurl = "https://ssl.ptlogin2.qq.com/";
         private static readonly string qq_smart_qrshow = qq_smart_ptlogin2sslurl + "ptqrshow?appid=501004106&e=0&l=M&s=5&d=72&v=4&t={0}";
-        private static readonly string qq_smart_qrlogin = qq_smart_ptlogin2sslurl + "ptqrlogin?webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-{0}&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10153&login_sig=&pt_randsalt=0";
 
+        private static readonly string qq_smart_qrlogin = qq_smart_ptlogin2sslurl + "ptqrlogin?ptqrtoken={1}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-{0}&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10153&login_sig=&pt_randsalt=0";
+       
         private static readonly string qq_smart_apiurl = "http://s.web2.qq.com/api/";
         private static readonly string qq_smart_getvfwebqq = qq_smart_apiurl + "getvfwebqq?ptwebqq={0}&clientid={1}&psessionid=&t={2}";
         private static readonly string qq_smart_get_group_info_ext2 = qq_smart_apiurl + "get_group_info_ext2?gcode={0}&vfwebqq={1}&t={2}";
@@ -209,11 +210,24 @@ namespace WebQQ2.WebQQ2
         }
         public Image GetQrImage()
         {
-            return new Bitmap(
-                _helper.GetUrlStream(
+            var stream = _helper.GetUrlStream(
                     string.Format(qq_smart_qrshow, _random.NextDouble())
-                    , qq_smart_referurl)
-                );
+                    , qq_smart_referurl);
+            if(stream == null)
+            {
+                return null;
+            }
+
+            var cookies = _cookiecontainer.GetCookies(new Uri("http://ui.ptlogin2.qq.com"));
+            foreach (Cookie v in cookies)
+            {
+                if (string.Compare(v.Name, "qrsig") == 0)
+                {
+                    _user.qrsig = v.Value;
+                    _user.PtQrToken = QQHelper.getPtQrToken(_user.qrsig);
+                }
+            }
+            return new Bitmap(stream);
         }
 
         public IEnumerable<string> DoSmartLogin(System.Threading.CancellationTokenSource cts = null)
@@ -228,7 +242,7 @@ namespace WebQQ2.WebQQ2
                 Thread.Sleep(1000);
                 rnumber += _random.Next(2000 - 10, 2000 + 10);
                 string result = _helper.GetUrlText(
-                    string.Format(qq_smart_qrlogin, rnumber), qq_smart_referurl
+                    string.Format(qq_smart_qrlogin, rnumber, _user.PtQrToken), qq_smart_referurl
                     );
                 if (string.IsNullOrWhiteSpace(result))
                 {
@@ -272,7 +286,8 @@ namespace WebQQ2.WebQQ2
                             {
                                 yield break;
                             }
-                            result = _helper.GetUrlText(items[2], qq_smart_referurl);
+                            var url = items[2];
+                            this.VisitUrl(url, qq_smart_referurl);
 
                             var cookies = _cookiecontainer.GetCookies(new Uri("http://ui.ptlogin2.qq.com"));
                             foreach (Cookie v in cookies)

@@ -137,7 +137,7 @@ namespace QQChat
                     return;
                 }
                 var qg = item.Tag as QunGroup;
-                var dc = _qq.QunSign(qg.groupid.ToString(), doSign);
+                var dc = this.DoSign(qg, doSign);
                 if (dc != null && dc.ContainsKey("ec") && dc["ec"].ToString() == "0")
                 {
                     var is_sign = dc["is_sign"].ToString();
@@ -183,7 +183,7 @@ namespace QQChat
                     return;
                 }
                 var qg = item.Tag as QunGroup;
-                var dc = _qq.QunSign(qg.groupid.ToString(), false);
+                var dc = this.DoSign(qg, false);
                 var qd = 0;
                 if (dc != null && dc.ContainsKey("ec") && dc["ec"].ToString() == "0")
                 {
@@ -238,7 +238,7 @@ namespace QQChat
                     }
                     else
                     {
-                        dc = _qq.QunSign(qg.groupid.ToString(), true);
+                        dc = this.DoSign(qg, true);
                         if (dc != null && dc.ContainsKey("ec") && dc["ec"].ToString() == "0")
                         {
                             is_sign = dc["is_sign"].ToString();
@@ -267,6 +267,11 @@ namespace QQChat
             }
         }
 
+        private Dictionary<string,object> DoSign(QunGroup group, bool doSign = false)
+        {
+            return _qq.QunSign(group.gcode, doSign);
+        }
+
         private void UpdateListViewItem(ListViewItem item, string[] texts)
         {
             if (InvokeRequired)
@@ -292,7 +297,7 @@ namespace QQChat
             {
                 if (g != null)
                 {
-                    this.listView1.Items.Add(new ListViewItem(new string[] { g.groupname, g.groupid.ToString(), "-", "-", "-", "-", "-", "-" }) { Tag = g });
+                    this.listView1.Items.Add(new ListViewItem(new string[] { g.gname, g.gcode.ToString(), "-", "-", "-", "-", "-", "-" }) { Tag = g });
                 }
             }
         }

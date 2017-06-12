@@ -118,7 +118,7 @@ namespace WebQQ2.Extends
             var a = j + "password error";
             var i = "";
             var E = new EIArray<int>();
-            for (; ; )
+            for (;;)
             {
                 if (i.Length <= a.Length)
                 {
@@ -189,7 +189,7 @@ namespace WebQQ2.Extends
             }
             var V = new Stack<u>();
             V.Push(new u(0, T.Count - 1));
-            for (; V.Count > 0; )
+            for (; V.Count > 0;)
             {
                 var P = V.Pop();
                 if (!(P.s >= P.e || P.s < 0 || P.e >= T.Count)) if (P.s + 1 == P.e)
@@ -206,9 +206,9 @@ namespace WebQQ2.Extends
                         int Z = P.s;
                         int U = P.e;
                         int X = T[P.s];
-                        for (; P.s < P.e; )
+                        for (; P.s < P.e;)
                         {
-                            for (; P.s < P.e && T[P.e] >= X; )
+                            for (; P.s < P.e && T[P.e] >= X;)
                             {
                                 P.e--;
                                 I[0] = I[0] + 3 & 255;
@@ -219,7 +219,7 @@ namespace WebQQ2.Extends
                                 P.s++;
                                 I[1] = I[1] * 13 + 43 & 255;
                             }
-                            for (; P.s < P.e && T[P.s] <= X; )
+                            for (; P.s < P.e && T[P.s] <= X;)
                             {
                                 P.s++;
                                 I[2] = I[2] - 3 & 255;
@@ -253,7 +253,7 @@ namespace WebQQ2.Extends
             var a = i + "password error";
             var s = "";
             var j = "";
-            for (; ; )
+            for (;;)
             {
                 if (s.Length <= a.Length)
                 {
@@ -287,6 +287,15 @@ namespace WebQQ2.Extends
                 hash += (hash << 5) + str[i];
             }
             return (hash & 0x7fffffff).ToString();
+        }
+
+        public static string getPtQrToken(string qrsig)
+        {
+            var e = 0;
+            var n = qrsig.Length;
+            for (var i = 0; n > i; ++i)
+                e += (e << 5) + qrsig[i];
+            return (2147483647 & e).ToString();
         }
     }
 }

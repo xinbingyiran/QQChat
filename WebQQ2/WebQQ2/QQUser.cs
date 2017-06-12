@@ -24,6 +24,7 @@ namespace WebQQ2.WebQQ2
         public string VfWebQQ { get; internal set; }
         public string VerifySession { get; internal set; }
         public string skey { get; internal set; }
+        public string qrsig { get; internal set; }
         public string GTK { get; internal set; }
         public string PsessionID { get; internal set; }
         public DateTime? LoginTime { get; internal set; }
@@ -33,6 +34,7 @@ namespace WebQQ2.WebQQ2
         public string QQName { get; internal set; }
         public string Status { get; internal set; }
 
+        public string PtQrToken { get; internal set; }
         public string PtLoginSig { get; internal set; }
         public string PtClientIp { get; internal set; }
         public string PtServerIp { get; internal set; }

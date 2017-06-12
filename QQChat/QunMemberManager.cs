@@ -11,7 +11,7 @@ namespace QQChat
 {
     public partial class QunMemberManager : Form
     {
-        private Dictionary<long, QzoneFriend> _flist = new Dictionary<long, QzoneFriend>();
+        private Dictionary<long, QunFriend> _flist = new Dictionary<long, QunFriend>();
         private Dictionary<long, QunGroup> _glist = new Dictionary<long, QunGroup>();
         private Dictionary<long, Dictionary<long, QunGroupMember>> _gmlist = new Dictionary<long, Dictionary<long, QunGroupMember>>();
         public QunMemberManager()
@@ -60,7 +60,7 @@ namespace QQChat
                         continue;
                     }
                     var gm = gmdict[item.Key];
-                    listBox2.Items.Add(string.Format("{0}[{1}] - {2}", g.groupname, g.groupid, gm.nick));
+                    listBox2.Items.Add(string.Format("{0}[{1}] - {2}", g.gname, g.gcode, gm.nick));
                 }
             }
         }
@@ -129,11 +129,16 @@ namespace QQChat
                 dict.Add(muin, new kcv { Key = muin, Name = name, Count = 1, Value = new HashSet<long>(new[] { guin }) });
             }
         }
-        internal void InitParas(List<QzoneFriend> flist, List<QunGroup> glist)
+        internal void InitParas(List<QunFriendGroup> fglist, List<QunGroup> glist)
         {
             listBox1.Items.Clear();
             listBox2.Items.Clear();
             checkedComboBox1.Items.Clear();
+            var flist = new List<QunFriend>();
+            foreach(var g in fglist)
+            {
+                flist.AddRange(g.friends);
+            }
             this._flist = flist.ToDictionary(e => e.uin);
             this._glist.Clear();
             this._gmlist.Clear();
@@ -141,11 +146,11 @@ namespace QQChat
             {
                 if (g.gmlist != null)
                 {
-                    this._glist.Add(g.groupid, g);
-                    this._gmlist.Add(g.groupid, g.gmlist.ToDictionary(e => e.uin));
+                    this._glist.Add(g.gcode, g);
+                    this._gmlist.Add(g.gcode, g.gmlist.ToDictionary(e => e.uin));
                 }
             }
-            var groups = _glist.Values.Select(u => new groupdefine { Name = u.groupname, uin = u.groupid }).ToList();
+            var groups = _glist.Values.Select(u => new groupdefine { Name = u.gname, uin = u.gcode }).ToList();
             groups.Insert(0, new groupdefine { Name = "我的好友", uin = -1 });
             checkedComboBox1.Items.AddRange(groups.ToArray());
             RefreshView();

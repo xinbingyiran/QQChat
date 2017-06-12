@@ -15,15 +15,41 @@ namespace WebQQ2.WebQQ2
         protected CookieContainer _cookiecontainer;
         protected HttpHelper _helper;
         protected QQUser _user;
-        protected string _baseRefer;
+        protected string _baseRefer = "http://qun.qq.com/member.html";
         public QQUser User { get { return _user; } }
 
 
-        private static readonly string qq_zone_friend = "http://r.qzone.qq.com/cgi-bin/tfriend/friend_ship_manager.cgi?uin={0}&do=1&rd={2}&fupdate=1&clean=1&g_tk={1}";
-        private static readonly string qq_qun_group = "http://qun.qzone.qq.com/cgi-bin/get_group_list?groupcount=4&count=4&uin={0}&g_tk={1}&r={2}";
-        private static readonly string qq_qun_member = "http://qun.qzone.qq.com/cgi-bin/get_group_member?uin={0}&groupid={1}&neednum=1&g_tk={2}&r={3}";
+        //private static readonly string qq_zone_friend = "http://r.qzone.qq.com/cgi-bin/tfriend/friend_ship_manager.cgi?uin={0}&do=1&rd={2}&fupdate=1&clean=1&g_tk={1}";
+        //private static readonly string qq_qun_group = "http://qun.qzone.qq.com/cgi-bin/get_group_list?groupcount=4&count=4&uin={0}&g_tk={1}&r={2}";
+        //private static readonly string qq_qun_member = "http://qun.qzone.qq.com/cgi-bin/get_group_member?uin={0}&groupid={1}&neednum=1&g_tk={2}&r={3}";
+
+        private static readonly string qq_qun_myinfo = "http://qun.qq.com/cgi-bin/qunwelcome/myinfo?callback=?&bkn={0}";
+        private static readonly string qq_qun_friend = "http://qun.qq.com/cgi-bin/qun_mgr/get_friend_list";
+        private static readonly string qq_qun_group = "http://qun.qq.com/cgi-bin/qun_mgr/get_group_list";
+        private static readonly string qq_qun_member = "http://qun.qq.com/cgi-bin/qun_mgr/search_group_members";
+
+
 
         public static readonly string qq_qun_sign = "http://qiandao.qun.qq.com/cgi-bin/sign";
+
+        protected class qq_qun_friend_post
+        {
+            public string bkn { get; set; }
+        };
+
+        protected class qq_qun_group_post
+        {
+            public string bkn { get; set; }
+        };
+
+        protected class qq_qun_member_post
+        {
+            public long gc { get; set; }
+            public int st { get; set; }
+            public int end { get; set; }
+            public int sort { get; set; }
+            public string bkn { get; set; }
+        };
 
         protected virtual void OnInit()
         {
@@ -56,29 +82,75 @@ namespace WebQQ2.WebQQ2
 
         #region QuickOperation
 
-        public Dictionary<string, object> GetFriendInfoFromZone()
+        //public Dictionary<string, object> GetFriendInfoFromZone()
+        //{
+        //    var furl = string.Format(qq_zone_friend, _user.QQNum, _user.GTK, _random.NextDouble());
+        //    var fresult = _helper.GetUrlText(furl, _baseRefer);
+        //    int fstart = fresult.IndexOf('(');
+        //    string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+        //    return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+        //}
+        //public Dictionary<string, object> GetGroupInfoFromQun()
+        //{
+        //    var furl = string.Format(qq_qun_group, _user.QQNum, _user.GTK, _random.NextDouble());
+        //    var fresult = _helper.GetUrlText(furl, _baseRefer);
+        //    int fstart = fresult.IndexOf('(');
+        //    string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+        //    return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+        //}
+        //public Dictionary<string, object> GetMemberInfoFromQun(string gid)
+        //{
+        //    var furl = string.Format(qq_qun_member, _user.QQNum, gid, _user.GTK, _random.NextDouble());
+        //    var fresult = _helper.GetUrlText(furl, _baseRefer);
+        //    int fstart = fresult.IndexOf('(');
+        //    string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
+        //    return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+        //}        
+
+        public void VisitUrl(string url,string refer = null, int timeout = 60000)
         {
-            var furl = string.Format(qq_zone_friend, _user.QQNum, _user.GTK, _random.NextDouble());
-            var fresult = _helper.GetUrlText(furl, _baseRefer);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+            _helper.GetNoRedirectResponse(url, refer??_baseRefer, timeout);
+        }
+
+        public Dictionary<string, object> GetMyInfo()
+        {
+            var furl = string.Format(qq_qun_myinfo, _user.GTK);
+            string fresult = _helper.GetUrlText(furl, _baseRefer);
+            var dict = QQHelper.FromJson<Dictionary<string, object>>(fresult);
+            if((int)dict["retcode"] == 0)
+            {
+                var data = dict["data"] as Dictionary<string, object>;
+                if(data != null)
+                {
+                    _user.Uin = data["uin"].ToString();
+                    _user.QQNum = data["uin"].ToString();
+                    _user.QQName = (string)data["nickName"];
+                }
+            }
+            return dict;
+        }
+
+        public Dictionary<string, object> GetFriendInfoFromQun()
+        {
+            var furl = qq_qun_friend;
+            string para = "bkn=" + _user.GTK;
+            string fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
         public Dictionary<string, object> GetGroupInfoFromQun()
         {
-            var furl = string.Format(qq_qun_group, _user.QQNum, _user.GTK, _random.NextDouble());
-            var fresult = _helper.GetUrlText(furl, _baseRefer);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+            var furl = qq_qun_group;
+            string para = "bkn=" + _user.GTK;
+            string fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
-        public Dictionary<string, object> GetMemberInfoFromQun(string gid)
+        public Dictionary<string, object> GetMemberInfoFromQun(long gcode, int st, int end)
         {
-            var furl = string.Format(qq_qun_member, _user.QQNum, gid, _user.GTK, _random.NextDouble());
-            var fresult = _helper.GetUrlText(furl, _baseRefer);
-            int fstart = fresult.IndexOf('(');
-            string fsub = fresult.Substring(fstart + 1, fresult.LastIndexOf(')') - fstart - 1);
-            return QQHelper.FromJson<Dictionary<string, object>>(fsub);
+            var furl = qq_qun_member;
+            string para = "gc=" + gcode + "&st=" + st + "&end=" + end + "&sort=0&bkn=" + _user.GTK;
+            string fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            var dict = QQHelper.FromJson<Dictionary<string, object>>(fresult);
+            return dict;
         }
         #endregion
 
@@ -88,10 +160,10 @@ namespace WebQQ2.WebQQ2
             _cookiecontainer.SetCookies(uri, cookie);
         }
 
-        public Dictionary<string, object> QunSign(string groupUin, bool doSign = false)
+        public Dictionary<string, object> QunSign(long groupCode, bool doSign = false)
         {
             var furl = string.Format(qq_qun_sign, _user.QQNum, _user.GTK, _random.NextDouble());
-            string para = string.Format("&gc={0}&is_sign={1}&bkn={2}", groupUin, doSign ? 0 : 1, _user.GTK);
+            string para = string.Format("&gc={0}&is_sign={1}&bkn={2}", groupCode, doSign ? 0 : 1, _user.GTK);
             var fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
             return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
@@ -110,13 +182,11 @@ namespace WebQQ2.WebQQ2
                         _user.skey = kv[1];
                         _user.GTK = QQHelper.getGTK(_user.skey);
                     }
-                    else if (kv[0] == "clientuin")
+                    else if (kv[0] == "uin")
                     {
-                        _user.QQNum = kv[1];
-                    }
-                    else if (kv[0] == "ptui_loginuin")
-                    {
-                        _user.QQNum = kv[1];
+                        var uin = kv[1].TrimStart(new[] { 'o', '0' });
+                        _user.QQNum = uin;
+                        _user.Uin = uin;
                     }
                     else if (kv[0] == "ptnick_" + _user.QQNum)
                     {
@@ -135,6 +205,7 @@ namespace WebQQ2.WebQQ2
                         }
                     }
                     _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qq.com"));
+                    _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "qun.qq.com"));
                     _cookiecontainer.Add(new Cookie(kv[0], kv[1], "/", "ptlogin2.qq.com"));
                 }
             }

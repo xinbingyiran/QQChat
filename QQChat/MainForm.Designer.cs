@@ -73,7 +73,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(70, 21);
             this.button1.TabIndex = 8;
-            this.button1.Text = "扫码";
+            this.button1.Text = "登录聊天";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -88,7 +88,7 @@
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label4);
             this.Name = "MainForm";
-            this.Text = "LoginForm";
+            this.Text = "好友获取";
             this.Load += new System.EventHandler(this.LoginForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -51,6 +51,11 @@ namespace QQChat
                     return;
                 }
                 var img = qq.GetQrImage();
+                if(img == null)
+                {
+                    SetInfo("获取二维码失败");
+                    return;
+                }
                 this.Invoke((Action<Bitmap>)((bm) => this.pictureBox1.Image = bm), new object[] { img });
                 foreach (var str in qq.DoSmartLogin(cts))
                 {

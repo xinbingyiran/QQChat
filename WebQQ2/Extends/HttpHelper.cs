@@ -109,6 +109,34 @@ namespace WebQQ2.Extends
             throw new TimeoutException();
         }
 
+
+        public HttpWebResponse GetNoRedirectResponse(string url, string refer, int timeout)
+        {
+            var messageTaskCts = new CancellationTokenSource();
+            HttpWebResponse response = null;
+            Task task = new Task(() =>
+            {
+                try
+                {
+                    HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
+                    myRequest.Method = "GET";
+                    myRequest.Referer = refer;
+                    myRequest.CookieContainer = _cookiecontainer;
+                    myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
+                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
+                    myRequest.AllowAutoRedirect = false;
+                    myRequest.KeepAlive = true;
+                    response = (HttpWebResponse)myRequest.GetResponse();
+                }
+                catch (Exception) { }
+            });
+            task.Start();
+            bool wait = task.Wait(timeout);
+            if (wait)
+                return response;
+            throw new TimeoutException();
+        }
+
         private HttpWebResponse GetPostResponse(string url, byte[] postData, string refer, int timeout)
         {
             HttpWebResponse response = null;
