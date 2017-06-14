@@ -42,7 +42,7 @@ namespace QQChat
             this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
             this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            //this.button2.Click += new System.EventHandler(this.button2_Click);
             this.Load += new System.EventHandler(this.GlobalForm_Load);
         }
 
@@ -145,7 +145,7 @@ namespace QQChat
             lines.Add(string.Format("{0}[{1}] 好友列表：", _qq.User.QQName, _qq.User.QQNum));
             foreach (var g in _qfgList)
             {
-                lines.Add(string.Format("----{0}----", g.gname));
+                lines.Add(g.gname + ":");
                 foreach (var f in g.friends)
                 {
                     lines.Add(string.Format("\t{0}[{1}]", f.name, f.uin));
@@ -161,32 +161,45 @@ namespace QQChat
             {
                 GetQunGroup();
                 RefreshGroupUI();
-                foreach (var group in _qglist.ToArray())
-                {
-                    GetQunMember(group);
-                }
+                //foreach (var group in _qglist.ToArray())
+                //{
+                //    GetQunMember(group);
+                //}
                 SetInfo("Refresh Group OK!");
             }).Start();
         }
 
+        private static readonly Dictionary<string, string> QunGroupRole = new Dictionary<string, string>
+        {
+            { "create","我创建的" },
+            { "manage","我管理的" },
+            { "join","我加入的" },
+        };
         private void GetQunGroup()
         {
             var list = _qq.GetGroupInfoFromQun();
             if ((int)list["ec"] == 0)
             {
-                _qglist.Clear();
-                var items = list["join"] as ArrayList;
-                if (items != null)
+                _qglist.Clear();                
+                foreach(var role in QunGroupRole)
                 {
-                    foreach (Dictionary<string, object> item in items)
+                    if(list.ContainsKey(role.Key))
                     {
-                        var friend = new QunGroup
+                        var items = list[role.Key] as ArrayList;
+                        if (items != null)
                         {
-                            owner = Convert.ToInt64(item["owner"]),
-                            gcode = Convert.ToInt64(item["gc"]),
-                            gname = (string)item["gn"],
-                        };
-                        _qglist.Add(friend);
+                            foreach (Dictionary<string, object> item in items)
+                            {
+                                var friend = new QunGroup
+                                {
+                                    role = role.Key,
+                                    owner = Convert.ToInt64(item["owner"]),
+                                    gcode = Convert.ToInt64(item["gc"]),
+                                    gname = (string)item["gn"],
+                                };
+                                _qglist.Add(friend);
+                            }
+                        }
                     }
                 }
             }
@@ -201,9 +214,19 @@ namespace QQChat
             }
             treeViewG.Nodes.Clear();
             treeViewG.BeginUpdate();
-            foreach (var g in _qglist)
+            foreach (var role in QunGroupRole)
             {
-                treeViewG.Nodes.Add(new TreeNode(string.Format("{0}[{1}]", g.gname, g.gcode)) { Tag = g });
+                var node = treeViewG.Nodes.Add(role.Value);
+                node.Tag = role.Key;
+                var list = _qglist.Where(e => e.role == role.Key).ToArray();
+                if (list.Length > 0)
+                {
+                    foreach (var g in list)
+                    {
+                        var gnode = node.Nodes.Add(string.Format("{0}[{1}]", g.gname, g.gcode));
+                        gnode.Tag = g;
+                    }
+                }
             }
             treeViewG.EndUpdate();
         }
@@ -225,9 +248,14 @@ namespace QQChat
         {
             List<string> lines = new List<string>();
             lines.Add(string.Format("{0}[{1}] 群列表：", _qq.User.QQName, _qq.User.QQNum));
-            foreach (var g in _qglist)
+            foreach (var role in QunGroupRole)
             {
-                lines.Add(string.Format("\t{0}[{1}]", g.gname, g.gcode));
+                lines.Add(role.Value + ":");
+                var list = _qglist.Where(e => e.role == role.Key).ToArray();
+                foreach (var g in list)
+                {
+                    lines.Add(string.Format("\t{0}[{1}]", g.gname, g.gcode));
+                }
             }
             File.WriteAllLines(filename, lines);
             SetInfo("ExportGroup OK:" + filename);
@@ -259,6 +287,10 @@ friends:        {1}",
             if (group == null)
             {
                 return;
+            }
+            if (group.gmlist == null || group.gmlist.Count == 0)
+            {
+                GetQunMember(group);
             }
             RefreshGroupinfoUI(group);
             RefreshMemberUI(group);
@@ -437,7 +469,7 @@ groupname:   {1}",
             richTextBox1.Text = string.Format(@"uin:        {0}
 nick:       {1}
 card:       {2}
-rold:       {3}",
+role:       {3}",
                  f.uin, f.nick, f.card, f.role);
         }
 
@@ -540,6 +572,7 @@ rold:       {3}",
     }
     internal class QunGroup
     {
+        public string role;
         public long gcode;
         public string gname;
         public long owner;
