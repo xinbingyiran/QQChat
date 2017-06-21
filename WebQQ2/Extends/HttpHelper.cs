@@ -44,7 +44,16 @@ namespace WebQQ2.Extends
                 Stream newStream = myResponse.GetResponseStream();
                 if (newStream != null)
                 {
-                    StreamReader reader = new StreamReader(newStream, Encoding.GetEncoding(myResponse.CharacterSet));
+                    Encoding encoding = null;
+                    try
+                    {
+                        encoding = Encoding.GetEncoding(myResponse.CharacterSet);
+                    }
+                    catch
+                    {
+                        encoding = Encoding.UTF8;
+                    }
+                    StreamReader reader = new StreamReader(newStream, encoding);
                     string result = reader.ReadToEnd();
                     return result;
                 }

@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Security.Cryptography;
 using System.Runtime.InteropServices;
+using WebQQ2.Extends;
 
 namespace QQChat
 {
@@ -77,6 +78,12 @@ namespace QQChat
         private void button2_Click(object sender, EventArgs e)
         {
             TraceToLoginForm();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            SetInfo("请登录");
+            webBrowser1.Navigate("http://zc.qq.com/iframe/9/reg.html");
         }
 
         private void TraceToLoginForm()
