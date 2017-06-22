@@ -115,7 +115,7 @@ namespace WebQQ2.WebQQ2
         public Dictionary<string, object> GetMyInfo()
         {
             var furl = string.Format(qq_qun_myinfo, _user.GTK);
-            string fresult = _helper.GetUrlText(furl, _baseRefer);
+            string fresult = _helper.GetUrlText(furl, null,_baseRefer);
             var dict = QQHelper.FromJson<Dictionary<string, object>>(fresult);
             if((int)dict["retcode"] == 0)
             {
@@ -134,21 +134,21 @@ namespace WebQQ2.WebQQ2
         {
             var furl = qq_qun_friend;
             string para = "bkn=" + _user.GTK;
-            string fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            string fresult = _helper.GetUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
             return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
         public Dictionary<string, object> GetGroupInfoFromQun()
         {
             var furl = qq_qun_group;
             string para = "bkn=" + _user.GTK;
-            string fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            string fresult = _helper.GetUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
             return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
         public Dictionary<string, object> GetMemberInfoFromQun(long gcode, int st, int end)
         {
             var furl = qq_qun_member;
             string para = "gc=" + gcode + "&st=" + st + "&end=" + end + "&sort=0&bkn=" + _user.GTK;
-            string fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            string fresult = _helper.GetUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
             var dict = QQHelper.FromJson<Dictionary<string, object>>(fresult);
             return dict;
         }
@@ -164,7 +164,7 @@ namespace WebQQ2.WebQQ2
         {
             var furl = string.Format(qq_qun_sign, _user.QQNum, _user.GTK, _random.NextDouble());
             string para = string.Format("&gc={0}&is_sign={1}&bkn={2}", groupCode, doSign ? 0 : 1, _user.GTK);
-            var fresult = _helper.PostUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
+            var fresult = _helper.GetUrlText(furl, Encoding.UTF8.GetBytes(para), _baseRefer);
             return QQHelper.FromJson<Dictionary<string, object>>(fresult);
         }
 

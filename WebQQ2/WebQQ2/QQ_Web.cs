@@ -201,7 +201,7 @@ namespace WebQQ2.WebQQ2
         #endregion
 
         #region paradefine
-        
+
         private int _qq_send_buddy_msg2_post_msg_id = 0;
 
         #endregion
@@ -243,7 +243,7 @@ namespace WebQQ2.WebQQ2
         public string GetCFaceUrl(string pic, string gid)
         {
             string url = string.Format(qq_cface, pic, gid, QQHelper.GetTime());
-            return _helper.GetFileTrueUrl(url,qq_referurl);
+            return _helper.GetFileTrueUrl(url, qq_referurl);
         }
 
         public string GetCFace2Url(string msg_id, string filename, string guin)
@@ -1696,22 +1696,22 @@ namespace WebQQ2.WebQQ2
 
         public string GetUrlText(string url, int timeout = 60000)
         {
-            return _helper.GetUrlText(url, qq_referurl, timeout);
+            return _helper.GetUrlText(url, null, qq_referurl, timeout);
         }
 
         public string PostUrlText(string url, byte[] postData, int timeout = 60000)
         {
-            return _helper.PostUrlText(url, postData, qq_referurl, timeout);
+            return _helper.GetUrlText(url, postData, qq_referurl, timeout);
         }
 
         public Stream GetUrlStream(string url, int timeout = 60000)
         {
-            return _helper.GetUrlStream(url,qq_referurl,timeout);
+            return _helper.GetUrlStream(url, null, qq_referurl, timeout);
         }
 
         public Stream GetPostStream(string url, byte[] postData, int timeout = 60000)
         {
-            return _helper.GetPostStream(url, postData,qq_referurl, timeout);
+            return _helper.GetUrlStream(url, postData, qq_referurl, timeout);
         }
 
         #endregion

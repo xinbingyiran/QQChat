@@ -178,7 +178,7 @@ namespace WebQQ2.WebQQ2
         }
         public bool SmartPreLogin()
         {
-            string result = _helper.GetUrlText(string.Format(qq_smart_prelogin, QQHelper.GetTime()), qq_smart_referurl);
+            string result = _helper.GetUrlText(string.Format(qq_smart_prelogin, QQHelper.GetTime()),null, qq_smart_referurl);
             int cookieSet = 0;
             foreach (Cookie v in _cookiecontainer.GetCookies(new Uri("http://ptlogin2.qq.com")))
             {
@@ -212,7 +212,7 @@ namespace WebQQ2.WebQQ2
         {
             var stream = _helper.GetUrlStream(
                     string.Format(qq_smart_qrshow, _random.NextDouble())
-                    , qq_smart_referurl);
+                    , null, qq_smart_referurl);
             if(stream == null)
             {
                 return null;
@@ -242,7 +242,7 @@ namespace WebQQ2.WebQQ2
                 Thread.Sleep(1000);
                 rnumber += _random.Next(2000 - 10, 2000 + 10);
                 string result = _helper.GetUrlText(
-                    string.Format(qq_smart_qrlogin, rnumber, _user.PtQrToken), qq_smart_referurl
+                    string.Format(qq_smart_qrlogin, rnumber, _user.PtQrToken), null, qq_smart_referurl
                     );
                 if (string.IsNullOrWhiteSpace(result))
                 {
@@ -352,7 +352,7 @@ namespace WebQQ2.WebQQ2
                 yield break;
             }
             yield return "获取cookie2";
-            var result = _helper.GetUrlText(string.Format(qq_smart_getvfwebqq, _user.PtWebQQ, _user.ClientID, QQHelper.GetTime()), qq_smart_referurl);
+            var result = _helper.GetUrlText(string.Format(qq_smart_getvfwebqq, _user.PtWebQQ, _user.ClientID, QQHelper.GetTime()), null, qq_smart_referurl);
 
             var obj = QQHelper.FromJson<Dictionary<string, object>>(result);
             if (!obj.ContainsKey("retcode") || !obj.ContainsKey("result"))
@@ -388,7 +388,7 @@ namespace WebQQ2.WebQQ2
                 yield break;
             }
             string para = QQHelper.ToPostData(postItem);
-            string retstr = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl);
+            string retstr = _helper.GetUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl);
             //_user.VfWebQQ = null;
             _user.Status = "offline";
 
@@ -434,7 +434,7 @@ namespace WebQQ2.WebQQ2
             int tick = 0;
             while (true)
             {
-                string str = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
+                string str = _helper.GetUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
                 LastStr = str;
                 //str = null;未获取信息
                 if (str == null)
@@ -772,7 +772,7 @@ namespace WebQQ2.WebQQ2
         public void GetGroupMembers(QQGroup group, int timeout = 60000)
         {
             string url = string.Format(qq_smart_get_group_info_ext2, group.code, _user.VfWebQQ, QQHelper.GetTime());
-            string resultStr = _helper.GetUrlText(url, qq_smart_referurl, timeout);
+            string resultStr = _helper.GetUrlText(url, null, qq_smart_referurl, timeout);
             Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
             if (root != null && root["retcode"] as int? == 0)
             {
@@ -969,7 +969,7 @@ namespace WebQQ2.WebQQ2
                 hash = QQHelper.GetToken(_user),
             };
             string para = QQHelper.ToPostData(postItem);
-            string resultStr = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
+            string resultStr = _helper.GetUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
             Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
             if (root != null && root["retcode"] as int? == 0)
             {
@@ -1083,7 +1083,7 @@ namespace WebQQ2.WebQQ2
         public void GetUserOnlineList()
         {
             string url = string.Format(qq_smart_get_online_buddies2, _user.VfWebQQ, _user.ClientID, _user.PsessionID, QQHelper.GetTime());
-            string resultStr = _helper.GetUrlText(url, qq_smart_referurl, int.MaxValue);
+            string resultStr = _helper.GetUrlText(url, null, qq_smart_referurl, int.MaxValue);
             Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
             if (root != null && root["retcode"] as int? == 0)
             {
@@ -1107,7 +1107,7 @@ namespace WebQQ2.WebQQ2
                 hash = QQHelper.GetToken(_user),
             };
             string para = QQHelper.ToPostData(postItem);
-            string resultStr = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
+            string resultStr = _helper.GetUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
             Dictionary<string, object> root = QQHelper.FromJson<Dictionary<string, object>>(resultStr);
             if (root != null && root["retcode"] as int? == 0)
             {
@@ -1156,7 +1156,7 @@ namespace WebQQ2.WebQQ2
                 content = content,
             };
             string para = QQHelper.ToPostData(postItem);
-            string result = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
+            string result = _helper.GetUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
             //str = null;未获取信息
             if (result == null)
             {
@@ -1188,7 +1188,7 @@ namespace WebQQ2.WebQQ2
                 content = content,
             };
             string para = QQHelper.ToPostData(postItem);
-            string result = _helper.PostUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
+            string result = _helper.GetUrlText(url, Encoding.UTF8.GetBytes(para), qq_smart_referurl, int.MaxValue);
             //str = null;未获取信息
             if (result == null)
             {

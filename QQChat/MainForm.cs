@@ -37,7 +37,7 @@ namespace QQChat
         {
             System.Diagnostics.Trace.WriteLine(e.Url);
             if (e.Url.AbsoluteUri.StartsWith("http://ptlogin2.qun.qq.com"))
-            {                
+            {
                 e.Cancel = true;
                 webBrowser1.Navigate("about:blank");
                 this.QQ.AnylizeCookie(webBrowser1.Document.Cookie);
@@ -82,8 +82,22 @@ namespace QQChat
 
         private void button3_Click(object sender, EventArgs e)
         {
-            SetInfo("请登录");
-            webBrowser1.Navigate("http://zc.qq.com/iframe/9/reg.html");
+            string url = string.Empty;
+            if((ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                url = "http://zc.qq.com/iframe/9/reg.html";
+            }
+            else if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+            {
+                url = "http://zc.qq.com/";
+            }
+            else
+            {
+                MainForm.BindToParent(ShowForm<RegForm>(), this);
+                this.Hide();
+                return;
+            }
+            System.Diagnostics.Process.Start(url);
         }
 
         private void TraceToLoginForm()
@@ -92,7 +106,7 @@ namespace QQChat
             SetInfo("请登录");
             webBrowser1.Navigate("https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=715030901&daid=73&hide_close_icon=1&pt_no_auth=1&s_url=http%3A%2F%2Fqun.qq.com%2Fmember.html%23");
         }
-        
+
         public static Form ShowGlobalForm(QQ_Base qq)
         {
             var form = new GlobalForm();
@@ -116,16 +130,17 @@ namespace QQChat
             };
         }
 
-        public static Form ShowQRForm()
+        public static Form ShowForm<T>()
+            where T : Form, new()
         {
-            var form = new QRForm();
+            var form = new T();
             form.Show();
             return form;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MainForm.BindToParent(ShowQRForm(), this);
+            MainForm.BindToParent(ShowForm<QRForm>(), this);
             this.Hide();
         }
     }
