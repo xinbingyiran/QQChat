@@ -11,9 +11,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using WebQQ2.Extends;
+using QQChat;
 
-namespace WebQQ2.WebQQ2
+namespace QQChat
 {
     public class QQ_Smart : QQ_Base
     {

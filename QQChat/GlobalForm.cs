@@ -11,8 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WebQQ2.Extends;
-using WebQQ2.WebQQ2;
+using QQChat;
+using QQChat;
 
 namespace QQChat
 {

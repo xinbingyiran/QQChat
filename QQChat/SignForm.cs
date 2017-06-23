@@ -8,8 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WebQQ2.Extends;
-using WebQQ2.WebQQ2;
+using QQChat;
+using QQChat;
 
 namespace QQChat
 {

@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebQQ2.Extends
+namespace QQChat
 {
     public class HttpHelper
     {
@@ -23,37 +23,41 @@ namespace WebQQ2.Extends
         {
             try
             {
-                HttpWebResponse myResponse = GetResponse(url, postData, refer, timeout,headers);
-                if (myResponse == null)
-                {
-                    return null;
-                }
-                Stream newStream = GetResponseStream(myResponse);
-                if (newStream != null)
-                {
-                    Encoding encoding = null;
-                    try
+                using (HttpWebResponse myResponse = GetResponse(url, postData, refer, timeout, headers))
+                { 
+                    if (myResponse == null)
                     {
-                        if (string.IsNullOrWhiteSpace(myResponse.CharacterSet))
+                        return null;
+                    }
+                    using (Stream newStream = GetResponseStream(myResponse))
+                    {
+                        if (newStream != null)
                         {
-                            encoding = Encoding.UTF8;
+                            Encoding encoding = null;
+                            try
+                            {
+                                if (string.IsNullOrWhiteSpace(myResponse.CharacterSet))
+                                {
+                                    encoding = Encoding.UTF8;
+                                }
+                                else
+                                {
+                                    encoding = Encoding.GetEncoding(myResponse.CharacterSet);
+                                }
+                            }
+                            catch
+                            {
+                                encoding = Encoding.UTF8;
+                            }
+                            StreamReader reader = new StreamReader(newStream, encoding);
+                            string result = reader.ReadToEnd();
+                            return result;
                         }
                         else
                         {
-                            encoding = Encoding.GetEncoding(myResponse.CharacterSet);
+                            return null;
                         }
                     }
-                    catch
-                    {
-                        encoding = Encoding.UTF8;
-                    }
-                    StreamReader reader = new StreamReader(newStream, encoding);
-                    string result = reader.ReadToEnd();
-                    return result;
-                }
-                else
-                {
-                    return null;
                 }
             }
             catch (Exception)
@@ -110,7 +114,21 @@ namespace WebQQ2.Extends
                     myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
                     myRequest.AllowAutoRedirect = false;
                     myRequest.KeepAlive = true;
-                    response = (HttpWebResponse)myRequest.GetResponse();
+                    try
+                    {
+                        response = (HttpWebResponse)myRequest.GetResponse();
+                    }
+                    catch (Exception)
+                    {
+                        if (response != null)
+                        {
+                            response.Close();
+                        }
+                        if (myRequest != null)
+                        {
+                            myRequest.Abort();
+                        }
+                    }
                 }
                 catch (Exception) { }
             });
@@ -131,8 +149,8 @@ namespace WebQQ2.Extends
                     HttpWebRequest myRequest = HttpWebRequest.Create(url) as HttpWebRequest;
                     myRequest.Referer = refer;
                     myRequest.CookieContainer = _cookiecontainer;
-                    myRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 5.2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.802.30 Safari/535.1 SE 2.X MetaSr 1.0";
+                    myRequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                    myRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.3051.400 QQBrowser/9.6.11301.400";
                     myRequest.AllowAutoRedirect = true;
                     myRequest.KeepAlive = true;
                     myRequest.Accept = "*/*";
@@ -167,9 +185,24 @@ namespace WebQQ2.Extends
                     {
                         myRequest.Method = "Get";
                     }
-                    response = (HttpWebResponse)myRequest.GetResponse();
+                    try
+                    {
+                        response = (HttpWebResponse)myRequest.GetResponse();
+                    }
+                    catch(Exception)
+                    {
+                        if(response != null)
+                        {
+                            response.Close();
+                        }
+                        if(myRequest != null)
+                        {
+                            myRequest.Abort();
+                        }
+                    }
                 }
-                catch (Exception) { }
+                catch (Exception) {
+                }
             });
             task.Start();
             bool wait = task.Wait(timeout);
@@ -206,7 +239,14 @@ namespace WebQQ2.Extends
                         newUrl = headers["Location"];
                         newUrl = newUrl.Trim();
                     }
-                    myResponse.Close();
+                    if (myResponse != null)
+                    {
+                        myResponse.Close();
+                    }
+                    if (myRequest != null)
+                    {
+                        myRequest.Abort();
+                    }
                 }
                 catch (Exception)
                 {

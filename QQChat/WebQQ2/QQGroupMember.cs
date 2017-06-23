@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WebQQ2.WebQQ2
+namespace QQChat
 {
     public class QQGroupMember
     {

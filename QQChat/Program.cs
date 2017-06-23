@@ -15,8 +15,11 @@ namespace QQChat
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
-            Application.Run(new MainForm());
+            var form = new MainForm();
+            MainWebBrowser = form.WebBroser;
+            Application.Run(form);
         }
+
+        public static WebBrowser MainWebBrowser;
     }
 }

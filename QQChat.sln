@@ -5,11 +5,7 @@ VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQChat", "QQChat\QQChat.csproj", "{6C620102-A242-43A6-A306-B8AB7B0C207D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebQQ2", "WebQQ2\WebQQ2.csproj", "{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{CAEBD991-9E24-467C-8C38-4940C25ECF1C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{D7A56A07-F495-47B4-A705-891805CA7EE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,20 +23,11 @@ Global
 		{6C620102-A242-43A6-A306-B8AB7B0C207D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C620102-A242-43A6-A306-B8AB7B0C207D}.Release|x86.ActiveCfg = Release|x86
 		{6C620102-A242-43A6-A306-B8AB7B0C207D}.Release|x86.Build.0 = Release|x86
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Debug|x86.ActiveCfg = Debug|x86
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Debug|x86.Build.0 = Debug|x86
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Release|x86.ActiveCfg = Release|x86
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6C620102-A242-43A6-A306-B8AB7B0C207D} = {CAEBD991-9E24-467C-8C38-4940C25ECF1C}
-		{4CBD09CC-4ADA-47F9-B556-814EAAE2D9E8} = {D7A56A07-F495-47B4-A705-891805CA7EE8}
 	EndGlobalSection
 EndGlobal

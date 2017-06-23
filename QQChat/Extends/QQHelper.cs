@@ -5,9 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
-using WebQQ2.WebQQ2;
+using QQChat;
 
-namespace WebQQ2.Extends
+namespace QQChat
 {
     public class QQHelper
     {

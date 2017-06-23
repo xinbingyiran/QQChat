@@ -5,9 +5,9 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using WebQQ2.Extends;
+using QQChat;
 
-namespace WebQQ2.WebQQ2
+namespace QQChat
 {
     public abstract class QQ_Base
     {

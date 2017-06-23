@@ -1,11 +1,3 @@
- var key = "C4D23C2DB0ECC904FE0CD0CBBCDC988C039D79E1BDA8ED4BFD4D43754EC9693460D15271AB43A59AD6D0F0EEE95424F70920F2C4A08DFDF03661300047CA3A6212E48204C1BE71A846E08DD2D9F1CBDDFF40CA00C10C62B1DD42486C70A09C454293BCA9ED4E7D6657E3F62076A14304943252A88EFA416770E0FBA270A141E7";
-
- function getPass(pass) { 
-    var RSA = new RSAKey();
-    RSA.setPublic(key, "10001");
-    return RSA.encrypt(pass);
- }
-
 // Depends on jsbn.js and rng.js
 
 // Version 1.1: support utf-8 encoding in pkcs1pad2
@@ -192,8 +184,18 @@ function am3(i,x,w,j,c,n) {
   }
   return c;
 }
+if(j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
+  BigInteger.prototype.am = am2;
+  dbits = 30;
+}
+else if(j_lm && (navigator.appName != "Netscape")) {
+  BigInteger.prototype.am = am1;
+  dbits = 26;
+}
+else { // Mozilla/Netscape seems to prefer am3
   BigInteger.prototype.am = am3;
   dbits = 28;
+}
 
 BigInteger.prototype.DB = dbits;
 BigInteger.prototype.DM = ((1<<dbits)-1);
@@ -703,6 +705,12 @@ if(rng_pool == null) {
   rng_pool = new Array();
   rng_pptr = 0;
   var t;
+  if(navigator.appName == "Netscape" && navigator.appVersion < "5" && window.crypto) {
+    // Extract entropy (256 bits) from NS4 RNG if available
+    var z = window.crypto.random(32);
+    for(t = 0; t < z.length; ++t)
+      rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
+  }  
   while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
     t = Math.floor(65536 * Math.random());
     rng_pool[rng_pptr++] = t >>> 8;

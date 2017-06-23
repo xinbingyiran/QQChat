@@ -53,13 +53,14 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.JScript" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -74,6 +75,10 @@
     <Compile Include="Classes\CheckedComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Extends\EIArray.cs" />
+    <Compile Include="Extends\HEXMD5.cs" />
+    <Compile Include="Extends\HttpHelper.cs" />
+    <Compile Include="Extends\QQHelper.cs" />
     <Compile Include="GlobalForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +122,20 @@
     <Compile Include="SignForm.Designer.cs">
       <DependentUpon>SignForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WebQQ2\FriendEventArgs.cs" />
+    <Compile Include="WebQQ2\GroupEventArgs.cs" />
+    <Compile Include="WebQQ2\MessageEventType.cs" />
+    <Compile Include="WebQQ2\QQFriend.cs" />
+    <Compile Include="WebQQ2\QQFriendDir.cs" />
+    <Compile Include="WebQQ2\QQFriends.cs" />
+    <Compile Include="WebQQ2\QQGroup.cs" />
+    <Compile Include="WebQQ2\QQGroupMember.cs" />
+    <Compile Include="WebQQ2\QQGroups.cs" />
+    <Compile Include="WebQQ2\QQStatus.cs" />
+    <Compile Include="WebQQ2\QQUser.cs" />
+    <Compile Include="WebQQ2\QQ_Base.cs" />
+    <Compile Include="WebQQ2\QQ_Smart.cs" />
+    <Compile Include="WebQQ2\QQ_Web.cs" />
     <EmbeddedResource Include="ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -151,25 +170,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WebQQ2\WebQQ2.csproj">
-      <Project>{4cbd09cc-4ada-47f9-b556-814eaae2d9e8}</Project>
-      <Name>WebQQ2</Name>
-      <Private>True</Private>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="MSScriptControl">
-      <Guid>{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\JS.txt" />

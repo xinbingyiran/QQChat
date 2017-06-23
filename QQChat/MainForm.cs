@@ -1,4 +1,4 @@
-﻿using WebQQ2.WebQQ2;
+﻿using QQChat;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Security.Cryptography;
 using System.Runtime.InteropServices;
-using WebQQ2.Extends;
+using QQChat;
 
 namespace QQChat
 {
@@ -22,6 +22,8 @@ namespace QQChat
             get;
             private set;
         }
+        public WebBrowser WebBroser { get { return webBrowser1; } }
+
         public MainForm()
         {
             InitializeComponent();
@@ -82,20 +84,19 @@ namespace QQChat
 
         private void button3_Click(object sender, EventArgs e)
         {
-            string url = string.Empty;
-            if((ModifierKeys & Keys.Control) == Keys.Control)
+            string url = "http://zc.qq.com/";
+            if ((ModifierKeys & Keys.Control) == Keys.Control)
             {
-                url = "http://zc.qq.com/iframe/9/reg.html";
-            }
-            else if ((ModifierKeys & Keys.Shift) == Keys.Shift)
-            {
-                url = "http://zc.qq.com/";
-            }
-            else
-            {
-                MainForm.BindToParent(ShowForm<RegForm>(), this);
-                this.Hide();
-                return;
+                if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+                {
+                    MainForm.BindToParent(ShowForm<RegForm>(), this);
+                    this.Hide();
+                    return;
+                }
+                else
+                {
+                    url = "http://zc.qq.com/iframe/9/reg.html";
+                }
             }
             System.Diagnostics.Process.Start(url);
         }

@@ -9,11 +9,11 @@ using System.Security.Cryptography;
 using System.Web.Script.Serialization;
 using System.Drawing;
 using System.Web;
-using WebQQ2.Extends;
+using QQChat;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace WebQQ2.WebQQ2
+namespace QQChat
 {
 
     public class QQUser
