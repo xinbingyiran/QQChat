@@ -250,12 +250,12 @@ namespace QQChat
                     yield break;
                 }
                 var ptuiCBStart = "ptuiCB('";
-                var ptuiCBEnd = "');";
+                var ptuiCBEnd = "')";
                 var resultitems = result.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 result = null;
                 foreach (var item in resultitems)
                 {
-                    var item0 = item.Replace(" ", "");
+                    var item0 = item.Replace(" ", "").TrimEnd(';');
                     if (!item0.StartsWith(ptuiCBStart) || !item0.EndsWith(ptuiCBEnd))
                     {
                         continue;
