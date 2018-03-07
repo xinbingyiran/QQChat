@@ -88,15 +88,18 @@ namespace QQChat
                         var friends = new List<QunFriend>();
                         var groupDefine = data.Value as Dictionary<string, object>;
                         var gname = groupDefine.ContainsKey("gname") ? (string)groupDefine["gname"] : "未分组";
-                        foreach (var item in groupDefine["mems"] as ArrayList)
+                        if (groupDefine.ContainsKey("mems"))
                         {
-                            var fitem = item as Dictionary<string, object>;
-                            var friend = new QunFriend
+                            foreach (var item in groupDefine["mems"] as ArrayList)
                             {
-                                uin = Convert.ToInt64(fitem["uin"]),
-                                name = (string)fitem["name"],
-                            };
-                            friends.Add(friend);
+                                var fitem = item as Dictionary<string, object>;
+                                var friend = new QunFriend
+                                {
+                                    uin = Convert.ToInt64(fitem["uin"]),
+                                    name = (string)fitem["name"],
+                                };
+                                friends.Add(friend);
+                            }
                         }
                         _qfgList.Add(new QunFriendGroup() { gname = gname, friends = friends });
                     }
@@ -332,7 +335,7 @@ friends:        {1}",
                 }
                 var list = _qq.GetMemberInfoFromQun(group.gcode, st, end);
                 st = end + 1;
-                if ((int)list["ec"] == 0)
+                if ((int)list["ec"] == 0 && list.ContainsKey("count") && list.ContainsKey("mems"))
                 {
                     count = (int)list["count"];
                     var items = list["mems"] as ArrayList;
@@ -497,13 +500,14 @@ role:       {3}",
                 return;
             }
             bool cancel = false;
-            var fname = fbd.SelectedPath + "\\QFriend_" + _qq.User.QQNum + ".txt";
+            var path = fbd.SelectedPath;
+            var fname = path + "\\QFriend_" + _qq.User.QQNum + ".txt";
             if (CanSave(fname, ref cancel))
             {
                 ExportQFriend(fname);
             }
             if (cancel) { return; }
-            var gname = fbd.SelectedPath + "\\QGroup_" + _qq.User.QQNum + ".txt";
+            var gname = path + "\\QGroup_" + _qq.User.QQNum + ".txt";
             if (CanSave(gname, ref cancel))
             {
                 ExportQGroup(gname);
@@ -511,13 +515,14 @@ role:       {3}",
             if (cancel) { return; }
             foreach (var group in _qglist)
             {
-                var mname = fbd.SelectedPath + string.Format("\\Member_{0}_{1}[{2}].txt", _qq.User.QQNum, GetFileName(group.gname), group.gcode);
+                var mname = path + string.Format("\\Member_{0}_{1}[{2}].txt", _qq.User.QQNum, GetFileName(group.gname), group.gcode);
                 if (CanSave(mname, ref cancel))
                 {
                     ExportGroupMember(group, mname);
                 }
                 if (cancel) { return; }
             }
+            SetInfo("ExportAll OK:" + path);
         }
 
         private bool CanSave(string name, ref bool cancel)
