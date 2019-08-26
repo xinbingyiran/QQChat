@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -46,19 +47,19 @@ namespace QQChat
         {
             new Task(() =>
             {
-                GetQunFriend();
+                GetQunFriend(PickEvent());
                 RefreshFriendUI();
                 SetInfo("Refresh Friend OK!");
             }).Start();
         }
 
-        private void GetQunFriend()
+        private void GetQunFriend(WaitHandle waitHandle)
         {
             var list = _qq.GetFriendInfoFromQun();
             if ((int)list["ec"] == 0)
             {
                 _qfgList.Clear();
-                if (list["result"] is Dictionary<string, object>datas && datas.Count > 0)
+                if (list["result"] is Dictionary<string, object> datas && datas.Count > 0)
                 {
                     foreach (var data in datas)
                     {
@@ -143,7 +144,7 @@ namespace QQChat
         {
             new Task(() =>
             {
-                GetQunGroup();
+                GetQunGroup(PickEvent());
                 RefreshGroupUI();
                 //foreach (var group in _qglist.ToArray())
                 //{
@@ -159,7 +160,7 @@ namespace QQChat
             { "manage","我管理的" },
             { "join","我加入的" },
         };
-        private void GetQunGroup()
+        private void GetQunGroup(WaitHandle waitHandle)
         {
             var list = _qq.GetGroupInfoFromQun();
             if ((int)list["ec"] == 0)
@@ -269,6 +270,20 @@ friends:        {1}",
             }
         }
 
+        private ManualResetEvent _event;
+
+        private ManualResetEvent PickEvent()
+        {
+            var newE = new ManualResetEvent(false);
+            var e = Interlocked.Exchange(ref _event, newE);
+            if (e != null)
+            {
+                e.Set();
+                e.Dispose();
+            }
+            return newE;
+        }
+
         private void treeViewG_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var group = e.Node.Tag as QunGroup;
@@ -280,7 +295,7 @@ friends:        {1}",
             {
                 if (group.gmlist == null || group.gmlist.Count == 0)
                 {
-                    GetQunMember(group);
+                    GetQunMember(group, PickEvent());
                 }
                 RefreshGroupinfoUI(group);
                 RefreshMemberUI(group);
@@ -297,13 +312,13 @@ friends:        {1}",
             var group = treeViewG.SelectedNode.Tag as QunGroup;
             new Task(() =>
             {
-                GetQunMember(group);
+                GetQunMember(group, PickEvent());
                 RefreshGroupinfoUI(group);
                 RefreshMemberUI(group);
             }).Start();
         }
 
-        private void GetQunMember(QunGroup group)
+        private void GetQunMember(QunGroup group, WaitHandle waitHandle)
         {
             var gmlist = new List<QunGroupMember>();
             gmlist.Clear();
@@ -311,6 +326,7 @@ friends:        {1}",
             var per = 20;
             var count = per + 1;
             var end = 0;
+            var rand = new Random();
             while (st < count)
             {
                 if (count - st > per)
@@ -346,7 +362,10 @@ friends:        {1}",
                         }
                     }
                 }
-                System.Threading.Thread.Sleep(3000);
+                if (waitHandle.WaitOne(rand.Next(300, 1000)))
+                {
+                    break;
+                }
             }
             gmlist.Sort((l, r) =>
             {
@@ -476,15 +495,22 @@ stime:       {f.stime}";
 
         private void buttona_Click(object sender, EventArgs e)
         {
+            var ev = PickEvent();
             new Task(() =>
                 {
-                    GetQunFriend();
+                    GetQunFriend(ev);
+                    if (ev.WaitOne(500)) { return; }
                     RefreshFriendUI();
-                    GetQunGroup();
+                    GetQunGroup(ev);
+                    if (ev.WaitOne(500)) { return; }
                     RefreshGroupUI();
                     foreach (var group in _qglist.ToArray())
                     {
-                        GetQunMember(group);
+                        GetQunMember(group,ev);
+                        if (ev.WaitOne(5000))
+                        {
+                            return;
+                        }
                     }
                     SetInfo("Refresh All OK!");
                 }).Start();
