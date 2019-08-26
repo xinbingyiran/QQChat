@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace QQChat
@@ -12,8 +8,8 @@ namespace QQChat
     public partial class QunMemberManager : Form
     {
         private Dictionary<long, QunFriend> _flist = new Dictionary<long, QunFriend>();
-        private Dictionary<long, QunGroup> _glist = new Dictionary<long, QunGroup>();
-        private Dictionary<long, Dictionary<long, QunGroupMember>> _gmlist = new Dictionary<long, Dictionary<long, QunGroupMember>>();
+        private readonly Dictionary<long, QunGroup> _glist = new Dictionary<long, QunGroup>();
+        private readonly Dictionary<long, Dictionary<long, QunGroupMember>> _gmlist = new Dictionary<long, Dictionary<long, QunGroupMember>>();
         public QunMemberManager()
         {
             InitializeComponent();
@@ -135,7 +131,7 @@ namespace QQChat
             listBox2.Items.Clear();
             checkedComboBox1.Items.Clear();
             var flist = new List<QunFriend>();
-            foreach(var g in fglist)
+            foreach (var g in fglist)
             {
                 flist.AddRange(g.friends);
             }

@@ -1,25 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using QQChat;
-using QQChat;
 
 namespace QQChat
 {
     public partial class GlobalForm : Form
     {
-        private List<QunFriendGroup> _qfgList = new List<QunFriendGroup>();
-        private List<QunGroup> _qglist = new List<QunGroup>();
+        private readonly List<QunFriendGroup> _qfgList = new List<QunFriendGroup>();
+        private readonly List<QunGroup> _qglist = new List<QunGroup>();
         private QQ_Base _qq;
         public GlobalForm()
         {
@@ -42,26 +35,11 @@ namespace QQChat
             this.buttonad.Click += new System.EventHandler(this.buttonad_Click);
             this.buttonc.Click += new System.EventHandler(this.buttonc_Click);
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            //this.button2.Click += new System.EventHandler(this.button2_Click);
-            this.Load += new System.EventHandler(this.GlobalForm_Load);
         }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            var manager = new SignForm();
-            MainForm.BindToParent(manager, this);
-            manager.Show();
-            manager.InitParas(this._qq, this._qglist);
-        }
-
         public void InitQQ(QQ_Base qq)
         {
             _qq = qq;
             this.Text = string.Format("{0}[{1}]", _qq.User.QQName, _qq.User.QQNum);
-        }
-
-        private void GlobalForm_Load(object sender, EventArgs e)
-        {
         }
 
         private void buttonf_Click(object sender, EventArgs e)
@@ -79,9 +57,8 @@ namespace QQChat
             var list = _qq.GetFriendInfoFromQun();
             if ((int)list["ec"] == 0)
             {
-                var datas = list["result"] as Dictionary<string, object>;
                 _qfgList.Clear();
-                if (datas != null && datas.Count > 0)
+                if (list["result"] is Dictionary<string, object>datas && datas.Count > 0)
                 {
                     foreach (var data in datas)
                     {
@@ -132,9 +109,11 @@ namespace QQChat
 
         private void buttonfd_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "文本文件|*.txt|所有文件|*.*";
-            sfd.FileName = "QFriend_" + _qq.User.QQNum;
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "文本文件|*.txt|所有文件|*.*",
+                FileName = "QFriend_" + _qq.User.QQNum
+            };
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -144,8 +123,10 @@ namespace QQChat
 
         private void ExportQFriend(string filename)
         {
-            List<string> lines = new List<string>();
-            lines.Add(string.Format("{0}[{1}] 好友列表：", _qq.User.QQName, _qq.User.QQNum));
+            List<string> lines = new List<string>
+            {
+                string.Format("{0}[{1}] 好友列表：", _qq.User.QQName, _qq.User.QQNum)
+            };
             foreach (var g in _qfgList)
             {
                 lines.Add(g.gname + ":");
@@ -183,10 +164,10 @@ namespace QQChat
             var list = _qq.GetGroupInfoFromQun();
             if ((int)list["ec"] == 0)
             {
-                _qglist.Clear();                
-                foreach(var role in QunGroupRole)
+                _qglist.Clear();
+                foreach (var role in QunGroupRole)
                 {
-                    if(list.ContainsKey(role.Key))
+                    if (list.ContainsKey(role.Key))
                     {
                         var items = list[role.Key] as ArrayList;
                         if (items != null)
@@ -236,9 +217,11 @@ namespace QQChat
 
         private void buttongd_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "文本文件|*.txt|所有文件|*.*";
-            sfd.FileName = "QGroup_" + _qq.User.QQNum;
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "文本文件|*.txt|所有文件|*.*",
+                FileName = "QGroup_" + _qq.User.QQNum
+            };
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -249,8 +232,10 @@ namespace QQChat
 
         private void ExportQGroup(string filename)
         {
-            List<string> lines = new List<string>();
-            lines.Add(string.Format("{0}[{1}] 群列表：", _qq.User.QQName, _qq.User.QQNum));
+            List<string> lines = new List<string>
+            {
+                string.Format("{0}[{1}] 群列表：", _qq.User.QQName, _qq.User.QQNum)
+            };
             foreach (var role in QunGroupRole)
             {
                 lines.Add(role.Value + ":");
@@ -291,12 +276,15 @@ friends:        {1}",
             {
                 return;
             }
-            if (group.gmlist == null || group.gmlist.Count == 0)
+            new Task(() =>
             {
-                GetQunMember(group);
-            }
-            RefreshGroupinfoUI(group);
-            RefreshMemberUI(group);
+                if (group.gmlist == null || group.gmlist.Count == 0)
+                {
+                    GetQunMember(group);
+                }
+                RefreshGroupinfoUI(group);
+                RefreshMemberUI(group);
+            }).Start();
         }
 
         private void buttonmf_Click(object sender, EventArgs e)
@@ -317,10 +305,10 @@ friends:        {1}",
 
         private void GetQunMember(QunGroup group)
         {
-            List<QunGroupMember> gmlist = new List<QunGroupMember>();
+            var gmlist = new List<QunGroupMember>();
             gmlist.Clear();
             var st = 0;
-            var per = 2000;
+            var per = 20;
             var count = per + 1;
             var end = 0;
             while (st < count)
@@ -335,13 +323,15 @@ friends:        {1}",
                 }
                 var list = _qq.GetMemberInfoFromQun(group.gcode, st, end);
                 st = end + 1;
-                if ((int)list["ec"] == 0 && list.ContainsKey("count") && list.ContainsKey("mems"))
+                if ((int)list["ec"] == 0)
                 {
-                    count = (int)list["count"];
-                    var items = list["mems"] as ArrayList;
-                    if (items != null)
+                    if (list.ContainsKey("count"))
                     {
-                        foreach (Dictionary<string, object> item in items)
+                        count = Convert.ToInt32(list["count"]);
+                    }
+                    if (list.ContainsKey("mems") && list["mems"] is ArrayList mems)
+                    {
+                        foreach (Dictionary<string, object> item in mems)
                         {
                             var member = new QunGroupMember
                             {
@@ -349,22 +339,25 @@ friends:        {1}",
                                 card = (string)item["card"],
                                 uin = Convert.ToInt64(item["uin"]),
                                 nick = (string)item["nick"],
+                                jtime = QQHelper.ToTime(Convert.ToInt64(item["join_time"])).ToString("yyyy-MM-dd HH:mm:ss"),
+                                stime = QQHelper.ToTime(Convert.ToInt64(item["last_speak_time"])).ToString("yyyy-MM-dd HH:mm:ss"),
                             };
                             gmlist.Add(member);
                         }
-                        gmlist.Sort((l, r) =>
-                        {
-                            if (l == r)
-                                return 0;
-                            else if (l.role != r.role)
-                            {
-                                return l.role.CompareTo(r.role);
-                            }
-                            return l.uin.CompareTo(r.uin);
-                        });
                     }
                 }
+                System.Threading.Thread.Sleep(3000);
             }
+            gmlist.Sort((l, r) =>
+            {
+                if (l == r)
+                    return 0;
+                else if (l.role != r.role)
+                {
+                    return l.role.CompareTo(r.role);
+                }
+                return l.uin.CompareTo(r.uin);
+            });
             group.gmlist = gmlist;
             SetInfo("GetGroupMember OK:" + group.gmlist.Count + "-" + group.gname + "[" + group.gcode + "]");
         }
@@ -417,9 +410,11 @@ groupname:   {1}",
             {
                 MessageBox.Show("请先选择群");
             }
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "文本文件|*.txt|所有文件|*.*";
-            sfd.FileName = string.Format("Member_{0}[{1}]", GetFileName(group.gname), group.gcode);
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "文本文件|*.txt|所有文件|*.*",
+                FileName = string.Format("Member_{0}[{1}]", GetFileName(group.gname), group.gcode)
+            };
             if (sfd.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 return;
@@ -436,8 +431,10 @@ groupname:   {1}",
 
         private void ExportGroupMember(QunGroup group, string filename)
         {
-            List<string> lines = new List<string>();
-            lines.Add(string.Format("{0}[{1}] 群信息：", group.gname, group.gcode));
+            List<string> lines = new List<string>
+            {
+                string.Format("{0}[{1}] 群信息：", group.gname, group.gcode)
+            };
             var lastRole = -1;
             if (group.gmlist != null)
             {
@@ -459,7 +456,7 @@ groupname:   {1}",
                         }
                         lastRole = gm.role;
                     }
-                    lines.Add(string.Format("\t{0}({1})[{2}]", gm.card, gm.nick, gm.uin));
+                    lines.Add($"\t{gm.card}({gm.nick})[{gm.uin}] - {gm.jtime} - {gm.stime}");
                 }
             }
             File.WriteAllLines(filename, lines);
@@ -469,11 +466,12 @@ groupname:   {1}",
         private void treeViewm_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var f = e.Node.Tag as QunGroupMember;
-            richTextBox1.Text = string.Format(@"uin:        {0}
-nick:       {1}
-card:       {2}
-role:       {3}",
-                 f.uin, f.nick, f.card, f.role);
+            richTextBox1.Text = $@"uin:        {f.uin}
+nick:       {f.nick}
+card:       {f.card}
+role:       {f.role}
+jtime:       {f.jtime}
+stime:       {f.stime}";
         }
 
         private void buttona_Click(object sender, EventArgs e)
@@ -589,6 +587,8 @@ role:       {3}",
         public string nick;
         public string card;
         public int role;
+        public string jtime;
+        public string stime;
     }
 
 }

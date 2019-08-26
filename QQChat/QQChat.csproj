@@ -65,18 +65,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ChatForm.Designer.cs">
-      <DependentUpon>ChatForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Classes\CCBoxItem.cs" />
     <Compile Include="Classes\CheckedComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Extends\EIArray.cs" />
-    <Compile Include="Extends\HEXMD5.cs" />
     <Compile Include="Extends\HttpHelper.cs" />
     <Compile Include="Extends\QQHelper.cs" />
     <Compile Include="GlobalForm.cs">
@@ -98,47 +89,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="QRForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="QRForm.Designer.cs">
-      <DependentUpon>QRForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="QunMemberManager.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="QunMemberManager.Designer.cs">
       <DependentUpon>QunMemberManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="RegForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="RegForm.Designer.cs">
-      <DependentUpon>RegForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SignForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SignForm.Designer.cs">
-      <DependentUpon>SignForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="WebQQ2\FriendEventArgs.cs" />
-    <Compile Include="WebQQ2\GroupEventArgs.cs" />
-    <Compile Include="WebQQ2\MessageEventType.cs" />
-    <Compile Include="WebQQ2\QQFriend.cs" />
-    <Compile Include="WebQQ2\QQFriendDir.cs" />
-    <Compile Include="WebQQ2\QQFriends.cs" />
-    <Compile Include="WebQQ2\QQGroup.cs" />
-    <Compile Include="WebQQ2\QQGroupMember.cs" />
-    <Compile Include="WebQQ2\QQGroups.cs" />
-    <Compile Include="WebQQ2\QQStatus.cs" />
     <Compile Include="WebQQ2\QQUser.cs" />
     <Compile Include="WebQQ2\QQ_Base.cs" />
-    <Compile Include="WebQQ2\QQ_Smart.cs" />
-    <Compile Include="WebQQ2\QQ_Web.cs" />
-    <EmbeddedResource Include="ChatForm.resx">
-      <DependentUpon>ChatForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GlobalForm.resx">
       <DependentUpon>GlobalForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -149,17 +107,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="QRForm.resx">
-      <DependentUpon>QRForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="QunMemberManager.resx">
       <DependentUpon>QunMemberManager.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RegForm.resx">
-      <DependentUpon>RegForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SignForm.resx">
-      <DependentUpon>SignForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -170,9 +119,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\JS.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
