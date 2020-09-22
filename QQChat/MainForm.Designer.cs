@@ -30,7 +30,7 @@
         {
             this.button2 = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // button2
@@ -40,7 +40,7 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(70, 21);
             this.button2.TabIndex = 8;
-            this.button2.Text = "刷新";
+            this.button2.Text = "确定";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -54,16 +54,13 @@
             this.label4.Size = new System.Drawing.Size(0, 12);
             this.label4.TabIndex = 0;
             // 
-            // webBrowser1
+            // richTextBox1
             // 
-            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser1.Location = new System.Drawing.Point(12, 12);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(437, 327);
-            this.webBrowser1.TabIndex = 11;
+            this.richTextBox1.Location = new System.Drawing.Point(12, 12);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(437, 327);
+            this.richTextBox1.TabIndex = 9;
+            this.richTextBox1.Text = "";
             // 
             // MainForm
             // 
@@ -71,12 +68,11 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(461, 378);
-            this.Controls.Add(this.webBrowser1);
+            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label4);
             this.Name = "MainForm";
             this.Text = "好友获取";
-            this.Load += new System.EventHandler(this.LoginForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -86,6 +82,6 @@
 
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.RichTextBox richTextBox1;
     }
 }

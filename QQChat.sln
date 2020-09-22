@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQChat", "QQChat\QQChat.csproj", "{6C620102-A242-43A6-A306-B8AB7B0C207D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{CAEBD991-9E24-467C-8C38-4940C25ECF1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,7 +25,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{6C620102-A242-43A6-A306-B8AB7B0C207D} = {CAEBD991-9E24-467C-8C38-4940C25ECF1C}
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CC2613D5-8223-4579-A72B-B162B114B557}
 	EndGlobalSection
 EndGlobal

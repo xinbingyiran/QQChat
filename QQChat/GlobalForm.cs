@@ -310,6 +310,9 @@ friends:        {1}",
                 return;
             }
             var group = treeViewG.SelectedNode.Tag as QunGroup;
+            group.gmlist = new List<QunGroupMember>();
+            RefreshGroupinfoUI(group);
+            RefreshMemberUI(group);
             new Task(() =>
             {
                 GetQunMember(group, PickEvent());
@@ -338,7 +341,6 @@ friends:        {1}",
                     end = count - 1;
                 }
                 var list = _qq.GetMemberInfoFromQun(group.gcode, st, end);
-                st = end + 1;
                 if ((int)list["ec"] == 0)
                 {
                     if (list.ContainsKey("count"))
@@ -360,11 +362,26 @@ friends:        {1}",
                             };
                             gmlist.Add(member);
                         }
+                        SetInfo("GetGroupMember:" + group.gname + "[" + group.gcode + "] " + st + " > " + end + " = " + mems.Count);
                     }
                 }
-                if (waitHandle.WaitOne(rand.Next(300, 1000)))
+                st = end + 1;
+                try
                 {
-                    break;
+                    if (!waitHandle.WaitOne(100))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        SetInfo("GetGroupMember Cancel:" + group.gname + "[" + group.gcode + "]");
+                        return;
+                    }
+                }
+                catch
+                {
+                    SetInfo("GetGroupMember Cancel:" + group.gname + "[" + group.gcode + "]");
+                    return;
                 }
             }
             gmlist.Sort((l, r) =>
@@ -499,15 +516,15 @@ stime:       {f.stime}";
             new Task(() =>
                 {
                     GetQunFriend(ev);
-                    if (ev.WaitOne(500)) { return; }
+                    if (ev.WaitOne(300)) { return; }
                     RefreshFriendUI();
                     GetQunGroup(ev);
-                    if (ev.WaitOne(500)) { return; }
+                    if (ev.WaitOne(300)) { return; }
                     RefreshGroupUI();
                     foreach (var group in _qglist.ToArray())
                     {
-                        GetQunMember(group,ev);
-                        if (ev.WaitOne(5000))
+                        GetQunMember(group, ev);
+                        if (ev.WaitOne(100))
                         {
                             return;
                         }
@@ -577,6 +594,7 @@ stime:       {f.stime}";
                 return;
             }
             richTextBox2.AppendText(DateTime.Now.ToString("HH:mm:ss:") + text + Environment.NewLine);
+            richTextBox2.ScrollToCaret();
         }
 
         private void button1_Click(object sender, EventArgs e)
